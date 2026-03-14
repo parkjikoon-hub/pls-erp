@@ -3,8 +3,8 @@
 
 ## 현재 상태
 - **최종 업데이트**: 2026-03-15
-- **현재 Phase**: Phase 1 진행 중 (Step 1-5 완료, Step 1-6 대기)
-- **전체 진행률**: 0 / 29 기능 (인프라 구축 완료, 첫 기능 구현 대기)
+- **현재 Phase**: Phase 1 진행 중 (Step 1-6 완료, Step 1-7 대기)
+- **전체 진행률**: 1 / 29 기능 (거래처 마스터 CRUD 완료)
 - **UI 디자인**: 시안 C (하이브리드) 확정
 - **DB**: Neon PostgreSQL (싱가포르 리전, 프로젝트명: pls-erp)
 
@@ -42,13 +42,17 @@
   - Zustand 인증/사이드바 스토어, Axios API 클라이언트
   - TypeScript 에러 없음, 빌드 성공
 - [x] 초기 데이터 시드 완료 (admin@pls-erp.com / admin1234)
+- [x] Step 1-6: 거래처 마스터 CRUD (첫 수직 슬라이스 — DB→API→UI) ✅
+  - 백엔드: schemas.py, service.py, router.py (5개 API 엔드포인트)
+  - 프론트엔드: CustomersPage (목록/검색/정렬/페이지네이션/등록/수정/삭제 모달)
+  - API: POST/GET/PUT/DELETE /api/v1/system/customers
+  - 감사 로그 연동, RBAC 권한 체크, 사업자번호 자동 포맷팅
 
 ---
 
 ## 다음 단계
 
 ### Phase 1 남은 작업
-- [ ] Step 1-6: 거래처 마스터 CRUD (첫 수직 슬라이스 — DB→API→UI)
 - [ ] Step 1-7: 품목 마스터 CRUD
 - [ ] Step 1-8: 부서/직급/사용자 관리
 - [ ] Step 1-9: 동적 폼 빌더 (M1-F01)

@@ -8,7 +8,7 @@ export default function DashboardPage() {
   const { user } = useAuthStore();
 
   const cards = [
-    { label: '거래처', value: '-', color: 'from-blue-500 to-blue-600', desc: 'Step 1-6에서 구현' },
+    { label: '거래처', value: '-', color: 'from-blue-500 to-blue-600', desc: '거래처 관리 활성화' },
     { label: '품목', value: '-', color: 'from-emerald-500 to-emerald-600', desc: 'Step 1-7에서 구현' },
     { label: '사용자', value: '2', color: 'from-purple-500 to-purple-600', desc: '관리자 + 테스트' },
     { label: '부서', value: '4', color: 'from-amber-500 to-amber-600', desc: '경영/개발/영업/생산' },
@@ -50,7 +50,7 @@ export default function DashboardPage() {
             { step: '1-3', name: 'JWT 인증 시스템', done: true },
             { step: '1-4', name: 'Audit Log 시스템', done: true },
             { step: '1-5', name: '프론트엔드 뼈대', done: true },
-            { step: '1-6', name: '거래처 마스터 CRUD', done: false },
+            { step: '1-6', name: '거래처 마스터 CRUD', done: true },
             { step: '1-7', name: '품목 마스터 CRUD', done: false },
             { step: '1-8', name: '부서/직급/사용자 관리', done: false },
           ].map((item) => (
