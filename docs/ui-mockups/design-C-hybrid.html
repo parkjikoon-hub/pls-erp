@@ -1,0 +1,1886 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PLS ERP - Design C Hybrid</title>
+<style>
+/* ========== CSS 변수 ========== */
+:root {
+  --sidebar-bg: #0f172a;
+  --sidebar-hover: #1e293b;
+  --sidebar-active: #334155;
+  --sidebar-width-expanded: 220px;
+  --sidebar-width-collapsed: 64px;
+  --accent: #10b981;
+  --accent-light: #d1fae5;
+  --content-bg: #dce1e9;
+  --card-bg: #e8ecf2;
+  --border: #c8ced8;
+  --text-primary: #1c1917;
+  --text-secondary: #78716c;
+  --text-muted: #a8a29e;
+  --text-sidebar: #94a3b8;
+  --text-sidebar-active: #f1f5f9;
+  --header-height: 48px;
+  --row-height: 32px;
+  /* 모듈 컬러 */
+  --mod-system: #3b82f6;
+  --mod-sales: #10b981;
+  --mod-finance: #f59e0b;
+  --mod-hr: #8b5cf6;
+  --mod-production: #ef4444;
+  --mod-groupware: #06b6d4;
+  --mod-alert: #f97316;
+  /* 현재 모듈 컬러 (JS로 변경) */
+  --current-mod-color: var(--mod-system);
+}
+
+/* ========== 리셋 & 기본 ========== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; overflow: hidden; }
+body {
+  font-family: 'Pretendard', 'Malgun Gothic', system-ui, -apple-system, sans-serif;
+  font-size: 13px;
+  color: var(--text-primary);
+  background: var(--content-bg);
+  line-height: 1.5;
+}
+button { cursor: pointer; font-family: inherit; font-size: inherit; }
+input, select, textarea { font-family: inherit; font-size: inherit; }
+a { text-decoration: none; color: inherit; }
+
+/* ========== 스크롤바 ========== */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #b0b8c4; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #8e96a4; }
+
+/* ========== 로그인 화면 ========== */
+.login-screen {
+  display: none;
+  height: 100vh;
+  width: 100vw;
+  position: fixed;
+  top: 0; left: 0;
+  z-index: 9999;
+}
+.login-screen.active { display: flex; }
+
+.login-left {
+  width: 45%;
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  color: #e2e8f0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 60px;
+  position: relative;
+  overflow: hidden;
+}
+.login-left::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -30%;
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, rgba(16,185,129,0.08) 0%, transparent 70%);
+  border-radius: 50%;
+}
+.login-left::after {
+  content: '';
+  position: absolute;
+  bottom: -30%;
+  left: -20%;
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(59,130,246,0.06) 0%, transparent 70%);
+  border-radius: 50%;
+}
+.login-brand {
+  position: relative;
+  z-index: 1;
+}
+.login-brand h1 {
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 4px;
+  color: #f1f5f9;
+}
+.login-brand h1 span { color: var(--accent); }
+.login-brand p {
+  font-size: 14px;
+  color: #64748b;
+  margin-bottom: 40px;
+}
+.login-features {
+  position: relative;
+  z-index: 1;
+  list-style: none;
+}
+.login-features li {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 0;
+  border-bottom: 1px solid rgba(148,163,184,0.1);
+  font-size: 14px;
+}
+.login-features li:last-child { border-bottom: none; }
+.feature-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+.feature-icon.ai { background: rgba(16,185,129,0.15); }
+.feature-icon.auto { background: rgba(59,130,246,0.15); }
+.feature-icon.dash { background: rgba(245,158,11,0.15); }
+.feature-icon.sec { background: rgba(139,92,246,0.15); }
+.feature-icon.mobile { background: rgba(6,182,212,0.15); }
+.feature-title { font-weight: 600; color: #e2e8f0; }
+.feature-desc { font-size: 12px; color: #64748b; margin-top: 2px; }
+
+.login-right {
+  width: 55%;
+  background: #dce1e9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 60px;
+}
+.login-form-wrap {
+  width: 100%;
+  max-width: 380px;
+}
+.login-form-wrap h2 {
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 6px;
+  color: var(--text-primary);
+}
+.login-form-wrap .login-sub {
+  color: var(--text-secondary);
+  font-size: 13px;
+  margin-bottom: 32px;
+}
+.form-group {
+  margin-bottom: 18px;
+}
+.form-group label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.form-group input {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  font-size: 14px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  outline: none;
+  background: #e8ecf2;
+}
+.form-group input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(16,185,129,0.1);
+  background: #edf1f7;
+}
+.form-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  font-size: 12px;
+}
+.form-row label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+.form-row label input[type="checkbox"] {
+  accent-color: var(--accent);
+}
+.form-row a {
+  color: var(--accent);
+  font-weight: 500;
+}
+.btn-login {
+  width: 100%;
+  padding: 12px;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  transition: background 0.2s, transform 0.1s;
+}
+.btn-login:hover { background: #059669; }
+.btn-login:active { transform: scale(0.99); }
+.login-footer {
+  text-align: center;
+  margin-top: 24px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+/* ========== 앱 레이아웃 ========== */
+.app-layout {
+  display: none;
+  height: 100vh;
+  overflow: hidden;
+}
+.app-layout.active { display: flex; }
+
+/* ========== 사이드바 ========== */
+.sidebar {
+  width: var(--sidebar-width-expanded);
+  min-width: var(--sidebar-width-expanded);
+  background: var(--sidebar-bg);
+  color: var(--text-sidebar);
+  display: flex;
+  flex-direction: column;
+  transition: width 0.25s ease, min-width 0.25s ease;
+  overflow: hidden;
+  position: relative;
+  z-index: 100;
+}
+.sidebar.collapsed {
+  width: var(--sidebar-width-collapsed);
+  min-width: var(--sidebar-width-collapsed);
+}
+
+.sidebar-header {
+  height: 48px;
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  border-bottom: 1px solid rgba(148,163,184,0.1);
+  gap: 10px;
+  flex-shrink: 0;
+}
+.sidebar-logo {
+  width: 32px;
+  height: 32px;
+  background: var(--accent);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 14px;
+  color: #fff;
+  flex-shrink: 0;
+}
+.sidebar-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #f1f5f9;
+  white-space: nowrap;
+  overflow: hidden;
+  transition: opacity 0.2s;
+}
+.sidebar.collapsed .sidebar-title { opacity: 0; width: 0; }
+
+.sidebar-toggle {
+  width: 100%;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  border-bottom: 1px solid rgba(148,163,184,0.1);
+  color: var(--text-sidebar);
+  font-size: 14px;
+  transition: background 0.15s;
+  flex-shrink: 0;
+}
+.sidebar-toggle:hover { background: var(--sidebar-hover); }
+
+.sidebar-nav {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 8px 0;
+}
+.nav-section {
+  margin-bottom: 4px;
+}
+.nav-section-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: background 0.15s;
+  border-radius: 0;
+  white-space: nowrap;
+  position: relative;
+}
+.nav-section-header:hover { background: var(--sidebar-hover); }
+.nav-section-header.active { background: var(--sidebar-active); }
+.nav-icon {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+  border-radius: 8px;
+  position: relative;
+}
+.nav-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  position: absolute;
+  top: 4px;
+  right: 4px;
+}
+.nav-label {
+  font-size: 13px;
+  font-weight: 500;
+  overflow: hidden;
+  transition: opacity 0.2s;
+}
+.sidebar.collapsed .nav-label { opacity: 0; width: 0; }
+.sidebar.collapsed .nav-sub { display: none !important; }
+
+.nav-sub {
+  overflow: hidden;
+  max-height: 0;
+  transition: max-height 0.25s ease;
+}
+.nav-section.open .nav-sub { max-height: 300px; }
+.nav-sub a {
+  display: flex;
+  align-items: center;
+  padding: 6px 12px 6px 58px;
+  font-size: 12px;
+  color: var(--text-sidebar);
+  transition: background 0.15s, color 0.15s;
+  white-space: nowrap;
+}
+.nav-sub a:hover { background: var(--sidebar-hover); color: var(--text-sidebar-active); }
+.nav-sub a.active { color: var(--accent); font-weight: 600; }
+
+.sidebar-footer {
+  border-top: 1px solid rgba(148,163,184,0.1);
+  padding: 10px 12px;
+  font-size: 11px;
+  flex-shrink: 0;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.sidebar.collapsed .sidebar-footer { text-align: center; }
+.sidebar.collapsed .footer-text { display: none; }
+.footer-stat {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+.footer-stat .dot-online { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
+.footer-stat .dot-server { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
+
+/* ========== 메인 영역 ========== */
+.main-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-width: 0;
+}
+
+/* ========== 헤더 ========== */
+.app-header {
+  height: var(--header-height);
+  background: var(--card-bg);
+  border-bottom: 2px solid var(--current-mod-color);
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  gap: 16px;
+  flex-shrink: 0;
+}
+.header-breadcrumb {
+  font-size: 13px;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.header-breadcrumb .bc-module { font-weight: 600; color: var(--text-primary); }
+.header-search {
+  flex: 1;
+  max-width: 360px;
+  margin-left: auto;
+}
+.header-search input {
+  width: 100%;
+  padding: 6px 12px 6px 32px;
+  border: 1.5px solid var(--border);
+  border-radius: 6px;
+  font-size: 12px;
+  outline: none;
+  background: var(--content-bg) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2378716c' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'/%3E%3C/svg%3E") no-repeat 10px center;
+  transition: border-color 0.2s;
+}
+.header-search input:focus { border-color: var(--accent); }
+.header-noti {
+  position: relative;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  font-size: 18px;
+  color: var(--text-secondary);
+  border-radius: 6px;
+  transition: background 0.15s;
+}
+.header-noti:hover { background: var(--content-bg); }
+.noti-badge {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 16px;
+  height: 16px;
+  background: #ef4444;
+  color: #fff;
+  font-size: 9px;
+  font-weight: 700;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.header-user {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s;
+  font-size: 13px;
+  font-weight: 500;
+}
+.header-user:hover { background: var(--content-bg); }
+.user-avatar {
+  width: 28px;
+  height: 28px;
+  background: linear-gradient(135deg, var(--accent), #059669);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+/* ========== 콘텐츠 ========== */
+.content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+}
+.screen { display: none; }
+.screen.active { display: block; }
+
+/* ========== 대시보드 ========== */
+.kpi-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin-bottom: 18px;
+}
+.kpi-card {
+  background: var(--card-bg);
+  border-radius: 8px;
+  padding: 16px 18px;
+  border-left: 4px solid;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  display: flex;
+  flex-direction: column;
+}
+.kpi-card.blue { border-left-color: var(--mod-system); }
+.kpi-card.red { border-left-color: #ef4444; }
+.kpi-card.green { border-left-color: var(--accent); }
+.kpi-card.orange { border-left-color: var(--mod-alert); }
+.kpi-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
+}
+.kpi-value {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+.kpi-change {
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.kpi-change.up { color: var(--accent); }
+.kpi-change.down { color: #ef4444; }
+
+.chart-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 18px;
+}
+.chart-card {
+  background: var(--card-bg);
+  border-radius: 8px;
+  padding: 18px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+}
+.chart-card h3 {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 14px;
+  color: var(--text-primary);
+}
+.chart-placeholder {
+  height: 180px;
+  background: repeating-linear-gradient(
+    90deg,
+    var(--content-bg) 0px,
+    var(--content-bg) 30px,
+    transparent 30px,
+    transparent 32px
+  );
+  border-radius: 6px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-around;
+  padding: 0 10px;
+  position: relative;
+  overflow: hidden;
+}
+.chart-bar {
+  width: 24px;
+  border-radius: 4px 4px 0 0;
+  transition: height 0.5s ease;
+}
+
+.bottom-row {
+  display: grid;
+  grid-template-columns: 1.6fr 1fr;
+  gap: 14px;
+}
+.widget-card {
+  background: var(--card-bg);
+  border-radius: 8px;
+  padding: 18px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+}
+.widget-card h3 {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.widget-card h3 a {
+  font-size: 11px;
+  color: var(--accent);
+  font-weight: 500;
+}
+
+/* ========== 공통 테이블 ========== */
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+.data-table thead th {
+  height: var(--row-height);
+  padding: 0 12px;
+  text-align: left;
+  font-weight: 600;
+  color: var(--text-secondary);
+  background: var(--content-bg);
+  border-bottom: 2px solid var(--border);
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+  position: relative;
+}
+.data-table thead th:hover { color: var(--text-primary); }
+.sort-icon { font-size: 10px; margin-left: 4px; opacity: 0.4; }
+.data-table tbody tr {
+  height: var(--row-height);
+  border-bottom: 1px solid #d0d6de;
+  transition: background 0.1s;
+}
+.data-table tbody tr:hover { background: #d5dbe4; }
+.data-table tbody td {
+  padding: 0 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 200px;
+}
+.status-dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  margin-right: 6px;
+  vertical-align: middle;
+}
+.status-dot.active { background: var(--accent); }
+.status-dot.inactive { background: #b0b8c4; }
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 500;
+}
+.badge-blue { background: #dbeafe; color: #1d4ed8; }
+.badge-green { background: #d1fae5; color: #065f46; }
+.badge-amber { background: #fef3c7; color: #92400e; }
+.badge-red { background: #fee2e2; color: #991b1b; }
+
+/* ========== 거래처 목록 ========== */
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+.toolbar-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.toolbar-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 12px;
+  border: 1.5px solid var(--border);
+  border-radius: 6px;
+  background: var(--card-bg);
+  color: var(--text-primary);
+  font-size: 12px;
+  font-weight: 500;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.btn:hover { border-color: #8e96a4; background: #d5dbe4; }
+.btn-primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+.btn-primary:hover { background: #059669; border-color: #059669; }
+.btn-danger {
+  color: #ef4444;
+}
+.btn-danger:hover { background: #fef2f2; border-color: #fca5a5; }
+.search-box {
+  position: relative;
+}
+.search-box input {
+  padding: 6px 12px 6px 30px;
+  border: 1.5px solid var(--border);
+  border-radius: 6px;
+  font-size: 12px;
+  width: 260px;
+  outline: none;
+  background: var(--card-bg) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='13' height='13' viewBox='0 0 24 24' fill='none' stroke='%2378716c' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'/%3E%3C/svg%3E") no-repeat 10px center;
+  transition: border-color 0.2s, width 0.2s;
+}
+.search-box input:focus {
+  border-color: var(--accent);
+  width: 320px;
+}
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 14px;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+.pagination-btns {
+  display: flex;
+  gap: 4px;
+}
+.pagination-btns button {
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--card-bg);
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+}
+.pagination-btns button:hover { border-color: var(--accent); color: var(--accent); }
+.pagination-btns button.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+.table-wrap {
+  background: var(--card-bg);
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  overflow: hidden;
+}
+.table-scroll {
+  overflow-x: auto;
+}
+
+/* ========== 거래처 등록 ========== */
+.form-card {
+  background: var(--card-bg);
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  overflow: hidden;
+}
+.form-tabs {
+  display: flex;
+  border-bottom: 2px solid var(--border);
+  background: var(--content-bg);
+}
+.form-tab {
+  padding: 10px 24px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  border: none;
+  background: none;
+  position: relative;
+  transition: color 0.15s;
+}
+.form-tab:hover { color: var(--text-primary); }
+.form-tab.active {
+  color: var(--accent);
+  font-weight: 600;
+}
+.form-tab.active::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--accent);
+}
+.form-body {
+  padding: 24px;
+}
+.form-section-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  padding-bottom: 8px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.form-section-title::before {
+  content: '';
+  width: 3px;
+  height: 14px;
+  background: var(--accent);
+  border-radius: 2px;
+}
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px 24px;
+  margin-bottom: 24px;
+}
+.form-field label {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 4px;
+}
+.form-field label .required { color: #ef4444; margin-left: 2px; }
+.form-field input,
+.form-field select {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1.5px solid var(--border);
+  border-radius: 6px;
+  outline: none;
+  transition: border-color 0.2s;
+  background: #e8ecf2;
+}
+.form-field input:focus,
+.form-field select:focus {
+  border-color: var(--accent);
+  background: #edf1f7;
+}
+.form-field .hint {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 3px;
+}
+.form-field .hint.error { color: #ef4444; }
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+
+/* ========== 할 일 체크리스트 ========== */
+.todo-list { list-style: none; }
+.todo-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid #d0d6de;
+  font-size: 12px;
+}
+.todo-item:last-child { border-bottom: none; }
+.todo-item input[type="checkbox"] {
+  accent-color: var(--accent);
+  width: 15px;
+  height: 15px;
+}
+.todo-item.done .todo-text {
+  text-decoration: line-through;
+  color: var(--text-muted);
+}
+.todo-tag {
+  font-size: 10px;
+  padding: 1px 6px;
+  border-radius: 3px;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+/* ========== 애니메이션 ========== */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.screen.active { animation: fadeIn 0.25s ease; }
+
+/* ========== 거래처 테이블 체크박스 ========== */
+.data-table input[type="checkbox"] {
+  accent-color: var(--accent);
+}
+
+/* ========== 탭 콘텐츠 ========== */
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+/* ========== 3D SVG 아이콘 스타일 ========== */
+.nav-icon svg, .feature-icon svg, .header-noti svg, .header-breadcrumb svg {
+  display: block;
+}
+</style>
+</head>
+<body>
+
+<!-- SVG 정의 (3D 그라디언트 및 그림자 필터) -->
+<svg xmlns="http://www.w3.org/2000/svg" style="position:absolute;width:0;height:0;overflow:hidden">
+  <defs>
+    <!-- 3D 그림자 필터 -->
+    <filter id="svg3dShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0.5" dy="1" stdDeviation="0.8" flood-color="rgba(0,0,0,0.3)" flood-opacity="0.5"/>
+    </filter>
+    <filter id="svg3dShadowLg" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0.6" dy="1.2" stdDeviation="1" flood-color="rgba(0,0,0,0.35)" flood-opacity="0.5"/>
+    </filter>
+    <!-- 시스템관리 (파란색) 그라디언트 -->
+    <linearGradient id="grad-system" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#60a5fa"/>
+      <stop offset="100%" style="stop-color:#2563eb"/>
+    </linearGradient>
+    <!-- 영업/수주 (녹색) 그라디언트 -->
+    <linearGradient id="grad-sales" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#34d399"/>
+      <stop offset="100%" style="stop-color:#059669"/>
+    </linearGradient>
+    <!-- 재무/회계 (앰버) 그라디언트 -->
+    <linearGradient id="grad-finance" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#fbbf24"/>
+      <stop offset="100%" style="stop-color:#d97706"/>
+    </linearGradient>
+    <!-- 인사/급여 (보라색) 그라디언트 -->
+    <linearGradient id="grad-hr" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#a78bfa"/>
+      <stop offset="100%" style="stop-color:#7c3aed"/>
+    </linearGradient>
+    <!-- 생산/SCM (빨간색) 그라디언트 -->
+    <linearGradient id="grad-production" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#f87171"/>
+      <stop offset="100%" style="stop-color:#dc2626"/>
+    </linearGradient>
+    <!-- 그룹웨어 (시안) 그라디언트 -->
+    <linearGradient id="grad-groupware" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#22d3ee"/>
+      <stop offset="100%" style="stop-color:#0891b2"/>
+    </linearGradient>
+    <!-- 알림센터 (오렌지) 그라디언트 -->
+    <linearGradient id="grad-alert" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#fb923c"/>
+      <stop offset="100%" style="stop-color:#ea580c"/>
+    </linearGradient>
+    <!-- AI (녹색) 그라디언트 -->
+    <linearGradient id="grad-ai" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#34d399"/>
+      <stop offset="100%" style="stop-color:#059669"/>
+    </linearGradient>
+    <!-- 자동화 (파란색) 그라디언트 -->
+    <linearGradient id="grad-auto" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#60a5fa"/>
+      <stop offset="100%" style="stop-color:#2563eb"/>
+    </linearGradient>
+    <!-- 대시보드 (앰버) 그라디언트 -->
+    <linearGradient id="grad-dash" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#fbbf24"/>
+      <stop offset="100%" style="stop-color:#d97706"/>
+    </linearGradient>
+    <!-- 보안 (보라색) 그라디언트 -->
+    <linearGradient id="grad-sec" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#a78bfa"/>
+      <stop offset="100%" style="stop-color:#7c3aed"/>
+    </linearGradient>
+    <!-- 모바일 (시안) 그라디언트 -->
+    <linearGradient id="grad-mobile" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#22d3ee"/>
+      <stop offset="100%" style="stop-color:#0891b2"/>
+    </linearGradient>
+    <!-- 헤더 벨 (회색) 그라디언트 -->
+    <linearGradient id="grad-bell-header" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#9ca3af"/>
+      <stop offset="100%" style="stop-color:#6b7280"/>
+    </linearGradient>
+    <!-- 브레드크럼 아이콘 그라디언트 -->
+    <linearGradient id="grad-bc" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#94a3b8"/>
+      <stop offset="100%" style="stop-color:#64748b"/>
+    </linearGradient>
+  </defs>
+</svg>
+
+<!-- ==================== 로그인 화면 ==================== -->
+<div class="login-screen active" id="loginScreen">
+  <div class="login-left">
+    <div class="login-brand">
+      <h1>PLS <span>ERP</span></h1>
+      <p>AI 기반 차세대 통합 업무 관리 시스템</p>
+    </div>
+    <ul class="login-features">
+      <li>
+        <div class="feature-icon ai"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" filter="url(#svg3dShadowLg)"><rect x="4" y="4" width="16" height="16" rx="3" fill="url(#grad-ai)" opacity="0.85"/><circle cx="9" cy="11" r="1.5" fill="#fff"/><circle cx="15" cy="11" r="1.5" fill="#fff"/><path d="M9 15c0 0 1.5 2 3 2s3-2 3-2" stroke="#fff" stroke-width="1.2" stroke-linecap="round"/><path d="M7 4V2M17 4V2" stroke="url(#grad-ai)" stroke-width="1.5" stroke-linecap="round"/><rect x="8" y="1.5" width="2" height="3" rx="1" fill="url(#grad-ai)"/><rect x="14" y="1.5" width="2" height="3" rx="1" fill="url(#grad-ai)"/></svg></div>
+        <div>
+          <div class="feature-title">AI OCR 자동 인식</div>
+          <div class="feature-desc">세금계산서, 영수증을 촬영하면 자동으로 전표 생성</div>
+        </div>
+      </li>
+      <li>
+        <div class="feature-icon auto"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" filter="url(#svg3dShadowLg)"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" fill="url(#grad-auto)" opacity="0.9"/><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" fill="none" stroke="#fff" stroke-width="0.5" opacity="0.4"/></svg></div>
+        <div>
+          <div class="feature-title">자동 전표 처리</div>
+          <div class="feature-desc">반복 거래를 학습하여 원클릭 전표 입력</div>
+        </div>
+      </li>
+      <li>
+        <div class="feature-icon dash"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" filter="url(#svg3dShadowLg)"><rect x="3" y="12" width="4" height="9" rx="1" fill="url(#grad-dash)" opacity="0.7"/><rect x="10" y="7" width="4" height="14" rx="1" fill="url(#grad-dash)" opacity="0.85"/><rect x="17" y="3" width="4" height="18" rx="1" fill="url(#grad-dash)"/><path d="M3 12L10 7L17 3" stroke="#fff" stroke-width="0.5" opacity="0.3"/></svg></div>
+        <div>
+          <div class="feature-title">실시간 대시보드</div>
+          <div class="feature-desc">매출, 재고, 생산 현황을 한눈에 파악</div>
+        </div>
+      </li>
+      <li>
+        <div class="feature-icon sec"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" filter="url(#svg3dShadowLg)"><rect x="5" y="10" width="14" height="11" rx="2" fill="url(#grad-sec)" opacity="0.9"/><path d="M8 10V7a4 4 0 018 0v3" stroke="url(#grad-sec)" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="15" r="1.5" fill="#fff"/><path d="M12 16.5V18" stroke="#fff" stroke-width="1.2" stroke-linecap="round"/></svg></div>
+        <div>
+          <div class="feature-title">역할 기반 보안</div>
+          <div class="feature-desc">부서별, 직급별 맞춤 권한으로 데이터 보호</div>
+        </div>
+      </li>
+      <li>
+        <div class="feature-icon mobile"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" filter="url(#svg3dShadowLg)"><rect x="6" y="2" width="12" height="20" rx="2.5" fill="url(#grad-mobile)" opacity="0.9"/><rect x="8" y="4" width="8" height="13" rx="1" fill="#fff" opacity="0.9"/><circle cx="12" cy="19" r="1" fill="#fff"/></svg></div>
+        <div>
+          <div class="feature-title">모바일 완벽 지원</div>
+          <div class="feature-desc">언제 어디서나 결재, 조회, 보고서 확인</div>
+        </div>
+      </li>
+    </ul>
+  </div>
+  <div class="login-right">
+    <div class="login-form-wrap">
+      <h2>로그인</h2>
+      <p class="login-sub">업무를 시작하려면 계정 정보를 입력하세요.</p>
+      <div class="form-group">
+        <label>회사 코드</label>
+        <input type="text" placeholder="예: ANTIGRAVITY" value="ANTIGRAVITY">
+      </div>
+      <div class="form-group">
+        <label>아이디</label>
+        <input type="text" placeholder="아이디를 입력하세요" value="admin">
+      </div>
+      <div class="form-group">
+        <label>비밀번호</label>
+        <input type="password" placeholder="비밀번호를 입력하세요" value="••••••••">
+      </div>
+      <div class="form-row">
+        <label><input type="checkbox" checked> 로그인 상태 유지</label>
+        <a href="#">비밀번호 찾기</a>
+      </div>
+      <button class="btn-login" onclick="doLogin()">로그인</button>
+      <div class="login-footer">
+        &copy; 2026 Antigravity. PLS ERP v1.0
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== 앱 레이아웃 ==================== -->
+<div class="app-layout" id="appLayout">
+  <!-- 사이드바 -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo">A</div>
+      <span class="sidebar-title">PLS ERP</span>
+    </div>
+    <button class="sidebar-toggle" onclick="toggleSidebar()" title="사이드바 접기/펼치기">
+      <span id="toggleIcon">◀</span>
+    </button>
+    <nav class="sidebar-nav" id="sidebarNav">
+      <!-- 시스템관리 -->
+      <div class="nav-section open" data-module="system" data-color="var(--mod-system)">
+        <div class="nav-section-header active" onclick="toggleNavSection(this)">
+          <div class="nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" filter="url(#svg3dShadow)"><rect x="3" y="6" width="18" height="14" rx="2" fill="url(#grad-system)" opacity="0.9"/><rect x="7" y="2" width="10" height="6" rx="1.5" fill="url(#grad-system)" opacity="0.7"/><rect x="7" y="10" width="4" height="4" rx="0.5" fill="#fff" opacity="0.85"/><rect x="13" y="10" width="4" height="4" rx="0.5" fill="#fff" opacity="0.85"/><rect x="7" y="16" width="10" height="1.5" rx="0.5" fill="#fff" opacity="0.5"/></svg><div class="nav-dot" style="background:var(--mod-system)"></div></div>
+          <span class="nav-label">시스템관리</span>
+        </div>
+        <div class="nav-sub">
+          <a href="#" class="active" onclick="navigate('dashboard', this, 'system')">대시보드</a>
+          <a href="#" onclick="navigate('partners', this, 'system')">거래처 관리</a>
+          <a href="#" onclick="navigate('partner-reg', this, 'system')">거래처 등록</a>
+          <a href="#">사용자 관리</a>
+          <a href="#">권한 설정</a>
+        </div>
+      </div>
+      <!-- 영업/수주 -->
+      <div class="nav-section" data-module="sales" data-color="var(--mod-sales)">
+        <div class="nav-section-header" onclick="toggleNavSection(this)">
+          <div class="nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" filter="url(#svg3dShadow)"><path d="M3 20L3 4" stroke="url(#grad-sales)" stroke-width="2" stroke-linecap="round"/><path d="M3 20L21 20" stroke="url(#grad-sales)" stroke-width="2" stroke-linecap="round"/><path d="M7 14L11 9L15 12L20 5" stroke="url(#grad-sales)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.9"/><circle cx="20" cy="5" r="2" fill="url(#grad-sales)"/><path d="M17 5L20 5L20 8" stroke="url(#grad-sales)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.7"/></svg><div class="nav-dot" style="background:var(--mod-sales)"></div></div>
+          <span class="nav-label">영업/수주</span>
+        </div>
+        <div class="nav-sub">
+          <a href="#">견적 관리</a>
+          <a href="#">수주 관리</a>
+          <a href="#">출하 관리</a>
+          <a href="#">매출 분석</a>
+        </div>
+      </div>
+      <!-- 재무/회계 -->
+      <div class="nav-section" data-module="finance" data-color="var(--mod-finance)">
+        <div class="nav-section-header" onclick="toggleNavSection(this)">
+          <div class="nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" filter="url(#svg3dShadow)"><rect x="2" y="7" width="20" height="14" rx="3" fill="url(#grad-finance)" opacity="0.9"/><rect x="2" y="7" width="20" height="5" rx="3" fill="url(#grad-finance)" opacity="0.7"/><circle cx="17" cy="15" r="2.5" fill="#fff" opacity="0.85"/><circle cx="14.5" cy="15" r="2.5" fill="#fff" opacity="0.55"/><path d="M6 5h12" stroke="url(#grad-finance)" stroke-width="1.5" stroke-linecap="round" opacity="0.5"/></svg><div class="nav-dot" style="background:var(--mod-finance)"></div></div>
+          <span class="nav-label">재무/회계</span>
+        </div>
+        <div class="nav-sub">
+          <a href="#">전표 입력</a>
+          <a href="#">계정별 원장</a>
+          <a href="#">세금계산서</a>
+          <a href="#">결산 관리</a>
+        </div>
+      </div>
+      <!-- 인사/급여 -->
+      <div class="nav-section" data-module="hr" data-color="var(--mod-hr)">
+        <div class="nav-section-header" onclick="toggleNavSection(this)">
+          <div class="nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" filter="url(#svg3dShadow)"><circle cx="9" cy="8" r="3.5" fill="url(#grad-hr)" opacity="0.9"/><circle cx="16" cy="8" r="3" fill="url(#grad-hr)" opacity="0.65"/><path d="M2 20c0-3.5 3-6 7-6s7 2.5 7 6" fill="url(#grad-hr)" opacity="0.85"/><path d="M14 14c2.5 0 5.5 1.5 5.5 4.5" stroke="url(#grad-hr)" stroke-width="2" stroke-linecap="round" opacity="0.6"/></svg><div class="nav-dot" style="background:var(--mod-hr)"></div></div>
+          <span class="nav-label">인사/급여</span>
+        </div>
+        <div class="nav-sub">
+          <a href="#">사원 관리</a>
+          <a href="#">근태 관리</a>
+          <a href="#">급여 관리</a>
+          <a href="#">연말정산</a>
+        </div>
+      </div>
+      <!-- 생산/SCM -->
+      <div class="nav-section" data-module="production" data-color="var(--mod-production)">
+        <div class="nav-section-header" onclick="toggleNavSection(this)">
+          <div class="nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" filter="url(#svg3dShadow)"><circle cx="12" cy="12" r="8" fill="url(#grad-production)" opacity="0.85"/><circle cx="12" cy="12" r="3" fill="#fff" opacity="0.9"/><rect x="11" y="2" width="2" height="4" rx="1" fill="url(#grad-production)"/><rect x="11" y="18" width="2" height="4" rx="1" fill="url(#grad-production)"/><rect x="18" y="11" width="4" height="2" rx="1" fill="url(#grad-production)"/><rect x="2" y="11" width="4" height="2" rx="1" fill="url(#grad-production)"/></svg><div class="nav-dot" style="background:var(--mod-production)"></div></div>
+          <span class="nav-label">생산/SCM</span>
+        </div>
+        <div class="nav-sub">
+          <a href="#">생산 계획</a>
+          <a href="#">작업 지시</a>
+          <a href="#">재고 관리</a>
+          <a href="#">BOM 관리</a>
+        </div>
+      </div>
+      <!-- 그룹웨어 -->
+      <div class="nav-section" data-module="groupware" data-color="var(--mod-groupware)">
+        <div class="nav-section-header" onclick="toggleNavSection(this)">
+          <div class="nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" filter="url(#svg3dShadow)"><rect x="4" y="3" width="16" height="19" rx="2" fill="url(#grad-groupware)" opacity="0.9"/><rect x="7" y="7" width="10" height="1.5" rx="0.5" fill="#fff" opacity="0.85"/><rect x="7" y="11" width="7" height="1.5" rx="0.5" fill="#fff" opacity="0.7"/><rect x="7" y="15" width="9" height="1.5" rx="0.5" fill="#fff" opacity="0.55"/><path d="M4 3h16v3H4z" fill="url(#grad-groupware)" opacity="0.7"/></svg><div class="nav-dot" style="background:var(--mod-groupware)"></div></div>
+          <span class="nav-label">그룹웨어</span>
+        </div>
+        <div class="nav-sub">
+          <a href="#">전자결재</a>
+          <a href="#">공지사항</a>
+          <a href="#">게시판</a>
+          <a href="#">일정 관리</a>
+        </div>
+      </div>
+      <!-- 알림센터 -->
+      <div class="nav-section" data-module="alert" data-color="var(--mod-alert)">
+        <div class="nav-section-header" onclick="toggleNavSection(this)">
+          <div class="nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" filter="url(#svg3dShadow)"><path d="M12 3C8.5 3 6 5.5 6 9v4l-2 2v1h16v-1l-2-2V9c0-3.5-2.5-6-6-6z" fill="url(#grad-alert)" opacity="0.9"/><path d="M10 18c0 1.1.9 2 2 2s2-.9 2-2" fill="url(#grad-alert)" opacity="0.7"/><ellipse cx="12" cy="4" rx="1.5" ry="1" fill="#fff" opacity="0.5"/></svg><div class="nav-dot" style="background:var(--mod-alert)"></div></div>
+          <span class="nav-label">알림센터</span>
+        </div>
+        <div class="nav-sub">
+          <a href="#">알림 목록</a>
+          <a href="#">알림 설정</a>
+        </div>
+      </div>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="footer-stat"><div class="dot-online"></div><span class="footer-text">접속자: 12명</span></div>
+      <div class="footer-stat"><div class="dot-server"></div><span class="footer-text">서버: 정상</span></div>
+    </div>
+  </aside>
+
+  <!-- 메인 -->
+  <div class="main-area">
+    <!-- 헤더 -->
+    <header class="app-header" id="appHeader">
+      <div class="header-breadcrumb">
+        <span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" filter="url(#svg3dShadow)"><rect x="3" y="6" width="18" height="14" rx="2" fill="url(#grad-bc)" opacity="0.9"/><rect x="7" y="2" width="10" height="6" rx="1.5" fill="url(#grad-bc)" opacity="0.7"/><rect x="7" y="10" width="4" height="3" rx="0.5" fill="#fff" opacity="0.7"/><rect x="13" y="10" width="4" height="3" rx="0.5" fill="#fff" opacity="0.7"/></svg></span>
+        <span class="bc-module" id="bcModule">시스템관리</span>
+        <span>/</span>
+        <span id="bcPage">대시보드</span>
+      </div>
+      <div class="header-search">
+        <input type="text" placeholder="메뉴, 거래처, 전표번호 검색... (Ctrl+K)">
+      </div>
+      <button class="header-noti">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" filter="url(#svg3dShadow)"><path d="M12 3C8.5 3 6 5.5 6 9v4l-2 2v1h16v-1l-2-2V9c0-3.5-2.5-6-6-6z" fill="url(#grad-bell-header)" opacity="0.9"/><path d="M10 18c0 1.1.9 2 2 2s2-.9 2-2" fill="url(#grad-bell-header)" opacity="0.7"/></svg>
+        <span class="noti-badge">3</span>
+      </button>
+      <div class="header-user">
+        <div class="user-avatar">관</div>
+        <span>관리자 ▾</span>
+      </div>
+    </header>
+
+    <!-- 콘텐츠 영역 -->
+    <div class="content">
+
+      <!-- ===== 대시보드 화면 ===== -->
+      <div class="screen active" id="screen-dashboard">
+        <!-- KPI 카드 -->
+        <div class="kpi-row">
+          <div class="kpi-card blue">
+            <div class="kpi-label">이번 달 매출</div>
+            <div class="kpi-value">₩125,400,000</div>
+            <div class="kpi-change up">▲ 12.5% 전월 대비</div>
+          </div>
+          <div class="kpi-card red">
+            <div class="kpi-label">미수금 잔액</div>
+            <div class="kpi-value">₩23,500,000</div>
+            <div class="kpi-change down">▲ 3.2% 증가</div>
+          </div>
+          <div class="kpi-card green">
+            <div class="kpi-label">총 재고 현황</div>
+            <div class="kpi-value">1,234건</div>
+            <div class="kpi-change up">적정 수준 유지</div>
+          </div>
+          <div class="kpi-card orange">
+            <div class="kpi-label">미결재 문서</div>
+            <div class="kpi-value">5건</div>
+            <div class="kpi-change down">▲ 2건 신규</div>
+          </div>
+        </div>
+
+        <!-- 차트 영역 -->
+        <div class="chart-row">
+          <div class="chart-card">
+            <h3>월별 매출 추이</h3>
+            <div class="chart-placeholder" id="chart1">
+              <!-- JS로 채워짐 -->
+            </div>
+          </div>
+          <div class="chart-card">
+            <h3>거래처별 매출 비중</h3>
+            <div class="chart-placeholder" id="chart2">
+              <!-- JS로 채워짐 -->
+            </div>
+          </div>
+        </div>
+
+        <!-- 하단 위젯 -->
+        <div class="bottom-row">
+          <div class="widget-card">
+            <h3>최근 거래 내역 <a href="#">전체보기 →</a></h3>
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>일자</th>
+                  <th>거래처</th>
+                  <th>유형</th>
+                  <th>금액</th>
+                  <th>상태</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>03-14</td><td>삼성전자</td><td>매출</td><td style="text-align:right">₩15,200,000</td><td><span class="badge badge-green">완료</span></td></tr>
+                <tr><td>03-14</td><td>LG화학</td><td>매입</td><td style="text-align:right">₩8,400,000</td><td><span class="badge badge-blue">진행중</span></td></tr>
+                <tr><td>03-13</td><td>현대모비스</td><td>매출</td><td style="text-align:right">₩22,800,000</td><td><span class="badge badge-green">완료</span></td></tr>
+                <tr><td>03-13</td><td>SK이노베이션</td><td>매입</td><td style="text-align:right">₩5,600,000</td><td><span class="badge badge-amber">대기</span></td></tr>
+                <tr><td>03-12</td><td>포스코</td><td>매출</td><td style="text-align:right">₩31,000,000</td><td><span class="badge badge-green">완료</span></td></tr>
+                <tr><td>03-12</td><td>한화솔루션</td><td>매입</td><td style="text-align:right">₩12,300,000</td><td><span class="badge badge-red">지연</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="widget-card">
+            <h3>오늘의 할 일</h3>
+            <ul class="todo-list">
+              <li class="todo-item done">
+                <input type="checkbox" checked>
+                <span class="todo-text">삼성전자 견적서 발송</span>
+                <span class="todo-tag badge-green">완료</span>
+              </li>
+              <li class="todo-item done">
+                <input type="checkbox" checked>
+                <span class="todo-text">3월 급여 데이터 검토</span>
+                <span class="todo-tag badge-green">완료</span>
+              </li>
+              <li class="todo-item">
+                <input type="checkbox">
+                <span class="todo-text">LG화학 미수금 확인 전화</span>
+                <span class="todo-tag badge-amber">오후</span>
+              </li>
+              <li class="todo-item">
+                <input type="checkbox">
+                <span class="todo-text">생산 계획 회의 (14:00)</span>
+                <span class="todo-tag badge-blue">회의</span>
+              </li>
+              <li class="todo-item">
+                <input type="checkbox">
+                <span class="todo-text">세금계산서 마감 처리</span>
+                <span class="todo-tag badge-red">긴급</span>
+              </li>
+              <li class="todo-item">
+                <input type="checkbox">
+                <span class="todo-text">신규 거래처 심사 보고서</span>
+                <span class="todo-tag badge-amber">내일</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== 거래처 목록 화면 ===== -->
+      <div class="screen" id="screen-partners">
+        <div class="toolbar">
+          <div class="toolbar-left">
+            <button class="btn btn-primary" onclick="navigate('partner-reg')">+ 등록</button>
+            <button class="btn"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M17 3a2.83 2.83 0 114 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg> 수정</button>
+            <button class="btn btn-danger"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg> 삭제</button>
+            <button class="btn"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Excel</button>
+            <button class="btn"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg> 인쇄</button>
+          </div>
+          <div class="toolbar-right">
+            <select class="btn" style="border:1.5px solid var(--border);border-radius:6px;padding:6px 10px;font-size:12px;outline:none">
+              <option>전체 상태</option>
+              <option>활성</option>
+              <option>비활성</option>
+            </select>
+            <select class="btn" style="border:1.5px solid var(--border);border-radius:6px;padding:6px 10px;font-size:12px;outline:none">
+              <option>전체 유형</option>
+              <option>매출처</option>
+              <option>매입처</option>
+              <option>매출/매입</option>
+            </select>
+            <div class="search-box">
+              <input type="text" placeholder="거래처명, 사업자번호, 담당자 검색...">
+            </div>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <div class="table-scroll">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th style="width:32px"><input type="checkbox"></th>
+                  <th>코드 <span class="sort-icon">▲</span></th>
+                  <th>거래처명 <span class="sort-icon">▼</span></th>
+                  <th>사업자번호</th>
+                  <th>대표자</th>
+                  <th>유형</th>
+                  <th>담당자</th>
+                  <th>연락처</th>
+                  <th>최근거래일</th>
+                  <th>미수잔액</th>
+                  <th>상태</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><input type="checkbox"></td>
+                  <td>C001</td>
+                  <td><strong>삼성전자(주)</strong></td>
+                  <td>124-81-00998</td>
+                  <td>한종희</td>
+                  <td><span class="badge badge-blue">매출처</span></td>
+                  <td>김영수</td>
+                  <td>02-2255-0114</td>
+                  <td>2026-03-14</td>
+                  <td style="text-align:right;color:#ef4444;font-weight:600">₩5,200,000</td>
+                  <td><span class="status-dot active"></span>활성</td>
+                </tr>
+                <tr>
+                  <td><input type="checkbox"></td>
+                  <td>C002</td>
+                  <td><strong>LG화학(주)</strong></td>
+                  <td>110-81-56806</td>
+                  <td>신학철</td>
+                  <td><span class="badge badge-green">매입처</span></td>
+                  <td>박지현</td>
+                  <td>02-3773-1114</td>
+                  <td>2026-03-14</td>
+                  <td style="text-align:right">-</td>
+                  <td><span class="status-dot active"></span>활성</td>
+                </tr>
+                <tr>
+                  <td><input type="checkbox"></td>
+                  <td>C003</td>
+                  <td><strong>현대모비스(주)</strong></td>
+                  <td>106-81-11111</td>
+                  <td>정의선</td>
+                  <td><span class="badge badge-amber">매출/매입</span></td>
+                  <td>이민호</td>
+                  <td>02-2018-5114</td>
+                  <td>2026-03-13</td>
+                  <td style="text-align:right;color:#ef4444;font-weight:600">₩3,800,000</td>
+                  <td><span class="status-dot active"></span>활성</td>
+                </tr>
+                <tr>
+                  <td><input type="checkbox"></td>
+                  <td>C004</td>
+                  <td><strong>SK이노베이션(주)</strong></td>
+                  <td>110-81-28184</td>
+                  <td>박상규</td>
+                  <td><span class="badge badge-blue">매출처</span></td>
+                  <td>최서연</td>
+                  <td>02-2121-5114</td>
+                  <td>2026-03-13</td>
+                  <td style="text-align:right;color:#ef4444;font-weight:600">₩8,400,000</td>
+                  <td><span class="status-dot active"></span>활성</td>
+                </tr>
+                <tr>
+                  <td><input type="checkbox"></td>
+                  <td>C005</td>
+                  <td><strong>(주)포스코</strong></td>
+                  <td>102-81-25991</td>
+                  <td>장인화</td>
+                  <td><span class="badge badge-green">매입처</span></td>
+                  <td>한동우</td>
+                  <td>054-220-0114</td>
+                  <td>2026-03-12</td>
+                  <td style="text-align:right">-</td>
+                  <td><span class="status-dot active"></span>활성</td>
+                </tr>
+                <tr>
+                  <td><input type="checkbox"></td>
+                  <td>C006</td>
+                  <td><strong>한화솔루션(주)</strong></td>
+                  <td>101-81-27340</td>
+                  <td>김동관</td>
+                  <td><span class="badge badge-amber">매출/매입</span></td>
+                  <td>이수진</td>
+                  <td>02-729-1114</td>
+                  <td>2026-03-12</td>
+                  <td style="text-align:right;color:#ef4444;font-weight:600">₩2,100,000</td>
+                  <td><span class="status-dot active"></span>활성</td>
+                </tr>
+                <tr>
+                  <td><input type="checkbox"></td>
+                  <td>C007</td>
+                  <td><strong>롯데케미칼(주)</strong></td>
+                  <td>110-81-07873</td>
+                  <td>김교현</td>
+                  <td><span class="badge badge-blue">매출처</span></td>
+                  <td>정유라</td>
+                  <td>02-829-4114</td>
+                  <td>2026-03-11</td>
+                  <td style="text-align:right">-</td>
+                  <td><span class="status-dot active"></span>활성</td>
+                </tr>
+                <tr>
+                  <td><input type="checkbox"></td>
+                  <td>C008</td>
+                  <td><strong>두산에너빌리티(주)</strong></td>
+                  <td>132-81-00517</td>
+                  <td>박지원</td>
+                  <td><span class="badge badge-green">매입처</span></td>
+                  <td>강민수</td>
+                  <td>02-3398-8114</td>
+                  <td>2026-03-10</td>
+                  <td style="text-align:right;color:#ef4444;font-weight:600">₩1,200,000</td>
+                  <td><span class="status-dot active"></span>활성</td>
+                </tr>
+                <tr>
+                  <td><input type="checkbox"></td>
+                  <td>C009</td>
+                  <td><strong>GS칼텍스(주)</strong></td>
+                  <td>110-81-04747</td>
+                  <td>허세홍</td>
+                  <td><span class="badge badge-amber">매출/매입</span></td>
+                  <td>오하늘</td>
+                  <td>02-2005-5114</td>
+                  <td>2026-03-08</td>
+                  <td style="text-align:right">-</td>
+                  <td><span class="status-dot inactive"></span>비활성</td>
+                </tr>
+                <tr>
+                  <td><input type="checkbox"></td>
+                  <td>C010</td>
+                  <td><strong>효성첨단소재(주)</strong></td>
+                  <td>104-81-50168</td>
+                  <td>조현준</td>
+                  <td><span class="badge badge-blue">매출처</span></td>
+                  <td>윤태희</td>
+                  <td>02-707-7000</td>
+                  <td>2026-03-07</td>
+                  <td style="text-align:right;color:#ef4444;font-weight:600">₩4,500,000</td>
+                  <td><span class="status-dot active"></span>활성</td>
+                </tr>
+                <tr>
+                  <td><input type="checkbox"></td>
+                  <td>C011</td>
+                  <td><strong>코오롱인더스트리(주)</strong></td>
+                  <td>110-81-11510</td>
+                  <td>장희구</td>
+                  <td><span class="badge badge-green">매입처</span></td>
+                  <td>배소영</td>
+                  <td>02-3677-6114</td>
+                  <td>2026-03-05</td>
+                  <td style="text-align:right">-</td>
+                  <td><span class="status-dot inactive"></span>비활성</td>
+                </tr>
+                <tr>
+                  <td><input type="checkbox"></td>
+                  <td>C012</td>
+                  <td><strong>OCI(주)</strong></td>
+                  <td>104-81-08114</td>
+                  <td>이우현</td>
+                  <td><span class="badge badge-blue">매출처</span></td>
+                  <td>김재훈</td>
+                  <td>02-727-9500</td>
+                  <td>2026-03-04</td>
+                  <td style="text-align:right;color:#ef4444;font-weight:600">₩900,000</td>
+                  <td><span class="status-dot active"></span>활성</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="pagination">
+          <span>총 128건 중 1-12 표시</span>
+          <div class="pagination-btns">
+            <button>◀</button>
+            <button class="active">1</button>
+            <button>2</button>
+            <button>3</button>
+            <button>4</button>
+            <button>5</button>
+            <button>...</button>
+            <button>11</button>
+            <button>▶</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== 거래처 등록 화면 ===== -->
+      <div class="screen" id="screen-partner-reg">
+        <div class="form-card">
+          <div class="form-tabs">
+            <button class="form-tab active" onclick="switchFormTab(this, 'tab-basic')">기본정보</button>
+            <button class="form-tab" onclick="switchFormTab(this, 'tab-detail')">상세정보</button>
+            <button class="form-tab" onclick="switchFormTab(this, 'tab-terms')">거래조건</button>
+          </div>
+          <div class="form-body">
+            <!-- 기본정보 탭 -->
+            <div class="tab-content active" id="tab-basic">
+              <div class="form-section-title">사업자 정보</div>
+              <div class="form-grid">
+                <div class="form-field">
+                  <label>거래처코드 <span class="required">*</span></label>
+                  <input type="text" value="C013" readonly style="background:#d5dbe4;color:var(--text-secondary)">
+                  <div class="hint">자동 생성됩니다.</div>
+                </div>
+                <div class="form-field">
+                  <label>거래처명 <span class="required">*</span></label>
+                  <input type="text" placeholder="거래처명을 입력하세요">
+                </div>
+                <div class="form-field">
+                  <label>사업자번호 <span class="required">*</span></label>
+                  <input type="text" placeholder="000-00-00000">
+                  <div class="hint">하이픈(-) 포함 입력</div>
+                </div>
+                <div class="form-field">
+                  <label>법인번호</label>
+                  <input type="text" placeholder="000000-0000000">
+                </div>
+                <div class="form-field">
+                  <label>대표자명 <span class="required">*</span></label>
+                  <input type="text" placeholder="대표자명">
+                </div>
+                <div class="form-field">
+                  <label>업태</label>
+                  <input type="text" placeholder="예: 제조업">
+                </div>
+                <div class="form-field">
+                  <label>종목</label>
+                  <input type="text" placeholder="예: 화학제품">
+                </div>
+                <div class="form-field">
+                  <label>거래 유형 <span class="required">*</span></label>
+                  <select>
+                    <option value="">선택하세요</option>
+                    <option>매출처</option>
+                    <option>매입처</option>
+                    <option>매출/매입</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-section-title">연락처 정보</div>
+              <div class="form-grid">
+                <div class="form-field">
+                  <label>대표 전화번호</label>
+                  <input type="text" placeholder="02-0000-0000">
+                </div>
+                <div class="form-field">
+                  <label>팩스 번호</label>
+                  <input type="text" placeholder="02-0000-0000">
+                </div>
+                <div class="form-field">
+                  <label>이메일</label>
+                  <input type="email" placeholder="email@company.com">
+                  <div class="hint error" style="display:none">올바른 이메일 형식이 아닙니다.</div>
+                </div>
+                <div class="form-field">
+                  <label>홈페이지</label>
+                  <input type="url" placeholder="https://www.company.com">
+                </div>
+                <div class="form-field" style="grid-column:1/3">
+                  <label>사업장 주소</label>
+                  <input type="text" placeholder="주소를 입력하세요">
+                </div>
+              </div>
+
+              <div class="form-section-title">담당자 정보</div>
+              <div class="form-grid">
+                <div class="form-field">
+                  <label>담당자명</label>
+                  <input type="text" placeholder="담당자명">
+                </div>
+                <div class="form-field">
+                  <label>담당자 연락처</label>
+                  <input type="text" placeholder="010-0000-0000">
+                </div>
+                <div class="form-field">
+                  <label>담당자 이메일</label>
+                  <input type="email" placeholder="person@company.com">
+                </div>
+                <div class="form-field">
+                  <label>담당 부서</label>
+                  <input type="text" placeholder="예: 구매팀">
+                </div>
+              </div>
+            </div>
+
+            <!-- 상세정보 탭 -->
+            <div class="tab-content" id="tab-detail">
+              <div class="form-section-title">추가 정보</div>
+              <div class="form-grid">
+                <div class="form-field">
+                  <label>산업 분류</label>
+                  <select>
+                    <option>선택하세요</option>
+                    <option>제조업</option>
+                    <option>서비스업</option>
+                    <option>유통/물류</option>
+                    <option>IT/소프트웨어</option>
+                    <option>건설업</option>
+                    <option>기타</option>
+                  </select>
+                </div>
+                <div class="form-field">
+                  <label>매출 규모</label>
+                  <select>
+                    <option>선택하세요</option>
+                    <option>10억 미만</option>
+                    <option>10억~50억</option>
+                    <option>50억~100억</option>
+                    <option>100억~500억</option>
+                    <option>500억 이상</option>
+                  </select>
+                </div>
+                <div class="form-field">
+                  <label>직원 수</label>
+                  <input type="number" placeholder="직원 수">
+                </div>
+                <div class="form-field">
+                  <label>설립일</label>
+                  <input type="date">
+                </div>
+                <div class="form-field" style="grid-column:1/3">
+                  <label>비고</label>
+                  <input type="text" placeholder="기타 참고 사항을 입력하세요">
+                </div>
+              </div>
+            </div>
+
+            <!-- 거래조건 탭 -->
+            <div class="tab-content" id="tab-terms">
+              <div class="form-section-title">결제 조건</div>
+              <div class="form-grid">
+                <div class="form-field">
+                  <label>결제 방식</label>
+                  <select>
+                    <option>선택하세요</option>
+                    <option>현금</option>
+                    <option>어음</option>
+                    <option>계좌이체</option>
+                    <option>카드</option>
+                    <option>혼합</option>
+                  </select>
+                </div>
+                <div class="form-field">
+                  <label>결제일</label>
+                  <select>
+                    <option>선택하세요</option>
+                    <option>당월 말일</option>
+                    <option>익월 10일</option>
+                    <option>익월 말일</option>
+                    <option>60일</option>
+                    <option>90일</option>
+                  </select>
+                </div>
+                <div class="form-field">
+                  <label>여신 한도</label>
+                  <input type="text" placeholder="₩0">
+                  <div class="hint">여신 한도를 초과하면 경고가 표시됩니다.</div>
+                </div>
+                <div class="form-field">
+                  <label>할인율 (%)</label>
+                  <input type="number" placeholder="0" min="0" max="100" step="0.1">
+                </div>
+              </div>
+
+              <div class="form-section-title">세금계산서 발행</div>
+              <div class="form-grid">
+                <div class="form-field">
+                  <label>발행 주기</label>
+                  <select>
+                    <option>선택하세요</option>
+                    <option>건별 발행</option>
+                    <option>월 합산</option>
+                    <option>주 합산</option>
+                  </select>
+                </div>
+                <div class="form-field">
+                  <label>발행 이메일</label>
+                  <input type="email" placeholder="tax@company.com">
+                </div>
+              </div>
+            </div>
+
+            <div class="form-actions">
+              <button class="btn" onclick="navigate('partners')">취소</button>
+              <button class="btn">임시저장</button>
+              <button class="btn btn-primary">저장</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+/* ========== 로그인 ========== */
+function doLogin() {
+  document.getElementById('loginScreen').classList.remove('active');
+  document.getElementById('appLayout').classList.add('active');
+  renderCharts();
+}
+
+/* ========== 사이드바 토글 ========== */
+function toggleSidebar() {
+  var sb = document.getElementById('sidebar');
+  var icon = document.getElementById('toggleIcon');
+  sb.classList.toggle('collapsed');
+  icon.textContent = sb.classList.contains('collapsed') ? '▶' : '◀';
+}
+
+/* ========== 내비게이션 섹션 토글 ========== */
+function toggleNavSection(header) {
+  var section = header.parentElement;
+  // 다른 섹션 닫기 (선택사항)
+  var allSections = document.querySelectorAll('.nav-section');
+  allSections.forEach(function(s) {
+    if (s !== section) s.classList.remove('open');
+  });
+  section.classList.toggle('open');
+  // 활성 헤더 표시
+  document.querySelectorAll('.nav-section-header').forEach(function(h) { h.classList.remove('active'); });
+  header.classList.add('active');
+  // 모듈 컬러 변경
+  var color = section.dataset.color;
+  if (color) {
+    document.documentElement.style.setProperty('--current-mod-color', color);
+  }
+}
+
+/* ========== 화면 전환 ========== */
+var screenMap = {
+  'dashboard': { title: '대시보드', module: '시스템관리' },
+  'partners': { title: '거래처 관리', module: '시스템관리' },
+  'partner-reg': { title: '거래처 등록', module: '시스템관리' }
+};
+
+function navigate(screenId, linkEl, moduleName) {
+  // 화면 전환
+  document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
+  var target = document.getElementById('screen-' + screenId);
+  if (target) target.classList.add('active');
+  // 브레드크럼 업데이트
+  var info = screenMap[screenId];
+  if (info) {
+    document.getElementById('bcModule').textContent = info.module;
+    document.getElementById('bcPage').textContent = info.title;
+  }
+  // 서브메뉴 활성 표시
+  if (linkEl) {
+    document.querySelectorAll('.nav-sub a').forEach(function(a) { a.classList.remove('active'); });
+    linkEl.classList.add('active');
+  }
+  // 이벤트 버블링 방지
+  if (event) event.preventDefault();
+}
+
+/* ========== 폼 탭 전환 ========== */
+function switchFormTab(tabBtn, contentId) {
+  // 탭 버튼 활성
+  document.querySelectorAll('.form-tab').forEach(function(t) { t.classList.remove('active'); });
+  tabBtn.classList.add('active');
+  // 탭 콘텐츠 활성
+  document.querySelectorAll('.tab-content').forEach(function(c) { c.classList.remove('active'); });
+  document.getElementById(contentId).classList.add('active');
+}
+
+/* ========== 차트 렌더링 (CSS 바 차트) ========== */
+function renderCharts() {
+  // 월별 매출 차트
+  var chart1 = document.getElementById('chart1');
+  var monthData = [65, 72, 58, 80, 95, 88, 110, 105, 92, 120, 115, 125];
+  var months = ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
+  var maxVal = Math.max.apply(null, monthData);
+  chart1.innerHTML = '';
+  monthData.forEach(function(val, i) {
+    var wrap = document.createElement('div');
+    wrap.style.cssText = 'display:flex;flex-direction:column;align-items:center;gap:4px;flex:1';
+    var bar = document.createElement('div');
+    bar.className = 'chart-bar';
+    bar.style.cssText = 'width:100%;max-width:28px;height:0;background:' +
+      (i === 11 ? 'var(--accent)' : (i >= 9 ? '#6ee7b7' : '#d1fae5')) + ';';
+    var label = document.createElement('div');
+    label.style.cssText = 'font-size:9px;color:var(--text-muted);';
+    label.textContent = months[i];
+    wrap.appendChild(bar);
+    wrap.appendChild(label);
+    chart1.appendChild(wrap);
+    // 애니메이션
+    setTimeout(function() {
+      bar.style.height = (val / maxVal * 160) + 'px';
+    }, 100 + i * 40);
+  });
+
+  // 거래처별 매출 비중 (수평 바)
+  var chart2 = document.getElementById('chart2');
+  var partners = [
+    { name: '삼성전자', val: 28, color: '#10b981' },
+    { name: '현대모비스', val: 22, color: '#6ee7b7' },
+    { name: '포스코', val: 18, color: '#3b82f6' },
+    { name: 'SK이노베이션', val: 15, color: '#93c5fd' },
+    { name: 'LG화학', val: 10, color: '#f59e0b' },
+    { name: '기타', val: 7, color: '#b0b8c4' }
+  ];
+  chart2.style.cssText = 'height:180px;display:flex;flex-direction:column;justify-content:center;gap:8px;padding:10px 14px;background:none;';
+  chart2.innerHTML = '';
+  partners.forEach(function(p) {
+    var row = document.createElement('div');
+    row.style.cssText = 'display:flex;align-items:center;gap:10px;';
+    row.innerHTML = '<span style="width:70px;font-size:11px;color:var(--text-secondary);text-align:right;flex-shrink:0">' + p.name + '</span>' +
+      '<div style="flex:1;height:16px;background:var(--content-bg);border-radius:3px;overflow:hidden">' +
+      '<div style="width:' + p.val + '%;height:100%;background:' + p.color + ';border-radius:3px;transition:width 0.6s ease"></div></div>' +
+      '<span style="width:30px;font-size:11px;font-weight:600;color:var(--text-primary)">' + p.val + '%</span>';
+    chart2.appendChild(row);
+  });
+}
+
+/* ========== 키보드 단축키 ========== */
+document.addEventListener('keydown', function(e) {
+  if (e.ctrlKey && e.key === 'k') {
+    e.preventDefault();
+    var searchInput = document.querySelector('.header-search input');
+    if (searchInput) searchInput.focus();
+  }
+});
+</script>
+</body>
+</html>

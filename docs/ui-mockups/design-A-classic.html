@@ -1,0 +1,949 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PLS ERP System - Classic Design A</title>
+<style>
+/* ===== 리셋 및 기본 스타일 ===== */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { height: 100%; overflow: hidden; }
+body {
+  font-family: 'Malgun Gothic', 'Segoe UI', sans-serif;
+  font-size: 12px;
+  color: #222;
+  background: #f0f2f5;
+  line-height: 1.4;
+}
+input, select, textarea, button { font-family: inherit; font-size: 12px; }
+a { color: #2563eb; text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* ===== 전체 레이아웃 ===== */
+.app-wrapper { display: flex; flex-direction: column; height: 100vh; }
+.app-header { flex-shrink: 0; }
+.app-body { display: flex; flex: 1; overflow: hidden; }
+.app-sidebar { flex-shrink: 0; }
+.app-main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+.app-footer { flex-shrink: 0; }
+
+/* ===== 헤더 ===== */
+.app-header {
+  background: #1e293b;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  height: 40px;
+  border-bottom: 1px solid #0f172a;
+}
+.header-left { display: flex; align-items: center; gap: 12px; }
+.header-logo {
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  color: #60a5fa;
+}
+.header-right { display: flex; align-items: center; gap: 16px; font-size: 12px; }
+.header-right .notif-bell {
+  position: relative;
+  cursor: pointer;
+  font-size: 15px;
+}
+.header-right .notif-bell .badge {
+  position: absolute;
+  top: -5px; right: -7px;
+  background: #ef4444;
+  color: #fff;
+  font-size: 9px;
+  padding: 1px 4px;
+  border-radius: 8px;
+  line-height: 1.2;
+}
+.header-right .user-name { color: #cbd5e1; }
+.header-right .logout-link { color: #94a3b8; cursor: pointer; }
+.header-right .logout-link:hover { color: #fff; }
+
+/* 브레드크럼 */
+.breadcrumb-bar {
+  background: #fff;
+  border-bottom: 1px solid #d1d5db;
+  padding: 4px 16px;
+  font-size: 11px;
+  color: #6b7280;
+  height: 26px;
+  display: flex;
+  align-items: center;
+}
+.breadcrumb-bar span { margin: 0 4px; }
+
+/* ===== 탭 바 ===== */
+.tab-bar {
+  background: #e5e7eb;
+  border-bottom: 1px solid #d1d5db;
+  display: flex;
+  padding: 0 8px;
+  height: 28px;
+  align-items: flex-end;
+  gap: 2px;
+}
+.tab-btn {
+  padding: 4px 14px;
+  background: #d1d5db;
+  border: 1px solid #9ca3af;
+  border-bottom: none;
+  border-radius: 4px 4px 0 0;
+  cursor: pointer;
+  font-size: 11px;
+  color: #374151;
+  white-space: nowrap;
+}
+.tab-btn:hover { background: #f3f4f6; }
+.tab-btn.active {
+  background: #fff;
+  border-color: #9ca3af;
+  color: #111;
+  font-weight: 600;
+  position: relative;
+  top: 1px;
+}
+
+/* ===== 사이드바 ===== */
+.app-sidebar {
+  width: 200px;
+  background: #1e293b;
+  color: #cbd5e1;
+  overflow-y: auto;
+  border-right: 1px solid #0f172a;
+}
+.sidebar-menu { list-style: none; }
+.sidebar-menu .menu-group {}
+.menu-group-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  color: #e2e8f0;
+  border-bottom: 1px solid #334155;
+  user-select: none;
+}
+.menu-group-title:hover { background: #334155; }
+.menu-group-title .arrow {
+  font-size: 10px;
+  transition: transform 0.15s;
+}
+.menu-group-title .arrow.open { transform: rotate(90deg); }
+.menu-group-title .menu-icon { margin-right: 6px; font-size: 13px; }
+.menu-sub { list-style: none; display: none; background: #162031; }
+.menu-sub.open { display: block; }
+.menu-sub li {
+  padding: 6px 12px 6px 32px;
+  cursor: pointer;
+  font-size: 11px;
+  color: #94a3b8;
+  border-bottom: 1px solid #1e293b;
+}
+.menu-sub li:hover { background: #1e3a5f; color: #fff; }
+.menu-sub li.active { background: #1d4ed8; color: #fff; }
+.menu-single {
+  display: block;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  color: #e2e8f0;
+  border-bottom: 1px solid #334155;
+}
+.menu-single:hover { background: #334155; }
+
+/* ===== 메인 콘텐츠 영역 ===== */
+.content-area {
+  flex: 1;
+  overflow-y: auto;
+  background: #f8f9fa;
+}
+.screen { display: none; height: 100%; }
+.screen.active { display: block; }
+
+/* ===== 로그인 화면 ===== */
+.login-screen {
+  display: none;
+  height: 100%;
+  background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+  justify-content: center;
+  align-items: center;
+}
+.login-screen.active { display: flex; }
+.login-box {
+  background: #fff;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  padding: 40px 36px;
+  width: 360px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+}
+.login-box .logo-area {
+  text-align: center;
+  margin-bottom: 28px;
+}
+.login-box .logo-area .logo-text {
+  font-size: 22px;
+  font-weight: 800;
+  color: #1e293b;
+  letter-spacing: 1px;
+}
+.login-box .logo-area .logo-sub {
+  font-size: 11px;
+  color: #6b7280;
+  margin-top: 4px;
+}
+.login-box .form-group { margin-bottom: 14px; }
+.login-box label {
+  display: block;
+  font-size: 11px;
+  color: #374151;
+  margin-bottom: 4px;
+  font-weight: 600;
+}
+.login-box input[type="text"],
+.login-box input[type="password"] {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 3px;
+  font-size: 13px;
+}
+.login-box input:focus { outline: none; border-color: #2563eb; box-shadow: 0 0 0 2px rgba(37,99,235,0.15); }
+.login-box .login-options {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
+  font-size: 11px;
+  color: #6b7280;
+}
+.login-box .btn-login {
+  width: 100%;
+  padding: 10px;
+  background: #1e293b;
+  color: #fff;
+  border: none;
+  border-radius: 3px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.login-box .btn-login:hover { background: #334155; }
+.login-box .login-footer {
+  text-align: center;
+  margin-top: 16px;
+  font-size: 10px;
+  color: #9ca3af;
+}
+
+/* ===== 대시보드 ===== */
+.dashboard-content { padding: 12px 16px; }
+.summary-cards {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.summary-card {
+  background: #fff;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  padding: 14px 16px;
+}
+.summary-card .card-label { font-size: 11px; color: #6b7280; margin-bottom: 4px; }
+.summary-card .card-value { font-size: 18px; font-weight: 700; color: #111; }
+.summary-card .card-sub { font-size: 10px; color: #9ca3af; margin-top: 4px; }
+.summary-card.blue .card-value { color: #1d4ed8; }
+.summary-card.red .card-value { color: #dc2626; }
+.summary-card.green .card-value { color: #16a34a; }
+.summary-card.orange .card-value { color: #ea580c; }
+
+.dash-row { display: grid; grid-template-columns: 2fr 1fr; gap: 12px; }
+.dash-panel {
+  background: #fff;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+}
+.dash-panel-header {
+  padding: 8px 12px;
+  border-bottom: 1px solid #e5e7eb;
+  font-size: 12px;
+  font-weight: 700;
+  color: #1e293b;
+  background: #f9fafb;
+}
+.dash-panel-body { padding: 8px 12px; }
+
+/* CSS 바 차트 */
+.bar-chart { display: flex; flex-direction: column; gap: 6px; }
+.bar-row { display: flex; align-items: center; gap: 8px; font-size: 11px; }
+.bar-label { width: 36px; text-align: right; color: #6b7280; flex-shrink: 0; }
+.bar-track { flex: 1; background: #e5e7eb; height: 14px; border-radius: 2px; overflow: hidden; }
+.bar-fill { height: 100%; border-radius: 2px; }
+.bar-fill.blue { background: #3b82f6; }
+.bar-fill.green { background: #22c55e; }
+.bar-fill.orange { background: #f97316; }
+.bar-fill.purple { background: #8b5cf6; }
+.bar-val { width: 60px; font-size: 10px; color: #374151; flex-shrink: 0; }
+
+/* ===== 테이블 공통 ===== */
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11px;
+}
+.data-table thead th {
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  padding: 5px 8px;
+  text-align: center;
+  font-weight: 600;
+  color: #334155;
+  white-space: nowrap;
+  position: sticky;
+  top: 0;
+}
+.data-table tbody td {
+  border: 1px solid #e2e8f0;
+  padding: 4px 8px;
+  white-space: nowrap;
+}
+.data-table tbody tr:hover { background: #eff6ff; }
+.data-table tbody tr:nth-child(even) { background: #fafbfc; }
+.data-table tbody tr:nth-child(even):hover { background: #eff6ff; }
+.text-right { text-align: right; }
+.text-center { text-align: center; }
+
+/* 상태 뱃지 */
+.badge {
+  display: inline-block;
+  padding: 1px 6px;
+  border-radius: 2px;
+  font-size: 10px;
+  font-weight: 600;
+}
+.badge-blue { background: #dbeafe; color: #1d4ed8; }
+.badge-green { background: #dcfce7; color: #15803d; }
+.badge-red { background: #fee2e2; color: #dc2626; }
+.badge-yellow { background: #fef9c3; color: #a16207; }
+.badge-gray { background: #f3f4f6; color: #6b7280; }
+
+/* ===== 거래처 목록 ===== */
+.list-content { display: flex; flex-direction: column; height: 100%; }
+.toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 12px;
+  background: #fff;
+  border-bottom: 1px solid #d1d5db;
+  gap: 8px;
+}
+.toolbar-left { display: flex; align-items: center; gap: 4px; }
+.toolbar-right { display: flex; align-items: center; gap: 8px; }
+.btn {
+  padding: 4px 10px;
+  border: 1px solid #d1d5db;
+  background: #fff;
+  border-radius: 2px;
+  cursor: pointer;
+  font-size: 11px;
+  color: #374151;
+  white-space: nowrap;
+}
+.btn:hover { background: #f3f4f6; }
+.btn-primary { background: #1e293b; color: #fff; border-color: #1e293b; }
+.btn-primary:hover { background: #334155; }
+.btn-danger { background: #fff; color: #dc2626; border-color: #fca5a5; }
+.btn-danger:hover { background: #fef2f2; }
+.btn-success { background: #fff; color: #16a34a; border-color: #86efac; }
+.btn-success:hover { background: #f0fdf4; }
+
+.search-box {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.search-box input {
+  width: 180px;
+  padding: 4px 8px;
+  border: 1px solid #d1d5db;
+  border-radius: 2px;
+  font-size: 11px;
+}
+.search-box select {
+  padding: 4px 6px;
+  border: 1px solid #d1d5db;
+  border-radius: 2px;
+  font-size: 11px;
+}
+
+.table-wrapper { flex: 1; overflow: auto; }
+
+.pagination-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 5px 12px;
+  background: #fff;
+  border-top: 1px solid #d1d5db;
+  font-size: 11px;
+  color: #6b7280;
+}
+.pagination-bar .page-info {}
+.pagination-btns { display: flex; gap: 2px; }
+.pagination-btns button {
+  padding: 2px 8px;
+  border: 1px solid #d1d5db;
+  background: #fff;
+  cursor: pointer;
+  font-size: 11px;
+  border-radius: 2px;
+}
+.pagination-btns button:hover { background: #f3f4f6; }
+.pagination-btns button.active { background: #1e293b; color: #fff; border-color: #1e293b; }
+
+/* ===== 거래처 등록 폼 ===== */
+.form-content { padding: 12px 16px; }
+.form-panel {
+  background: #fff;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+}
+.form-panel-header {
+  padding: 8px 14px;
+  background: #f1f5f9;
+  border-bottom: 1px solid #d1d5db;
+  font-size: 13px;
+  font-weight: 700;
+  color: #1e293b;
+}
+.form-panel-body { padding: 16px; }
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px 24px;
+}
+.form-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.form-row label {
+  width: 90px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #374151;
+  text-align: right;
+  flex-shrink: 0;
+}
+.form-row label .req { color: #dc2626; margin-left: 2px; }
+.form-row input,
+.form-row select {
+  flex: 1;
+  padding: 5px 8px;
+  border: 1px solid #d1d5db;
+  border-radius: 2px;
+  font-size: 12px;
+}
+.form-row input:focus,
+.form-row select:focus { outline: none; border-color: #2563eb; }
+.form-row textarea {
+  flex: 1;
+  padding: 5px 8px;
+  border: 1px solid #d1d5db;
+  border-radius: 2px;
+  font-size: 12px;
+  resize: vertical;
+  min-height: 60px;
+}
+.form-row.full-width { grid-column: 1 / -1; }
+.form-actions {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 20px;
+  padding-top: 14px;
+  border-top: 1px solid #e5e7eb;
+}
+.form-actions .btn { padding: 6px 24px; font-size: 12px; }
+
+/* ===== 상태 바 (푸터) ===== */
+.app-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  height: 24px;
+  background: #1e293b;
+  color: #94a3b8;
+  font-size: 10px;
+  border-top: 1px solid #0f172a;
+}
+
+/* ===== 스크롤바 커스텀 ===== */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: #f1f5f9; }
+::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #64748b; }
+
+/* ===== 로그인 화면에서는 사이드바/헤더 숨기기 ===== */
+body.login-mode .app-sidebar,
+body.login-mode .breadcrumb-bar,
+body.login-mode .tab-bar,
+body.login-mode .app-footer { display: none; }
+body.login-mode .app-header { display: none; }
+body.login-mode .app-main { flex: 1; }
+body.login-mode .content-area { background: transparent; }
+</style>
+</head>
+<body>
+<div class="app-wrapper">
+
+  <!-- ===== 헤더 ===== -->
+  <header class="app-header">
+    <div class="header-left">
+      <div class="header-logo">PLS ERP System</div>
+    </div>
+    <div class="header-right">
+      <span class="notif-bell" title="알림">&#128276;<span class="badge">3</span></span>
+      <span class="user-name">관리자</span>
+      <span class="logout-link" onclick="showScreen('login')" title="로그아웃">로그아웃</span>
+    </div>
+  </header>
+
+  <!-- 브레드크럼 -->
+  <div class="breadcrumb-bar" id="breadcrumb">
+    <span>홈</span><span>&gt;</span><span>시스템관리</span><span>&gt;</span><span id="bc-current">거래처관리</span>
+  </div>
+
+  <div class="app-body">
+    <!-- ===== 사이드바 ===== -->
+    <nav class="app-sidebar">
+      <ul class="sidebar-menu" id="sidebarMenu">
+        <!-- 시스템관리 -->
+        <li class="menu-group">
+          <div class="menu-group-title" onclick="toggleMenu(this)">
+            <span><span class="menu-icon">&#9881;</span>시스템관리</span>
+            <span class="arrow open">&#9654;</span>
+          </div>
+          <ul class="menu-sub open">
+            <li onclick="showScreen('partner-list')">사용자관리</li>
+            <li>부서관리</li>
+            <li>권한설정</li>
+            <li>시스템설정</li>
+          </ul>
+        </li>
+        <!-- 영업/수주 -->
+        <li class="menu-group">
+          <div class="menu-group-title" onclick="toggleMenu(this)">
+            <span><span class="menu-icon">&#128181;</span>영업/수주</span>
+            <span class="arrow">&#9654;</span>
+          </div>
+          <ul class="menu-sub">
+            <li class="active" onclick="showScreen('partner-list')">거래처관리</li>
+            <li>견적서</li>
+            <li>수주관리</li>
+            <li>주문서관리</li>
+          </ul>
+        </li>
+        <!-- 재무/회계 -->
+        <li class="menu-group">
+          <div class="menu-group-title" onclick="toggleMenu(this)">
+            <span><span class="menu-icon">&#128200;</span>재무/회계</span>
+            <span class="arrow">&#9654;</span>
+          </div>
+          <ul class="menu-sub">
+            <li>전표관리</li>
+            <li>계정과목</li>
+            <li>세금계산서</li>
+            <li>결산관리</li>
+          </ul>
+        </li>
+        <!-- 인사/급여 -->
+        <li class="menu-group">
+          <div class="menu-group-title" onclick="toggleMenu(this)">
+            <span><span class="menu-icon">&#128101;</span>인사/급여</span>
+            <span class="arrow">&#9654;</span>
+          </div>
+          <ul class="menu-sub">
+            <li>직원관리</li>
+            <li>근태관리</li>
+            <li>급여관리</li>
+            <li>급여대장</li>
+          </ul>
+        </li>
+        <!-- 생산/SCM -->
+        <li class="menu-group">
+          <div class="menu-group-title" onclick="toggleMenu(this)">
+            <span><span class="menu-icon">&#9874;</span>생산/SCM</span>
+            <span class="arrow">&#9654;</span>
+          </div>
+          <ul class="menu-sub">
+            <li>BOM관리</li>
+            <li>작업지시</li>
+            <li>재고관리</li>
+            <li>QC검사</li>
+          </ul>
+        </li>
+        <!-- 그룹웨어 -->
+        <li class="menu-group">
+          <div class="menu-group-title" onclick="toggleMenu(this)">
+            <span><span class="menu-icon">&#128196;</span>그룹웨어</span>
+            <span class="arrow">&#9654;</span>
+          </div>
+          <ul class="menu-sub">
+            <li>전자결재</li>
+            <li>게시판</li>
+            <li>일정관리</li>
+          </ul>
+        </li>
+        <!-- 알림센터 -->
+        <li class="menu-single" onclick="showScreen('dashboard')">
+          <span class="menu-icon">&#128276;</span>알림센터
+        </li>
+      </ul>
+    </nav>
+
+    <!-- ===== 메인 영역 ===== -->
+    <div class="app-main">
+      <!-- 탭 바 -->
+      <div class="tab-bar" id="tabBar">
+        <div class="tab-btn" data-screen="login" onclick="showScreen('login')">로그인</div>
+        <div class="tab-btn active" data-screen="dashboard" onclick="showScreen('dashboard')">대시보드</div>
+        <div class="tab-btn" data-screen="partner-list" onclick="showScreen('partner-list')">거래처 목록</div>
+        <div class="tab-btn" data-screen="partner-form" onclick="showScreen('partner-form')">거래처 등록</div>
+      </div>
+
+      <!-- 콘텐츠 영역 -->
+      <div class="content-area">
+
+        <!-- ==================== 로그인 화면 ==================== -->
+        <div class="screen login-screen" id="screen-login">
+          <div class="login-box">
+            <div class="logo-area">
+              <div class="logo-text">PLS ERP</div>
+              <div class="logo-sub">Next-Gen AI Integrated ERP System</div>
+            </div>
+            <div class="form-group">
+              <label>아이디</label>
+              <input type="text" placeholder="사용자 ID를 입력하세요" value="admin">
+            </div>
+            <div class="form-group">
+              <label>비밀번호</label>
+              <input type="password" placeholder="비밀번호를 입력하세요" value="********">
+            </div>
+            <div class="login-options">
+              <label style="display:flex;align-items:center;gap:4px;cursor:pointer;">
+                <input type="checkbox" checked> 아이디 저장
+              </label>
+              <a href="#" style="font-size:11px;">비밀번호 찾기</a>
+            </div>
+            <button class="btn-login" onclick="showScreen('dashboard')">로그인</button>
+            <div class="login-footer">&copy; 2026 PLS Corp. All rights reserved. v2.1.0</div>
+          </div>
+        </div>
+
+        <!-- ==================== 대시보드 ==================== -->
+        <div class="screen active" id="screen-dashboard">
+          <div class="dashboard-content">
+            <!-- 요약 카드 4개 -->
+            <div class="summary-cards">
+              <div class="summary-card blue">
+                <div class="card-label">매출현황 (당월)</div>
+                <div class="card-value">&#8361;125,400,000</div>
+                <div class="card-sub">전월 대비 +8.2%</div>
+              </div>
+              <div class="summary-card red">
+                <div class="card-label">미수금</div>
+                <div class="card-value">&#8361;23,500,000</div>
+                <div class="card-sub">30일 이상 연체 3건</div>
+              </div>
+              <div class="summary-card green">
+                <div class="card-label">재고현황</div>
+                <div class="card-value">1,234건</div>
+                <div class="card-sub">안전재고 미달 12건</div>
+              </div>
+              <div class="summary-card orange">
+                <div class="card-label">미결재</div>
+                <div class="card-value">5건</div>
+                <div class="card-sub">긴급 1건</div>
+              </div>
+            </div>
+
+            <div class="dash-row">
+              <!-- 최근 거래 테이블 -->
+              <div class="dash-panel">
+                <div class="dash-panel-header">최근 거래 내역</div>
+                <div class="dash-panel-body" style="padding:0;">
+                  <table class="data-table">
+                    <thead>
+                      <tr>
+                        <th>날짜</th>
+                        <th>전표번호</th>
+                        <th>거래처</th>
+                        <th>금액</th>
+                        <th>상태</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr><td class="text-center">2026-03-14</td><td class="text-center">SL-20260314-001</td><td>(주)한국산업</td><td class="text-right">&#8361;15,400,000</td><td class="text-center"><span class="badge badge-green">승인</span></td></tr>
+                      <tr><td class="text-center">2026-03-14</td><td class="text-center">SL-20260314-002</td><td>대한전자(주)</td><td class="text-right">&#8361;8,200,000</td><td class="text-center"><span class="badge badge-yellow">대기</span></td></tr>
+                      <tr><td class="text-center">2026-03-13</td><td class="text-center">PU-20260313-005</td><td>삼성물산</td><td class="text-right">&#8361;32,100,000</td><td class="text-center"><span class="badge badge-green">승인</span></td></tr>
+                      <tr><td class="text-center">2026-03-13</td><td class="text-center">SL-20260313-003</td><td>LG화학</td><td class="text-right">&#8361;5,600,000</td><td class="text-center"><span class="badge badge-green">승인</span></td></tr>
+                      <tr><td class="text-center">2026-03-12</td><td class="text-center">SL-20260312-008</td><td>(주)미래테크</td><td class="text-right">&#8361;12,800,000</td><td class="text-center"><span class="badge badge-red">반려</span></td></tr>
+                      <tr><td class="text-center">2026-03-12</td><td class="text-center">PU-20260312-002</td><td>현대중공업</td><td class="text-right">&#8361;45,000,000</td><td class="text-center"><span class="badge badge-green">승인</span></td></tr>
+                      <tr><td class="text-center">2026-03-11</td><td class="text-center">SL-20260311-004</td><td>SK이노베이션</td><td class="text-right">&#8361;9,300,000</td><td class="text-center"><span class="badge badge-yellow">대기</span></td></tr>
+                      <tr><td class="text-center">2026-03-11</td><td class="text-center">SL-20260311-006</td><td>포스코</td><td class="text-right">&#8361;21,700,000</td><td class="text-center"><span class="badge badge-green">승인</span></td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+              <!-- 월별 매출 차트 -->
+              <div class="dash-panel">
+                <div class="dash-panel-header">월별 매출 추이</div>
+                <div class="dash-panel-body">
+                  <div class="bar-chart">
+                    <div class="bar-row"><span class="bar-label">10월</span><div class="bar-track"><div class="bar-fill blue" style="width:62%"></div></div><span class="bar-val">&#8361;98.2M</span></div>
+                    <div class="bar-row"><span class="bar-label">11월</span><div class="bar-track"><div class="bar-fill blue" style="width:71%"></div></div><span class="bar-val">&#8361;112.5M</span></div>
+                    <div class="bar-row"><span class="bar-label">12월</span><div class="bar-track"><div class="bar-fill blue" style="width:85%"></div></div><span class="bar-val">&#8361;134.8M</span></div>
+                    <div class="bar-row"><span class="bar-label">1월</span><div class="bar-track"><div class="bar-fill green" style="width:58%"></div></div><span class="bar-val">&#8361;91.3M</span></div>
+                    <div class="bar-row"><span class="bar-label">2월</span><div class="bar-track"><div class="bar-fill green" style="width:73%"></div></div><span class="bar-val">&#8361;115.9M</span></div>
+                    <div class="bar-row"><span class="bar-label">3월</span><div class="bar-track"><div class="bar-fill orange" style="width:79%"></div></div><span class="bar-val">&#8361;125.4M</span></div>
+                  </div>
+                  <div style="margin-top:16px; border-top:1px solid #e5e7eb; padding-top:12px;">
+                    <div class="dash-panel-header" style="padding:0 0 8px 0; border:none; background:none;">거래처 유형별 매출</div>
+                    <div class="bar-chart">
+                      <div class="bar-row"><span class="bar-label" style="width:48px">제조업</span><div class="bar-track"><div class="bar-fill blue" style="width:82%"></div></div><span class="bar-val">45.2%</span></div>
+                      <div class="bar-row"><span class="bar-label" style="width:48px">도매업</span><div class="bar-track"><div class="bar-fill green" style="width:54%"></div></div><span class="bar-val">29.8%</span></div>
+                      <div class="bar-row"><span class="bar-label" style="width:48px">소매업</span><div class="bar-track"><div class="bar-fill orange" style="width:28%"></div></div><span class="bar-val">15.4%</span></div>
+                      <div class="bar-row"><span class="bar-label" style="width:48px">기타</span><div class="bar-track"><div class="bar-fill purple" style="width:17%"></div></div><span class="bar-val">9.6%</span></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ==================== 거래처 목록 ==================== -->
+        <div class="screen" id="screen-partner-list">
+          <div class="list-content">
+            <!-- 툴바 -->
+            <div class="toolbar">
+              <div class="toolbar-left">
+                <button class="btn btn-primary" onclick="showScreen('partner-form')">&#10010; 등록</button>
+                <button class="btn">&#9998; 수정</button>
+                <button class="btn btn-danger">&#10006; 삭제</button>
+                <button class="btn btn-success">&#8595; Excel 다운로드</button>
+              </div>
+              <div class="toolbar-right">
+                <div class="search-box">
+                  <select>
+                    <option>전체</option>
+                    <option>거래처코드</option>
+                    <option>거래처명</option>
+                    <option>사업자번호</option>
+                    <option>대표자</option>
+                  </select>
+                  <input type="text" placeholder="검색어를 입력하세요">
+                  <button class="btn">검색</button>
+                </div>
+              </div>
+            </div>
+            <!-- 테이블 -->
+            <div class="table-wrapper">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th style="width:30px;"><input type="checkbox"></th>
+                    <th>코드</th>
+                    <th>거래처명</th>
+                    <th>사업자번호</th>
+                    <th>대표자</th>
+                    <th>전화번호</th>
+                    <th>담당자</th>
+                    <th>상태</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr><td class="text-center"><input type="checkbox"></td><td class="text-center">C-0001</td><td>(주)한국산업</td><td class="text-center">123-45-67890</td><td class="text-center">김대표</td><td class="text-center">02-1234-5678</td><td class="text-center">이영업</td><td class="text-center"><span class="badge badge-green">정상</span></td></tr>
+                  <tr><td class="text-center"><input type="checkbox"></td><td class="text-center">C-0002</td><td>대한전자(주)</td><td class="text-center">234-56-78901</td><td class="text-center">박사장</td><td class="text-center">031-234-5678</td><td class="text-center">김마케팅</td><td class="text-center"><span class="badge badge-green">정상</span></td></tr>
+                  <tr><td class="text-center"><input type="checkbox"></td><td class="text-center">C-0003</td><td>삼성물산</td><td class="text-center">345-67-89012</td><td class="text-center">이회장</td><td class="text-center">02-3456-7890</td><td class="text-center">최구매</td><td class="text-center"><span class="badge badge-green">정상</span></td></tr>
+                  <tr><td class="text-center"><input type="checkbox"></td><td class="text-center">C-0004</td><td>LG화학</td><td class="text-center">456-78-90123</td><td class="text-center">정대표</td><td class="text-center">02-4567-8901</td><td class="text-center">한영업</td><td class="text-center"><span class="badge badge-green">정상</span></td></tr>
+                  <tr><td class="text-center"><input type="checkbox"></td><td class="text-center">C-0005</td><td>(주)미래테크</td><td class="text-center">567-89-01234</td><td class="text-center">강대표</td><td class="text-center">032-567-8901</td><td class="text-center">윤기술</td><td class="text-center"><span class="badge badge-yellow">거래중지</span></td></tr>
+                  <tr><td class="text-center"><input type="checkbox"></td><td class="text-center">C-0006</td><td>현대중공업</td><td class="text-center">678-90-12345</td><td class="text-center">조사장</td><td class="text-center">052-678-9012</td><td class="text-center">송구매</td><td class="text-center"><span class="badge badge-green">정상</span></td></tr>
+                  <tr><td class="text-center"><input type="checkbox"></td><td class="text-center">C-0007</td><td>SK이노베이션</td><td class="text-center">789-01-23456</td><td class="text-center">신대표</td><td class="text-center">02-7890-1234</td><td class="text-center">장영업</td><td class="text-center"><span class="badge badge-green">정상</span></td></tr>
+                  <tr><td class="text-center"><input type="checkbox"></td><td class="text-center">C-0008</td><td>포스코</td><td class="text-center">890-12-34567</td><td class="text-center">최회장</td><td class="text-center">054-890-1234</td><td class="text-center">임구매</td><td class="text-center"><span class="badge badge-green">정상</span></td></tr>
+                  <tr><td class="text-center"><input type="checkbox"></td><td class="text-center">C-0009</td><td>(주)글로벌무역</td><td class="text-center">901-23-45678</td><td class="text-center">오대표</td><td class="text-center">02-9012-3456</td><td class="text-center">서무역</td><td class="text-center"><span class="badge badge-green">정상</span></td></tr>
+                  <tr><td class="text-center"><input type="checkbox"></td><td class="text-center">C-0010</td><td>동양기계(주)</td><td class="text-center">012-34-56789</td><td class="text-center">유사장</td><td class="text-center">041-012-3456</td><td class="text-center">백생산</td><td class="text-center"><span class="badge badge-gray">폐업</span></td></tr>
+                  <tr><td class="text-center"><input type="checkbox"></td><td class="text-center">C-0011</td><td>(주)세진테크</td><td class="text-center">111-22-33444</td><td class="text-center">남대표</td><td class="text-center">02-1112-2334</td><td class="text-center">고영업</td><td class="text-center"><span class="badge badge-green">정상</span></td></tr>
+                  <tr><td class="text-center"><input type="checkbox"></td><td class="text-center">C-0012</td><td>한양소재(주)</td><td class="text-center">222-33-44555</td><td class="text-center">문사장</td><td class="text-center">031-222-3344</td><td class="text-center">양구매</td><td class="text-center"><span class="badge badge-green">정상</span></td></tr>
+                  <tr><td class="text-center"><input type="checkbox"></td><td class="text-center">C-0013</td><td>(주)대성에너지</td><td class="text-center">333-44-55666</td><td class="text-center">황대표</td><td class="text-center">042-333-4455</td><td class="text-center">조에너지</td><td class="text-center"><span class="badge badge-yellow">거래중지</span></td></tr>
+                  <tr><td class="text-center"><input type="checkbox"></td><td class="text-center">C-0014</td><td>금호타이어</td><td class="text-center">444-55-66777</td><td class="text-center">배사장</td><td class="text-center">062-444-5566</td><td class="text-center">안영업</td><td class="text-center"><span class="badge badge-green">정상</span></td></tr>
+                  <tr><td class="text-center"><input type="checkbox"></td><td class="text-center">C-0015</td><td>(주)한진물류</td><td class="text-center">555-66-77888</td><td class="text-center">전대표</td><td class="text-center">02-5556-6778</td><td class="text-center">노물류</td><td class="text-center"><span class="badge badge-green">정상</span></td></tr>
+                </tbody>
+              </table>
+            </div>
+            <!-- 페이지네이션 -->
+            <div class="pagination-bar">
+              <span class="page-info">1 - 20 / 전체 156건</span>
+              <div class="pagination-btns">
+                <button>&#171;</button>
+                <button>&#8249;</button>
+                <button class="active">1</button>
+                <button>2</button>
+                <button>3</button>
+                <button>4</button>
+                <button>5</button>
+                <button>&#8250;</button>
+                <button>&#187;</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ==================== 거래처 등록 ==================== -->
+        <div class="screen" id="screen-partner-form">
+          <div class="form-content">
+            <div class="form-panel">
+              <div class="form-panel-header">거래처 등록</div>
+              <div class="form-panel-body">
+                <div class="form-grid">
+                  <!-- 1행 -->
+                  <div class="form-row">
+                    <label>거래처코드<span class="req">*</span></label>
+                    <input type="text" value="C-0016" readonly style="background:#f3f4f6;">
+                  </div>
+                  <div class="form-row">
+                    <label>거래처명<span class="req">*</span></label>
+                    <input type="text" placeholder="거래처명을 입력하세요">
+                  </div>
+                  <!-- 2행 -->
+                  <div class="form-row">
+                    <label>사업자번호<span class="req">*</span></label>
+                    <input type="text" placeholder="000-00-00000">
+                  </div>
+                  <div class="form-row">
+                    <label>대표자</label>
+                    <input type="text" placeholder="대표자명">
+                  </div>
+                  <!-- 3행 -->
+                  <div class="form-row">
+                    <label>업태</label>
+                    <input type="text" placeholder="제조업, 도매업 등">
+                  </div>
+                  <div class="form-row">
+                    <label>종목</label>
+                    <input type="text" placeholder="전자부품, 기계류 등">
+                  </div>
+                  <!-- 4행 - 주소 (full width) -->
+                  <div class="form-row full-width">
+                    <label>주소</label>
+                    <input type="text" placeholder="사업장 주소를 입력하세요" style="flex:1;">
+                  </div>
+                  <!-- 5행 -->
+                  <div class="form-row">
+                    <label>전화번호</label>
+                    <input type="text" placeholder="02-0000-0000">
+                  </div>
+                  <div class="form-row">
+                    <label>팩스</label>
+                    <input type="text" placeholder="02-0000-0000">
+                  </div>
+                  <!-- 6행 -->
+                  <div class="form-row">
+                    <label>이메일</label>
+                    <input type="text" placeholder="example@company.co.kr">
+                  </div>
+                  <div class="form-row">
+                    <label>담당자</label>
+                    <input type="text" placeholder="영업 담당자명">
+                  </div>
+                  <!-- 7행 - 메모 (full width) -->
+                  <div class="form-row full-width">
+                    <label>메모</label>
+                    <textarea placeholder="거래처 관련 특이사항을 입력하세요"></textarea>
+                  </div>
+                </div>
+                <!-- 버튼 -->
+                <div class="form-actions">
+                  <button class="btn btn-primary" style="padding:7px 32px;font-size:12px;">&#10003; 저장</button>
+                  <button class="btn" style="padding:7px 32px;font-size:12px;" onclick="showScreen('partner-list')">취소</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /content-area -->
+    </div><!-- /app-main -->
+  </div><!-- /app-body -->
+
+  <!-- ===== 상태 바 (푸터) ===== -->
+  <footer class="app-footer">
+    <span>관리자 (admin@pls.co.kr)</span>
+    <span>2026-03-14 금요일</span>
+  </footer>
+</div>
+
+<script>
+/* ===== 사이드바 메뉴 토글 ===== */
+function toggleMenu(titleEl) {
+  var sub = titleEl.nextElementSibling;
+  var arrow = titleEl.querySelector('.arrow');
+  if (sub && sub.classList.contains('menu-sub')) {
+    sub.classList.toggle('open');
+    arrow.classList.toggle('open');
+  }
+}
+
+/* ===== 화면 전환 ===== */
+function showScreen(screenId) {
+  // 로그인 모드 토글
+  if (screenId === 'login') {
+    document.body.classList.add('login-mode');
+  } else {
+    document.body.classList.remove('login-mode');
+  }
+
+  // 모든 screen 비활성화
+  var screens = document.querySelectorAll('.screen');
+  for (var i = 0; i < screens.length; i++) {
+    screens[i].classList.remove('active');
+  }
+  // 선택 screen 활성화
+  var target = document.getElementById('screen-' + screenId);
+  if (target) target.classList.add('active');
+
+  // 탭 활성화
+  var tabs = document.querySelectorAll('.tab-btn');
+  for (var i = 0; i < tabs.length; i++) {
+    tabs[i].classList.remove('active');
+    if (tabs[i].getAttribute('data-screen') === screenId) {
+      tabs[i].classList.add('active');
+    }
+  }
+
+  // 브레드크럼 업데이트
+  var bcMap = {
+    'login': '로그인',
+    'dashboard': '대시보드',
+    'partner-list': '거래처관리',
+    'partner-form': '거래처 등록'
+  };
+  var bcEl = document.getElementById('bc-current');
+  if (bcEl && bcMap[screenId]) bcEl.textContent = bcMap[screenId];
+}
+</script>
+</body>
+</html>
