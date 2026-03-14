@@ -1,0 +1,41 @@
+# ERP Backend 의존성 패키지
+# pip install -r requirements.txt --break-system-packages
+
+# FastAPI 핵심
+fastapi==0.109.0
+uvicorn[standard]==0.27.0
+python-multipart==0.0.6
+
+# 데이터베이스
+sqlalchemy==2.0.25
+asyncpg==0.29.0
+alembic==1.13.1
+
+# 인증
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+
+# AI
+google-generativeai==0.3.2
+
+# 외부 API
+httpx==0.26.0
+
+# 데이터 처리
+pandas==2.2.0
+openpyxl==3.1.2
+reportlab==4.1.0
+
+# 유틸리티
+python-dotenv==1.0.0
+pydantic[email]==2.5.3
+pydantic-settings==2.1.0
+
+# 테스트
+pytest==7.4.4
+pytest-asyncio==0.23.3
+pytest-cov==4.1.0
+httpx==0.26.0
+
+# 스케줄러
+apscheduler==3.10.4
