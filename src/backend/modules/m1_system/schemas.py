@@ -123,3 +123,251 @@ class CustomerResponse(BaseModel):
     updated_at: datetime
 
     model_config = {"from_attributes": True}
+
+
+# ──────────────────────────────────────────────
+# 품목 카테고리 (ProductCategory) 스키마
+# ──────────────────────────────────────────────
+
+class ProductCategoryCreate(BaseModel):
+    """품목 카테고리 생성 요청"""
+    code: str = Field(..., min_length=1, max_length=30, description="분류 코드 (예: CAT001)")
+    name: str = Field(..., min_length=1, max_length=100, description="분류명")
+    parent_id: Optional[uuid.UUID] = Field(None, description="상위 카테고리 ID (없으면 최상위)")
+    sort_order: int = Field(0, ge=0, description="정렬 순서")
+
+
+class ProductCategoryResponse(BaseModel):
+    """품목 카테고리 응답"""
+    id: uuid.UUID
+    code: str
+    name: str
+    parent_id: Optional[uuid.UUID] = None
+    sort_order: int
+
+    model_config = {"from_attributes": True}
+
+
+# ──────────────────────────────────────────────
+# 품목 (Product) 스키마
+# ──────────────────────────────────────────────
+
+class ProductCreate(BaseModel):
+    """품목 생성 요청"""
+    code: str = Field(..., min_length=1, max_length=50, description="품목 코드 (예: P001)")
+    name: str = Field(..., min_length=1, max_length=200, description="품목명")
+    category_id: Optional[uuid.UUID] = Field(None, description="카테고리 ID")
+    product_type: str = Field("product", description="유형: product(제품), material(자재), semi(반제품)")
+    unit: str = Field("EA", max_length=20, description="단위 (EA, KG, M 등)")
+    standard_price: float = Field(0, ge=0, description="기준 단가 (원)")
+    cost_price: float = Field(0, ge=0, description="원가 (원)")
+    safety_stock: int = Field(0, ge=0, description="안전재고 수량")
+    inventory_method: str = Field("fifo", description="재고평가 방법: fifo(선입선출), avg(이동평균)")
+    tax_rate: float = Field(10.00, ge=0, le=100, description="부가세율 (%)")
+
+    @field_validator("product_type")
+    @classmethod
+    def validate_product_type(cls, v: str) -> str:
+        """품목 유형은 product/material/semi 중 하나"""
+        allowed = ("product", "material", "semi")
+        if v not in allowed:
+            raise ValueError(f"허용된 유형: {', '.join(allowed)}")
+        return v
+
+    @field_validator("inventory_method")
+    @classmethod
+    def validate_inventory_method(cls, v: str) -> str:
+        """재고평가 방법은 fifo/avg 중 하나"""
+        allowed = ("fifo", "avg")
+        if v not in allowed:
+            raise ValueError(f"허용된 방법: {', '.join(allowed)}")
+        return v
+
+
+class ProductUpdate(BaseModel):
+    """품목 수정 요청 (변경할 필드만 전송)"""
+    name: Optional[str] = Field(None, min_length=1, max_length=200)
+    category_id: Optional[uuid.UUID] = None
+    product_type: Optional[str] = None
+    unit: Optional[str] = Field(None, max_length=20)
+    standard_price: Optional[float] = Field(None, ge=0)
+    cost_price: Optional[float] = Field(None, ge=0)
+    safety_stock: Optional[int] = Field(None, ge=0)
+    inventory_method: Optional[str] = None
+    tax_rate: Optional[float] = Field(None, ge=0, le=100)
+    is_active: Optional[bool] = None
+
+    @field_validator("product_type")
+    @classmethod
+    def validate_product_type(cls, v: Optional[str]) -> Optional[str]:
+        if v is None:
+            return v
+        allowed = ("product", "material", "semi")
+        if v not in allowed:
+            raise ValueError(f"허용된 유형: {', '.join(allowed)}")
+        return v
+
+    @field_validator("inventory_method")
+    @classmethod
+    def validate_inventory_method(cls, v: Optional[str]) -> Optional[str]:
+        if v is None:
+            return v
+        allowed = ("fifo", "avg")
+        if v not in allowed:
+            raise ValueError(f"허용된 방법: {', '.join(allowed)}")
+        return v
+
+
+class ProductResponse(BaseModel):
+    """품목 단건 응답"""
+    id: uuid.UUID
+    code: str
+    name: str
+    category_id: Optional[uuid.UUID] = None
+    product_type: str
+    unit: str
+    standard_price: float
+    cost_price: float
+    safety_stock: int
+    inventory_method: str
+    tax_rate: float
+    is_active: bool
+    mdm_status: str
+    created_at: datetime
+    updated_at: datetime
+
+    model_config = {"from_attributes": True}
+
+
+# ──────────────────────────────────────────────
+# 부서 (Department) 스키마
+# ──────────────────────────────────────────────
+
+class DepartmentCreate(BaseModel):
+    """부서 생성 요청"""
+    code: str = Field(..., min_length=1, max_length=20, description="부서 코드 (예: D001)")
+    name: str = Field(..., min_length=1, max_length=100, description="부서명")
+    parent_id: Optional[uuid.UUID] = Field(None, description="상위 부서 ID (없으면 최상위)")
+    sort_order: int = Field(0, ge=0, description="정렬 순서")
+
+
+class DepartmentUpdate(BaseModel):
+    """부서 수정 요청"""
+    name: Optional[str] = Field(None, min_length=1, max_length=100)
+    parent_id: Optional[uuid.UUID] = None
+    sort_order: Optional[int] = Field(None, ge=0)
+    is_active: Optional[bool] = None
+
+
+class DepartmentResponse(BaseModel):
+    """부서 응답"""
+    id: uuid.UUID
+    code: str
+    name: str
+    parent_id: Optional[uuid.UUID] = None
+    sort_order: int
+    is_active: bool
+    created_at: datetime
+
+    model_config = {"from_attributes": True}
+
+
+# ──────────────────────────────────────────────
+# 직급 (Position) 스키마
+# ──────────────────────────────────────────────
+
+class PositionCreate(BaseModel):
+    """직급 생성 요청"""
+    code: str = Field(..., min_length=1, max_length=20, description="직급 코드 (예: POS001)")
+    name: str = Field(..., min_length=1, max_length=50, description="직급명")
+    level: int = Field(..., ge=1, le=20, description="직급 레벨 (높을수록 상위)")
+
+
+class PositionUpdate(BaseModel):
+    """직급 수정 요청"""
+    name: Optional[str] = Field(None, min_length=1, max_length=50)
+    level: Optional[int] = Field(None, ge=1, le=20)
+    is_active: Optional[bool] = None
+
+
+class PositionResponse(BaseModel):
+    """직급 응답"""
+    id: uuid.UUID
+    code: str
+    name: str
+    level: int
+    is_active: bool
+    created_at: datetime
+
+    model_config = {"from_attributes": True}
+
+
+# ──────────────────────────────────────────────
+# 사용자 (User) 관리 스키마
+# ──────────────────────────────────────────────
+
+class UserCreate(BaseModel):
+    """사용자 생성 요청 (관리자가 계정 등록)"""
+    employee_no: str = Field(..., min_length=1, max_length=20, description="사번")
+    name: str = Field(..., min_length=1, max_length=50, description="이름")
+    email: str = Field(..., max_length=255, description="이메일 (로그인 ID)")
+    password: str = Field(..., min_length=4, max_length=100, description="초기 비밀번호")
+    department_id: Optional[uuid.UUID] = Field(None, description="부서 ID")
+    position_id: Optional[uuid.UUID] = Field(None, description="직급 ID")
+    role: str = Field("user", description="역할: admin, manager, user")
+
+    @field_validator("role")
+    @classmethod
+    def validate_role(cls, v: str) -> str:
+        allowed = ("admin", "manager", "user")
+        if v not in allowed:
+            raise ValueError(f"허용된 역할: {', '.join(allowed)}")
+        return v
+
+    @field_validator("email")
+    @classmethod
+    def validate_email(cls, v: str) -> str:
+        if "@" not in v:
+            raise ValueError("올바른 이메일 형식이 아닙니다")
+        return v.lower().strip()
+
+
+class UserUpdate(BaseModel):
+    """사용자 수정 요청 (비밀번호 변경은 별도)"""
+    name: Optional[str] = Field(None, min_length=1, max_length=50)
+    department_id: Optional[uuid.UUID] = None
+    position_id: Optional[uuid.UUID] = None
+    role: Optional[str] = None
+    is_active: Optional[bool] = None
+
+    @field_validator("role")
+    @classmethod
+    def validate_role(cls, v: Optional[str]) -> Optional[str]:
+        if v is None:
+            return v
+        allowed = ("admin", "manager", "user")
+        if v not in allowed:
+            raise ValueError(f"허용된 역할: {', '.join(allowed)}")
+        return v
+
+
+class UserPasswordReset(BaseModel):
+    """비밀번호 초기화 요청 (관리자 전용)"""
+    new_password: str = Field(..., min_length=4, max_length=100, description="새 비밀번호")
+
+
+class UserResponse(BaseModel):
+    """사용자 응답 (비밀번호 제외)"""
+    id: uuid.UUID
+    employee_no: str
+    name: str
+    email: str
+    department_id: Optional[uuid.UUID] = None
+    position_id: Optional[uuid.UUID] = None
+    role: str
+    is_active: bool
+    last_login_at: Optional[datetime] = None
+    created_at: datetime
+    updated_at: datetime
+
+    model_config = {"from_attributes": True}

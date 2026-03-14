@@ -9,6 +9,8 @@ import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
 import SystemPage from './pages/SystemPage';
 import CustomersPage from './pages/CustomersPage';
+import ProductsPage from './pages/ProductsPage';
+import UsersPage from './pages/UsersPage';
 
 /** 인증된 사용자만 접근 가능한 라우트 */
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -34,6 +36,8 @@ export default function App() {
           <Route path="/" element={<DashboardPage />} />
           <Route path="/system" element={<SystemPage />} />
           <Route path="/system/customers" element={<CustomersPage />} />
+          <Route path="/system/products" element={<ProductsPage />} />
+          <Route path="/system/users" element={<UsersPage />} />
         </Route>
 
         {/* 그 외 경로 → 대시보드로 이동 */}

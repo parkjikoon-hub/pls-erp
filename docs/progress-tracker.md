@@ -3,8 +3,8 @@
 
 ## 현재 상태
 - **최종 업데이트**: 2026-03-15
-- **현재 Phase**: Phase 1 진행 중 (Step 1-6 완료, Step 1-7 대기)
-- **전체 진행률**: 1 / 29 기능 (거래처 마스터 CRUD 완료)
+- **현재 Phase**: Phase 1 진행 중 (Step 1-8 완료, Step 1-9 대기)
+- **전체 진행률**: 3 / 29 기능 (거래처 + 품목 + 부서/직급/사용자 관리 완료)
 - **UI 디자인**: 시안 C (하이브리드) 확정
 - **DB**: Neon PostgreSQL (싱가포르 리전, 프로젝트명: pls-erp)
 
@@ -50,14 +50,33 @@
   - Excel 일괄 업로드: 공통 엔진(excel_import.py) + ExcelImportModal 컴포넌트
   - 이카운트 엑셀 컬럼 자동 매핑 (aliases 시스템)
   - API: POST /api/v1/system/import/{analyze,preview,execute}
+- [x] Step 1-7: 품목 마스터 CRUD (수직 슬라이스 — DB→API→UI) ✅
+  - 백엔드: schemas.py에 Product/ProductCategory 스키마 추가
+  - 백엔드: service.py에 품목+카테고리 CRUD 서비스 추가
+  - 백엔드: router.py에 7개 API 엔드포인트 추가
+  - 프론트엔드: ProductsPage (목록/검색/정렬/페이지네이션/등록/수정/삭제 모달)
+  - 카테고리 관리 (드롭다운 + 신규 추가 모달)
+  - Excel 일괄 업로드: router.py에 products 분기 추가 (엔진은 기존 공유)
+  - API: POST/GET/PUT/DELETE /api/v1/system/products
+  - API: GET/POST /api/v1/system/product-categories
+
+- [x] Step 1-8: 부서/직급/사용자 관리 (탭 기반 통합 UI) ✅
+  - 백엔드: schemas.py에 Department/Position/User 스키마 추가
+  - 백엔드: service.py에 부서/직급/사용자 CRUD + 비밀번호 초기화 서비스
+  - 백엔드: router.py에 11개 API 엔드포인트 추가
+  - 프론트엔드: UsersPage (탭 3개: 사용자/부서/직급)
+  - 사용자: 목록/검색/등록/수정/활성화토글/비밀번호초기화
+  - 부서/직급: 목록/추가/수정/활성화토글
+  - API: GET/POST/PUT /api/v1/system/departments
+  - API: GET/POST/PUT /api/v1/system/positions
+  - API: GET/POST/PUT /api/v1/system/users
+  - API: POST /api/v1/system/users/{id}/reset-password
 
 ---
 
 ## 다음 단계
 
 ### Phase 1 남은 작업
-- [ ] Step 1-7: 품목 마스터 CRUD
-- [ ] Step 1-8: 부서/직급/사용자 관리
 - [ ] Step 1-9: 동적 폼 빌더 (M1-F01)
 - [ ] Step 1-10: AI 챗봇 내비게이션 (M1-F03)
 

@@ -26,8 +26,7 @@ const menuItems = [
     path: '/system/products',
     color: 'border-emerald-400',
     iconColor: 'text-emerald-500',
-    enabled: false,
-    step: 'Step 1-7',
+    enabled: true,
   },
   {
     title: '사용자 관리',
@@ -36,8 +35,7 @@ const menuItems = [
     path: '/system/users',
     color: 'border-purple-400',
     iconColor: 'text-purple-500',
-    enabled: false,
-    step: 'Step 1-8',
+    enabled: true,
   },
 ];
 

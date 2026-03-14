@@ -16,7 +16,14 @@ from ...shared.excel_import import (
     ColumnMapping, FIELD_REGISTRY,
 )
 from .models import User
-from .schemas import CustomerCreate, CustomerUpdate, CustomerResponse
+from .schemas import (
+    CustomerCreate, CustomerUpdate, CustomerResponse,
+    ProductCreate, ProductUpdate, ProductResponse,
+    ProductCategoryCreate, ProductCategoryResponse,
+    DepartmentCreate, DepartmentUpdate, DepartmentResponse,
+    PositionCreate, PositionUpdate, PositionResponse,
+    UserCreate, UserUpdate, UserResponse, UserPasswordReset,
+)
 from . import service
 
 router = APIRouter()
@@ -240,7 +247,20 @@ async def execute_import(
                 )
                 await service.create_customer(db, create_data, current_user, ip)
                 success_count += 1
-            # Phase 2 이후: products, inventory 등 추가
+            elif module == "products":
+                # ProductCreate 스키마로 검증 후 생성
+                create_data = ProductCreate(
+                    code=row_data.get("code", ""),
+                    name=row_data.get("name", ""),
+                    product_type=row_data.get("product_type", "product"),
+                    unit=row_data.get("unit", "EA"),
+                    standard_price=float(row_data.get("standard_price", 0) or 0),
+                    cost_price=float(row_data.get("cost_price", 0) or 0),
+                    safety_stock=int(row_data.get("safety_stock", 0) or 0),
+                    tax_rate=float(row_data.get("tax_rate", 10) or 10),
+                )
+                await service.create_product(db, create_data, current_user, ip)
+                success_count += 1
         except Exception as e:
             error_detail = str(e.detail) if hasattr(e, "detail") else str(e)
             # 중복 에러는 건너뛰기
@@ -270,5 +290,293 @@ async def execute_import(
     )
 
 
-# Step 1-7에서 구현 예정: 품목 마스터 CRUD
-# Step 1-8에서 구현 예정: 부서/직급/사용자 관리
+# ──────────────────────────────────────────────
+# 품목 카테고리 (Step 1-7)
+# ──────────────────────────────────────────────
+
+@router.get("/product-categories", summary="품목 카테고리 목록")
+async def list_categories(
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """전체 품목 카테고리 목록을 반환합니다. (드롭다운용)"""
+    categories = await service.list_categories(db)
+    return success_response(
+        data=[ProductCategoryResponse.model_validate(c).model_dump(mode="json") for c in categories],
+    )
+
+
+@router.post("/product-categories", summary="품목 카테고리 생성")
+async def create_category(
+    data: ProductCategoryCreate,
+    request: Request,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role("admin", "manager")),
+):
+    """새 품목 카테고리를 등록합니다. (관리자/매니저 전용)"""
+    ip = request.client.host if request.client else None
+    category = await service.create_category(db, data, current_user, ip)
+    return success_response(
+        data=ProductCategoryResponse.model_validate(category).model_dump(mode="json"),
+        message=f"카테고리 '{category.name}'이(가) 등록되었습니다",
+    )
+
+
+# ──────────────────────────────────────────────
+# 품목 마스터 CRUD (Step 1-7)
+# ──────────────────────────────────────────────
+
+@router.post("/products", summary="품목 생성")
+async def create_product(
+    data: ProductCreate,
+    request: Request,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role("admin", "manager")),
+):
+    """새 품목을 등록합니다. (관리자/매니저 전용)"""
+    ip = request.client.host if request.client else None
+    product = await service.create_product(db, data, current_user, ip)
+    return success_response(
+        data=ProductResponse.model_validate(product).model_dump(mode="json"),
+        message=f"품목 '{product.name}'이(가) 등록되었습니다",
+    )
+
+
+@router.get("/products", summary="품목 목록 조회")
+async def list_products(
+    page: int = Query(1, ge=1, description="페이지 번호"),
+    size: int = Query(20, ge=1, le=100, description="페이지 크기"),
+    search: Optional[str] = Query(None, description="검색어 (품목명/코드)"),
+    sort_by: str = Query("created_at", description="정렬 기준"),
+    sort_order: str = Query("desc", description="정렬 방향 (asc/desc)"),
+    product_type: Optional[str] = Query(None, description="품목 유형 필터"),
+    category_id: Optional[uuid.UUID] = Query(None, description="카테고리 필터"),
+    is_active: Optional[bool] = Query(None, description="활성화 필터"),
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """품목 목록을 검색·정렬·페이지네이션하여 조회합니다."""
+    result = await service.list_products(
+        db, page=page, size=size, search=search,
+        sort_by=sort_by, sort_order=sort_order,
+        product_type=product_type, category_id=category_id,
+        is_active=is_active,
+    )
+    result["items"] = [item.model_dump(mode="json") for item in result["items"]]
+    return success_response(data=result)
+
+
+@router.get("/products/{product_id}", summary="품목 상세 조회")
+async def get_product(
+    product_id: uuid.UUID,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """품목 ID로 상세 정보를 조회합니다."""
+    product = await service.get_product(db, product_id)
+    return success_response(
+        data=ProductResponse.model_validate(product).model_dump(mode="json"),
+    )
+
+
+@router.put("/products/{product_id}", summary="품목 수정")
+async def update_product(
+    product_id: uuid.UUID,
+    data: ProductUpdate,
+    request: Request,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role("admin", "manager")),
+):
+    """품목 정보를 수정합니다. (관리자/매니저 전용)"""
+    ip = request.client.host if request.client else None
+    product = await service.update_product(db, product_id, data, current_user, ip)
+    return success_response(
+        data=ProductResponse.model_validate(product).model_dump(mode="json"),
+        message=f"품목 '{product.name}'이(가) 수정되었습니다",
+    )
+
+
+@router.delete("/products/{product_id}", summary="품목 삭제 (비활성화)")
+async def delete_product(
+    product_id: uuid.UUID,
+    request: Request,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role("admin", "manager")),
+):
+    """품목을 비활성화합니다. (실제 삭제 아님, 관리자/매니저 전용)"""
+    ip = request.client.host if request.client else None
+    product = await service.delete_product(db, product_id, current_user, ip)
+    return success_response(
+        message=f"품목 '{product.name}'이(가) 비활성화되었습니다",
+    )
+
+
+# ──────────────────────────────────────────────
+# 부서 관리 (Step 1-8)
+# ──────────────────────────────────────────────
+
+@router.get("/departments", summary="부서 목록")
+async def list_departments(
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """전체 부서 목록을 반환합니다."""
+    departments = await service.list_departments(db)
+    return success_response(
+        data=[DepartmentResponse.model_validate(d).model_dump(mode="json") for d in departments],
+    )
+
+
+@router.post("/departments", summary="부서 생성")
+async def create_department(
+    data: DepartmentCreate,
+    request: Request,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role("admin")),
+):
+    """새 부서를 등록합니다. (관리자 전용)"""
+    ip = request.client.host if request.client else None
+    dept = await service.create_department(db, data, current_user, ip)
+    return success_response(
+        data=DepartmentResponse.model_validate(dept).model_dump(mode="json"),
+        message=f"부서 '{dept.name}'이(가) 등록되었습니다",
+    )
+
+
+@router.put("/departments/{dept_id}", summary="부서 수정")
+async def update_department(
+    dept_id: uuid.UUID,
+    data: DepartmentUpdate,
+    request: Request,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role("admin")),
+):
+    """부서 정보를 수정합니다. (관리자 전용)"""
+    ip = request.client.host if request.client else None
+    dept = await service.update_department(db, dept_id, data, current_user, ip)
+    return success_response(
+        data=DepartmentResponse.model_validate(dept).model_dump(mode="json"),
+        message=f"부서 '{dept.name}'이(가) 수정되었습니다",
+    )
+
+
+# ──────────────────────────────────────────────
+# 직급 관리 (Step 1-8)
+# ──────────────────────────────────────────────
+
+@router.get("/positions", summary="직급 목록")
+async def list_positions(
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """전체 직급 목록을 반환합니다."""
+    positions = await service.list_positions(db)
+    return success_response(
+        data=[PositionResponse.model_validate(p).model_dump(mode="json") for p in positions],
+    )
+
+
+@router.post("/positions", summary="직급 생성")
+async def create_position(
+    data: PositionCreate,
+    request: Request,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role("admin")),
+):
+    """새 직급을 등록합니다. (관리자 전용)"""
+    ip = request.client.host if request.client else None
+    pos = await service.create_position(db, data, current_user, ip)
+    return success_response(
+        data=PositionResponse.model_validate(pos).model_dump(mode="json"),
+        message=f"직급 '{pos.name}'이(가) 등록되었습니다",
+    )
+
+
+@router.put("/positions/{pos_id}", summary="직급 수정")
+async def update_position(
+    pos_id: uuid.UUID,
+    data: PositionUpdate,
+    request: Request,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role("admin")),
+):
+    """직급 정보를 수정합니다. (관리자 전용)"""
+    ip = request.client.host if request.client else None
+    pos = await service.update_position(db, pos_id, data, current_user, ip)
+    return success_response(
+        data=PositionResponse.model_validate(pos).model_dump(mode="json"),
+        message=f"직급 '{pos.name}'이(가) 수정되었습니다",
+    )
+
+
+# ──────────────────────────────────────────────
+# 사용자 관리 (Step 1-8)
+# ──────────────────────────────────────────────
+
+@router.get("/users", summary="사용자 목록 조회")
+async def list_users(
+    page: int = Query(1, ge=1),
+    size: int = Query(20, ge=1, le=100),
+    search: Optional[str] = Query(None, description="검색어 (이름/이메일/사번)"),
+    role: Optional[str] = Query(None, description="역할 필터"),
+    department_id: Optional[uuid.UUID] = Query(None, description="부서 필터"),
+    is_active: Optional[bool] = Query(None, description="활성화 필터"),
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role("admin")),
+):
+    """사용자 목록을 조회합니다. (관리자 전용)"""
+    result = await service.list_users(
+        db, page=page, size=size, search=search,
+        role=role, department_id=department_id, is_active=is_active,
+    )
+    result["items"] = [item.model_dump(mode="json") for item in result["items"]]
+    return success_response(data=result)
+
+
+@router.post("/users", summary="사용자 생성")
+async def create_user(
+    data: UserCreate,
+    request: Request,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role("admin")),
+):
+    """새 사용자 계정을 등록합니다. (관리자 전용)"""
+    ip = request.client.host if request.client else None
+    user = await service.create_user(db, data, current_user, ip)
+    return success_response(
+        data=UserResponse.model_validate(user).model_dump(mode="json"),
+        message=f"사용자 '{user.name}'이(가) 등록되었습니다",
+    )
+
+
+@router.put("/users/{user_id}", summary="사용자 수정")
+async def update_user(
+    user_id: uuid.UUID,
+    data: UserUpdate,
+    request: Request,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role("admin")),
+):
+    """사용자 정보를 수정합니다. (관리자 전용)"""
+    ip = request.client.host if request.client else None
+    user = await service.update_user(db, user_id, data, current_user, ip)
+    return success_response(
+        data=UserResponse.model_validate(user).model_dump(mode="json"),
+        message=f"사용자 '{user.name}'이(가) 수정되었습니다",
+    )
+
+
+@router.post("/users/{user_id}/reset-password", summary="비밀번호 초기화")
+async def reset_password(
+    user_id: uuid.UUID,
+    data: UserPasswordReset,
+    request: Request,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role("admin")),
+):
+    """사용자 비밀번호를 초기화합니다. (관리자 전용)"""
+    ip = request.client.host if request.client else None
+    user = await service.reset_user_password(db, user_id, data.new_password, current_user, ip)
+    return success_response(
+        message=f"'{user.name}'의 비밀번호가 초기화되었습니다",
+    )
