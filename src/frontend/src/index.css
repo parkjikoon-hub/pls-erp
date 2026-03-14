@@ -1,12 +1,22 @@
 @import "tailwindcss";
 
-/* ERP 기본 스타일 - UI 시안 결정 후 상세 커스터마이징 예정 */
+/* PLS ERP 기본 스타일 — 시안 C 기반 */
 body {
   margin: 0;
-  font-family: 'Pretendard', system-ui, -apple-system, sans-serif;
+  font-family: 'Pretendard', 'Malgun Gothic', system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
+  font-size: 13px;
+  color: #1c1917;
+  background: #dce1e9;
+  line-height: 1.5;
 }
 
 #root {
   min-height: 100vh;
 }
+
+/* 스크롤바 스타일 */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #b0b8c4; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #8e96a4; }

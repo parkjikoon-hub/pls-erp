@@ -2,10 +2,11 @@
 > 이 파일은 새 세션 시작 시 반드시 먼저 읽으세요.
 
 ## 현재 상태
-- **최종 업데이트**: 2026-03-14
-- **현재 Phase**: Phase 0.5 완료 → Phase 1 시작 대기
-- **전체 진행률**: 0 / 29 기능 (외부 연동 5개 제외)
+- **최종 업데이트**: 2026-03-15
+- **현재 Phase**: Phase 1 진행 중 (Step 1-5 완료, Step 1-6 대기)
+- **전체 진행률**: 0 / 29 기능 (인프라 구축 완료, 첫 기능 구현 대기)
 - **UI 디자인**: 시안 C (하이브리드) 확정
+- **DB**: Neon PostgreSQL (싱가포르 리전, 프로젝트명: pls-erp)
 
 ---
 
@@ -14,42 +15,40 @@
 ### ✅ Phase 0: 환경 설정 (2026-03-14 완료)
 - [x] Git 저장소 초기화 (.gitignore + 초기 커밋 22개 파일)
 - [x] 백엔드 프로젝트 구조 생성 (src/backend/ 전체 디렉토리)
-  - main.py, config.py, database.py, shared/response.py, shared/pagination.py
-  - modules/m1~m7, auth/, audit/, tests/ 디렉토리
-  - 모든 __init__.py 파일 생성
-- [x] Python 가상환경 생성 (venv/) + 패키지 설치 (requirements.txt)
-  - FastAPI 0.109, SQLAlchemy 2.0.25, asyncpg, Alembic, pytest 등
-- [x] 프론트엔드 환경 생성 (Vite + React + TypeScript)
-  - src/frontend/ 에 Vite 프로젝트 생성
-  - Tailwind CSS, React Router, Axios, Zustand, Heroicons 설치
-  - vite.config.ts에 Tailwind 플러그인 + API 프록시 설정
-- [ ] **클라우드 PostgreSQL 연결 미완료** (Supabase/Neon 인스턴스 필요, .env 파일 생성 필요)
-- [ ] Gemini API 키 설정 미완료
+- [x] Python 가상환경 생성 (venv/) + 패키지 설치
+- [x] 프론트엔드 환경 생성 (Vite + React + TypeScript + Tailwind)
+- [x] **클라우드 PostgreSQL 연결 완료** (Neon, 싱가포르 리전)
+- [x] .env 파일 생성 (DATABASE_URL, JWT 설정 등)
+- [ ] Gemini API 키 설정 미완료 (Phase에서 필요할 때 설정)
 
 ### ✅ Phase 0.5: UI 디자인 시안 (2026-03-14 완료)
-- [x] 시안 A (클래식 ERP) HTML 제작 → docs/ui-mockups/design-A-classic.html
-- [x] 시안 B (모던 SaaS) HTML 제작 → docs/ui-mockups/design-B-modern.html
-- [x] 시안 C (하이브리드) HTML 제작 → docs/ui-mockups/design-C-hybrid.html
-- [x] **시안 C 확정** — 수정사항 반영 완료:
-  - 이모지 → 3D 그라디언트 SVG 아이콘으로 교체
-  - 콘텐츠 배경색: 밝은 흰색 → 슬레이트 블루그레이(#dce1e9)
-  - "Next-Gen ERP" → "PLS ERP"로 명칭 변경
+- [x] 시안 A/B/C HTML 제작
+- [x] **시안 C 확정** — 다크 사이드바 + 슬레이트 블루그레이 콘텐츠
+
+### ✅ Phase 1 진행 현황 (2026-03-15 시작)
+- [x] Step 1-1: 백엔드 뼈대 코드 (main.py CORS, auth/m1/audit 라우터 등록)
+- [x] Step 1-2: M1 DB 스키마 + Alembic 마이그레이션 (11개 테이블 생성)
+  - departments, positions, users, permissions, role_permissions
+  - audit_logs, customers, product_categories, products, form_configs
+- [x] Step 1-3: 인증 시스템 (JWT 로그인, bcrypt 해싱, RBAC 의존성)
+  - POST /api/v1/auth/login, GET /api/v1/auth/me
+  - get_current_user, get_current_admin, require_role 의존성
+- [x] Step 1-4: Audit Log 시스템 (서비스 + 관리자 조회 API)
+  - GET /api/v1/audit/logs (관리자 전용, 페이지네이션)
+  - log_action(), get_changed_fields() 유틸리티
+- [x] Step 1-5: 프론트엔드 뼈대 (시안 C 기반 레이아웃)
+  - 로그인 페이지, 대시보드, M1 시스템 페이지
+  - Sidebar, Header, AppLayout 컴포넌트
+  - Zustand 인증/사이드바 스토어, Axios API 클라이언트
+  - TypeScript 에러 없음, 빌드 성공
+- [x] 초기 데이터 시드 완료 (admin@pls-erp.com / admin1234)
 
 ---
 
-## 다음 단계 (Phase 1: M1 시스템 아키텍처 & MDM)
+## 다음 단계
 
-### 선행 작업 (미완료)
-- [ ] 클라우드 PostgreSQL 인스턴스 생성 (Supabase 또는 Neon)
-- [ ] .env 파일 생성 (DATABASE_URL 등)
-
-### Phase 1 구현 순서
-- [ ] Step 1-1: 백엔드 뼈대 코드 (main.py CORS, 라우터 등록)
-- [ ] Step 1-2: M1 DB 스키마 생성 (Alembic 마이그레이션)
-- [ ] Step 1-3: 인증 시스템 (JWT 로그인, RBAC)
-- [ ] Step 1-4: Audit Log 시스템
-- [ ] Step 1-5: 프론트엔드 뼈대 (시안 C 기반 레이아웃, 공통 컴포넌트)
-- [ ] Step 1-6: 거래처 마스터 CRUD (첫 수직 슬라이스)
+### Phase 1 남은 작업
+- [ ] Step 1-6: 거래처 마스터 CRUD (첫 수직 슬라이스 — DB→API→UI)
 - [ ] Step 1-7: 품목 마스터 CRUD
 - [ ] Step 1-8: 부서/직급/사용자 관리
 - [ ] Step 1-9: 동적 폼 빌더 (M1-F01)
@@ -69,7 +68,7 @@
 ## 개발 전략
 - **수직 슬라이스**: 한 기능을 DB→API→UI까지 완전히 구현 후 다음으로 이동
 - **UI**: 시안 C (하이브리드) 기반 — 다크 사이드바 + 슬레이트 블루그레이 콘텐츠
-- **DB**: 클라우드 PostgreSQL (Supabase 또는 Neon)
+- **DB**: Neon PostgreSQL (싱가포르 리전, pls-erp 프로젝트)
 - **명칭**: "PLS ERP" (Next-Gen ERP 아님)
 
 ---
@@ -81,12 +80,22 @@
 | `agents/aria-api-engineer.md` | 백엔드 구조, API 패턴, 인증 |
 | `agents/nova-frontend-builder.md` | 프론트엔드 컴포넌트, UX 원칙 |
 | `docs/ui-mockups/design-C-hybrid.html` | 확정된 UI 디자인 시안 |
-| `.claude/plans/proud-booping-sifakis.md` | 전체 개발 실행 계획서 |
+| `src/backend/modules/m1_system/models.py` | M1 ORM 모델 |
+| `src/backend/auth/` | JWT 인증 모듈 |
+| `src/frontend/src/` | React 프론트엔드 코드 |
+
+---
+
+## 로그인 계정
+| 역할 | 이메일 | 비밀번호 |
+|------|--------|----------|
+| 관리자 | admin@pls-erp.com | admin1234 |
+| 테스트 | user@pls-erp.com | user1234 |
 
 ---
 
 ## 다음 세션 시작 방법
 ```
-docs/progress-tracker.md를 읽고 현재 상태에서 개발을 재개해줘.
-클라우드 DB 설정부터 시작하고, Phase 1의 Step 1-1부터 순서대로 진행하자.
+docs/progress-tracker.md와 docs/handover-note.md를 읽고
+이전 세션에서 중단된 작업을 이어서 진행해줘.
 ```

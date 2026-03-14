@@ -1,5 +1,5 @@
 """
-AI 통합 ERP 시스템 — FastAPI 메인 애플리케이션
+PLS ERP — FastAPI 메인 애플리케이션
 모든 모듈 라우터를 등록하고 미들웨어를 설정합니다.
 """
 from fastapi import FastAPI
@@ -21,7 +21,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(
     title=settings.APP_NAME,
-    description="Next-Gen AI Integrated ERP — REST API v1.0",
+    description="PLS ERP — AI 통합 ERP REST API",
     version=settings.APP_VERSION,
     docs_url="/api/docs",
     redoc_url="/api/redoc",
@@ -50,9 +50,16 @@ async def health_check():
 
 
 # ── 모듈 라우터 등록 (개발 순서에 따라 순차 추가) ──
+
 # Phase 1: M1 시스템 아키텍처 & MDM
-# from .modules.m1_system.router import router as m1_router
-# app.include_router(m1_router, prefix="/api/v1/system", tags=["M1-시스템"])
+from .auth.router import router as auth_router
+app.include_router(auth_router, prefix="/api/v1/auth", tags=["인증"])
+
+from .modules.m1_system.router import router as m1_router
+app.include_router(m1_router, prefix="/api/v1/system", tags=["M1-시스템"])
+
+from .audit.router import router as audit_router
+app.include_router(audit_router, prefix="/api/v1/audit", tags=["감사로그"])
 
 # Phase 2: M4 재무/회계 (M1 완료 후 활성화)
 # from .modules.m4_finance.router import router as m4_router
