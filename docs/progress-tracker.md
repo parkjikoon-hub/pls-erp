@@ -47,6 +47,9 @@
   - 프론트엔드: CustomersPage (목록/검색/정렬/페이지네이션/등록/수정/삭제 모달)
   - API: POST/GET/PUT/DELETE /api/v1/system/customers
   - 감사 로그 연동, RBAC 권한 체크, 사업자번호 자동 포맷팅
+  - Excel 일괄 업로드: 공통 엔진(excel_import.py) + ExcelImportModal 컴포넌트
+  - 이카운트 엑셀 컬럼 자동 매핑 (aliases 시스템)
+  - API: POST /api/v1/system/import/{analyze,preview,execute}
 
 ---
 
