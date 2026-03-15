@@ -21,7 +21,7 @@ import { useSidebarStore } from '../stores/sidebarStore';
 const navItems = [
   { path: '/', label: '대시보드', icon: HomeIcon, color: '#10b981' },
   { path: '/system', label: 'M1 시스템', icon: Cog6ToothIcon, color: '#3b82f6' },
-  { path: '/finance', label: 'M4 재무회계', icon: CurrencyDollarIcon, color: '#f59e0b', disabled: true },
+  { path: '/finance', label: 'M4 재무회계', icon: CurrencyDollarIcon, color: '#f59e0b' },
   { path: '/hr', label: 'M3 인사급여', icon: UserGroupIcon, color: '#8b5cf6', disabled: true },
   { path: '/sales', label: 'M2 영업수주', icon: ShoppingCartIcon, color: '#10b981', disabled: true },
   { path: '/production', label: 'M5 생산SCM', icon: WrenchScrewdriverIcon, color: '#ef4444', disabled: true },

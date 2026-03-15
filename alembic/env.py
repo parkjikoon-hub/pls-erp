@@ -18,6 +18,10 @@ from src.backend.modules.m1_system.models import (  # noqa: F401
     Department, Position, User, Permission, RolePermission,
     AuditLog, Customer, ProductCategory, Product, FormConfig,
 )
+from src.backend.modules.m4_finance.models import (  # noqa: F401
+    ChartOfAccounts, FiscalYear, JournalEntry, JournalEntryLine,
+    TaxInvoice, BankTransfer, BankTransferLine,
+)
 
 config = context.config
 

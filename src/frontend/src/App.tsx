@@ -11,6 +11,13 @@ import SystemPage from './pages/SystemPage';
 import CustomersPage from './pages/CustomersPage';
 import ProductsPage from './pages/ProductsPage';
 import UsersPage from './pages/UsersPage';
+import FormBuilderPage from './pages/FormBuilderPage';
+import FinancePage from './pages/FinancePage';
+import AccountsPage from './pages/AccountsPage';
+import JournalListPage from './pages/JournalListPage';
+import JournalFormPage from './pages/JournalFormPage';
+import InvoicesPage from './pages/InvoicesPage';
+import ClosingPage from './pages/ClosingPage';
 
 /** 인증된 사용자만 접근 가능한 라우트 */
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -38,6 +45,17 @@ export default function App() {
           <Route path="/system/customers" element={<CustomersPage />} />
           <Route path="/system/products" element={<ProductsPage />} />
           <Route path="/system/users" element={<UsersPage />} />
+          <Route path="/system/form-builder" element={<FormBuilderPage />} />
+
+          {/* M4 재무/회계 */}
+          <Route path="/finance" element={<FinancePage />} />
+          <Route path="/finance/accounts" element={<AccountsPage />} />
+          <Route path="/finance/journals" element={<JournalListPage />} />
+          <Route path="/finance/journals/new" element={<JournalFormPage />} />
+          <Route path="/finance/journals/:id" element={<JournalFormPage />} />
+          <Route path="/finance/journals/:id/edit" element={<JournalFormPage />} />
+          <Route path="/finance/invoices" element={<InvoicesPage />} />
+          <Route path="/finance/closing" element={<ClosingPage />} />
         </Route>
 
         {/* 그 외 경로 → 대시보드로 이동 */}

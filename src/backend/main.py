@@ -61,9 +61,9 @@ app.include_router(m1_router, prefix="/api/v1/system", tags=["M1-시스템"])
 from .audit.router import router as audit_router
 app.include_router(audit_router, prefix="/api/v1/audit", tags=["감사로그"])
 
-# Phase 2: M4 재무/회계 (M1 완료 후 활성화)
-# from .modules.m4_finance.router import router as m4_router
-# app.include_router(m4_router, prefix="/api/v1/finance", tags=["M4-재무회계"])
+# Phase 2: M4 재무/회계
+from .modules.m4_finance.routers import router as m4_router
+app.include_router(m4_router, prefix="/api/v1/finance", tags=["M4-재무회계"])
 
 # Phase 3: M3 인사/급여 (M1, M4 완료 후 활성화)
 # from .modules.m3_hr.router import router as m3_router
