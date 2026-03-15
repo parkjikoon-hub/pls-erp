@@ -6,6 +6,7 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
+from sqlalchemy.orm import selectinload
 
 from ..database import get_db
 from ..modules.m1_system.models import User
@@ -35,8 +36,12 @@ async def get_current_user(
     if user_id is None:
         raise credentials_exception
 
-    # DB에서 사용자 조회
-    result = await db.execute(select(User).where(User.id == user_id))
+    # DB에서 사용자 조회 (부서/직급 관계도 함께 로딩)
+    result = await db.execute(
+        select(User)
+        .options(selectinload(User.department), selectinload(User.position))
+        .where(User.id == user_id)
+    )
     user = result.scalar_one_or_none()
 
     if user is None or not user.is_active:

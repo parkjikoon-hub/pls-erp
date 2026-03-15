@@ -50,9 +50,12 @@ export const useAuthStore = create<AuthState>((set) => ({
     try {
       const res = await api.get('/auth/me');
       set({ user: res.data });
-    } catch {
-      localStorage.removeItem('access_token');
-      set({ user: null, isAuthenticated: false });
+    } catch (err: any) {
+      // 401(인증 만료)일 때만 로그아웃, 그 외 에러는 무시
+      if (err?.response?.status === 401) {
+        localStorage.removeItem('access_token');
+        set({ user: null, isAuthenticated: false });
+      }
     }
   },
 }));
