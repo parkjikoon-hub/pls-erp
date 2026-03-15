@@ -89,3 +89,7 @@ app.include_router(m6_router, prefix="/api/v1/groupware", tags=["M6-그룹웨어
 # Phase 7: M7 알림센터
 from .modules.m7_notifications.routers import router as m7_router
 app.include_router(m7_router, prefix="/api/v1/notifications", tags=["M7-알림센터"])
+
+# 대시보드 요약 API
+from .dashboard.router import router as dashboard_router
+app.include_router(dashboard_router, prefix="/api/v1/dashboard", tags=["대시보드"])
