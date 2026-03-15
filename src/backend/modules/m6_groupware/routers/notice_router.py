@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from ....database import AsyncSessionLocal
 from ....shared.response import success_response
-from ...m1_system.dependencies import get_current_user, require_role
+from ....auth.dependencies import get_current_user, require_role
 from ..schemas.notices import NoticeCreate, NoticeUpdate
 from ..services import notice_service
 
