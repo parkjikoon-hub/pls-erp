@@ -20,7 +20,7 @@ async def get_db():
         yield session
 
 
-@router.get("")
+@router.get("/")
 async def list_notifications(
     notification_type: str | None = None,
     is_read: bool | None = None,
