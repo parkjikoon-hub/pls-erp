@@ -23,7 +23,13 @@ def _clean_url(url: str) -> str:
 
 # SSL 설정 (Neon 등 클라우드 DB 접속 시 필요)
 _use_ssl = "neon.tech" in settings.DATABASE_URL
-_connect_args = {"ssl": _ssl.create_default_context()} if _use_ssl else {}
+if _use_ssl:
+    _ctx = _ssl.create_default_context()
+    _ctx.check_hostname = False
+    _ctx.verify_mode = _ssl.CERT_NONE
+    _connect_args = {"ssl": _ctx}
+else:
+    _connect_args = {}
 
 # 비동기 엔진 생성 (DB와의 연결 통로)
 engine = create_async_engine(
