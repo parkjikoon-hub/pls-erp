@@ -3,8 +3,8 @@
 
 ## 현재 상태
 - **최종 업데이트**: 2026-03-15
-- **현재 Phase**: Phase 3 완료 (M3 인사/급여 Step 3-1 ~ 3-6 전체 완료)
-- **전체 진행률**: Phase 0 + 0.5 + Phase 1 (M1) + Phase 2 (M4) + Phase 3 (M3) 완료
+- **현재 Phase**: Phase 4 완료 (M2 영업/수주 Step 4-1 ~ 4-4 전체 완료)
+- **전체 진행률**: Phase 0 + 0.5 + Phase 1 (M1) + Phase 2 (M4) + Phase 3 (M3) + Phase 4 (M2) 완료
 - **UI 디자인**: 시안 C (하이브리드) 확정
 - **DB**: Neon PostgreSQL (싱가포르 리전, 프로젝트명: pls-erp)
 
@@ -101,11 +101,26 @@
   - 프론트엔드: TaxFilingPage (연/월 선택 → CSV 다운로드 + 사용 가이드)
   - API: GET /hr/reports/tax-filing (StreamingResponse)
 
-### Phase 4: M2 영업 및 수주 관리 (M1, M4 필요)
-- [ ] Step 4-1: M2 DB 스키마 + 마이그레이션
-- [ ] Step 4-2: 견적서/수주 관리
-- [ ] Step 4-3: 매출 관리
-- [ ] Step 4-4: 수금 관리
+### Phase 4: M2 영업/수주 (2026-03-15 완료)
+- [x] Step 4-1: DB 스키마 + Alembic 마이그레이션 (4개 테이블)
+  - Quotation (견적서 헤더), QuotationLine (견적서 라인)
+  - SalesOrder (수주 헤더), SalesOrderLine (수주 라인)
+- [x] Step 4-2: 견적서 CRUD
+  - 백엔드: schemas/quotations.py, services/quotation_service.py, routers/quotation_router.py
+  - 프론트엔드: QuotationsPage (목록/필터/생성/수정 모달 + 동적 라인)
+  - 상태 워크플로우: draft→sent→accepted/rejected
+  - 견적번호 자동 생성 (QT-YYYYMM-NNNN)
+  - API: /sales/quotations (6개 엔드포인트)
+- [x] Step 4-3: 수주 관리 CRUD
+  - 백엔드: schemas/orders.py, services/order_service.py, routers/order_router.py
+  - 프론트엔드: SalesOrdersPage (목록/필터/생성/수정/상태변경 모달 + 진행률 바)
+  - 상태 워크플로우: confirmed→in_production→shipped→completed→invoiced
+  - 견적서→수주 전환 기능 (from-quotation 엔드포인트)
+  - 수주번호 자동 생성 (SO-YYYYMM-NNNN)
+  - API: /sales/orders (7개 엔드포인트)
+- [x] Step 4-4: 영업 현황 대시보드
+  - 프론트엔드: SalesDashboardPage (요약카드 + 최근 견적/수주 목록)
+  - SalesPage (M2 메인 카드 그리드)
 
 ### AI 기능 (별도 Step, 나중에 추가)
 - [ ] M4-F01: 영수증 OCR (Gemini Vision → 자동 분개)
@@ -144,6 +159,7 @@
 | `src/backend/modules/m1_system/` | M1 ORM 모델 + 서비스 + 라우터 |
 | `src/backend/modules/m4_finance/` | M4 재무/회계 전체 모듈 |
 | `src/backend/modules/m3_hr/` | M3 인사/급여 전체 모듈 |
+| `src/backend/modules/m2_sales/` | M2 영업/수주 전체 모듈 |
 | `src/backend/auth/` | JWT 인증 모듈 |
 | `src/frontend/src/` | React 프론트엔드 코드 |
 

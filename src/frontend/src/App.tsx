@@ -24,6 +24,10 @@ import AttendancePage from './pages/AttendancePage';
 import PayrollPage from './pages/PayrollPage';
 import HRReportsPage from './pages/HRReportsPage';
 import TaxFilingPage from './pages/TaxFilingPage';
+import SalesPage from './pages/SalesPage';
+import QuotationsPage from './pages/QuotationsPage';
+import SalesOrdersPage from './pages/SalesOrdersPage';
+import SalesDashboardPage from './pages/SalesDashboardPage';
 
 /** 인증된 사용자만 접근 가능한 라우트 */
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -70,6 +74,12 @@ export default function App() {
           <Route path="/hr/payroll" element={<PayrollPage />} />
           <Route path="/hr/reports" element={<HRReportsPage />} />
           <Route path="/hr/tax-filing" element={<TaxFilingPage />} />
+
+          {/* M2 영업/수주 */}
+          <Route path="/sales" element={<SalesPage />} />
+          <Route path="/sales/quotations" element={<QuotationsPage />} />
+          <Route path="/sales/orders" element={<SalesOrdersPage />} />
+          <Route path="/sales/dashboard" element={<SalesDashboardPage />} />
         </Route>
 
         {/* 그 외 경로 → 대시보드로 이동 */}

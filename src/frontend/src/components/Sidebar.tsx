@@ -23,7 +23,7 @@ const navItems = [
   { path: '/system', label: 'M1 시스템', icon: Cog6ToothIcon, color: '#3b82f6' },
   { path: '/finance', label: 'M4 재무회계', icon: CurrencyDollarIcon, color: '#f59e0b' },
   { path: '/hr', label: 'M3 인사급여', icon: UserGroupIcon, color: '#8b5cf6' },
-  { path: '/sales', label: 'M2 영업수주', icon: ShoppingCartIcon, color: '#10b981', disabled: true },
+  { path: '/sales', label: 'M2 영업수주', icon: ShoppingCartIcon, color: '#10b981' },
   { path: '/production', label: 'M5 생산SCM', icon: WrenchScrewdriverIcon, color: '#ef4444', disabled: true },
   { path: '/groupware', label: 'M6 그룹웨어', icon: ChatBubbleLeftRightIcon, color: '#06b6d4', disabled: true },
   { path: '/notifications', label: 'M7 알림센터', icon: BellIcon, color: '#f97316', disabled: true },

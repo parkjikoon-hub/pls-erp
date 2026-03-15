@@ -25,6 +25,9 @@ from src.backend.modules.m4_finance.models import (  # noqa: F401
 from src.backend.modules.m3_hr.models import (  # noqa: F401
     Employee, AttendanceRecord, PayrollHeader, PayrollDetail,
 )
+from src.backend.modules.m2_sales.models import (  # noqa: F401
+    Quotation, QuotationLine, SalesOrder, SalesOrderLine,
+)
 
 config = context.config
 
