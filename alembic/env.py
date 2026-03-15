@@ -33,6 +33,11 @@ from src.backend.modules.m5_production.models import (  # noqa: F401
     Warehouse, BomHeader, BomLine, Inventory, InventoryTransaction,
     WorkOrder, QcInspection, Shipment, ShipmentLine,
 )
+# M6 그룹웨어
+from src.backend.modules.m6_groupware.models import (  # noqa: F401
+    ApprovalTemplate, ApprovalTemplateLine, ApprovalRequest,
+    ApprovalStep, Notice,
+)
 
 config = context.config
 

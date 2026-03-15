@@ -34,6 +34,12 @@ import WorkOrdersPage from './pages/WorkOrdersPage';
 import QcPage from './pages/QcPage';
 import ShipmentsPage from './pages/ShipmentsPage';
 import ProductionPage from './pages/ProductionPage';
+import GroupwarePage from './pages/GroupwarePage';
+import ApprovalsPage from './pages/ApprovalsPage';
+import ApprovalFormPage from './pages/ApprovalFormPage';
+import ApprovalDetailPage from './pages/ApprovalDetailPage';
+import ApprovalTemplatesPage from './pages/ApprovalTemplatesPage';
+import NoticesPage from './pages/NoticesPage';
 
 /** 인증된 사용자만 접근 가능한 라우트 */
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -94,6 +100,14 @@ export default function App() {
           <Route path="/production/work-orders" element={<WorkOrdersPage />} />
           <Route path="/production/qc" element={<QcPage />} />
           <Route path="/production/shipments" element={<ShipmentsPage />} />
+
+          {/* M6 그룹웨어 */}
+          <Route path="/groupware" element={<GroupwarePage />} />
+          <Route path="/groupware/approvals" element={<ApprovalsPage />} />
+          <Route path="/groupware/approvals/new" element={<ApprovalFormPage />} />
+          <Route path="/groupware/approvals/:id" element={<ApprovalDetailPage />} />
+          <Route path="/groupware/templates" element={<ApprovalTemplatesPage />} />
+          <Route path="/groupware/notices" element={<NoticesPage />} />
         </Route>
 
         {/* 그 외 경로 → 대시보드로 이동 */}

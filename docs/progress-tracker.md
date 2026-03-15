@@ -3,8 +3,8 @@
 
 ## 현재 상태
 - **최종 업데이트**: 2026-03-15
-- **현재 Phase**: Phase 5 완료 (M5 생산/SCM Step 5-1 ~ 5-7 전체 완료)
-- **전체 진행률**: Phase 0 + 0.5 + Phase 1 (M1) + Phase 2 (M4) + Phase 3 (M3) + Phase 4 (M2) + Phase 5 (M5) 완료
+- **현재 Phase**: Phase 6 완료 (M6 그룹웨어 Step 6-1 ~ 6-5 전체 완료)
+- **전체 진행률**: Phase 0 + 0.5 + Phase 1 (M1) + Phase 2 (M4) + Phase 3 (M3) + Phase 4 (M2) + Phase 5 (M5) + Phase 6 (M6) 완료
 - **UI 디자인**: 시안 C (하이브리드) 확정
 - **DB**: Neon PostgreSQL (싱가포르 리전, 프로젝트명: pls-erp)
 
@@ -158,6 +158,35 @@
   - 프론트엔드: ProductionPage (현황카드 + 하위메뉴 카드 그리드)
   - Sidebar M5 활성화 (disabled 제거)
 
+### Phase 6: M6 그룹웨어 (2026-03-15 완료)
+- [x] Step 6-1: DB 스키마 + Alembic 마이그레이션 (5개 테이블)
+  - ApprovalTemplate (결재선 템플릿), ApprovalTemplateLine (템플릿 단계)
+  - ApprovalRequest (결재 요청), ApprovalStep (결재/참조 단계)
+  - Notice (공지사항)
+- [x] Step 6-2: 결재선 템플릿 CRUD
+  - 백엔드: schemas/approvals.py, services/template_service.py, routers/template_router.py
+  - 자주 쓰는 결재선 저장/불러오기/삭제
+  - API: /groupware/templates (3개 엔드포인트)
+- [x] Step 6-3: 결재 요청/승인/반려 엔진
+  - 백엔드: services/approval_service.py, routers/approval_router.py
+  - 범용 결재 엔진: document_type + reference_type/id로 ERP 문서 연결
+  - 결재선 vs 참조선 분리 (step_type: approval/reference)
+  - 순차 결재 + 즉시 반려 흐름
+  - 결재번호 자동 생성 (AP-YYYYMM-NNNN)
+  - API: /groupware/approvals (9개 엔드포인트)
+- [x] Step 6-4: 공지사항 CRUD
+  - 백엔드: schemas/notices.py, services/notice_service.py, routers/notice_router.py
+  - 관리자/매니저만 작성, 고정글 우선 정렬, 조회수 자동 증가
+  - API: /groupware/notices (5개 엔드포인트)
+- [x] Step 6-5: 프론트엔드 UI + Sidebar 활성화
+  - 프론트엔드: GroupwarePage (메인 현황), ApprovalsPage (3탭 결재함)
+  - ApprovalFormPage (기안 작성 + 템플릿 불러오기 + 결재선/참조선 설정)
+  - ApprovalDetailPage (상세 + 승인/반려 액션)
+  - ApprovalTemplatesPage (템플릿 관리)
+  - NoticesPage (공지 목록/상세/작성/수정/삭제)
+  - API: api/groupware/approvals.ts, api/groupware/notices.ts
+  - Sidebar M6 활성화 (disabled 제거)
+
 ### AI 기능 (별도 Step, 나중에 추가)
 - [ ] M4-F01: 영수증 OCR (Gemini Vision → 자동 분개)
 - [ ] M4-F01: 계정과목 AI 추천 (적요→계정 매칭)
@@ -197,6 +226,7 @@
 | `src/backend/modules/m3_hr/` | M3 인사/급여 전체 모듈 |
 | `src/backend/modules/m2_sales/` | M2 영업/수주 전체 모듈 |
 | `src/backend/modules/m5_production/` | M5 생산/SCM 전체 모듈 |
+| `src/backend/modules/m6_groupware/` | M6 그룹웨어 전체 모듈 |
 | `src/backend/auth/` | JWT 인증 모듈 |
 | `src/frontend/src/` | React 프론트엔드 코드 |
 
