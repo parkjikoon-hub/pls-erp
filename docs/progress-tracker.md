@@ -3,8 +3,8 @@
 
 ## 현재 상태
 - **최종 업데이트**: 2026-03-15
-- **현재 Phase**: Phase 6 완료 (M6 그룹웨어 Step 6-1 ~ 6-5 전체 완료)
-- **전체 진행률**: Phase 0 + 0.5 + Phase 1 (M1) + Phase 2 (M4) + Phase 3 (M3) + Phase 4 (M2) + Phase 5 (M5) + Phase 6 (M6) 완료
+- **현재 Phase**: Phase 7 완료 — 전 모듈 구현 완료!
+- **전체 진행률**: Phase 0~7 전체 완료 (M1~M7 7개 모듈)
 - **UI 디자인**: 시안 C (하이브리드) 확정
 - **DB**: Neon PostgreSQL (싱가포르 리전, 프로젝트명: pls-erp)
 
@@ -187,6 +187,20 @@
   - API: api/groupware/approvals.ts, api/groupware/notices.ts
   - Sidebar M6 활성화 (disabled 제거)
 
+### Phase 7: M7 알림센터 (2026-03-15 완료)
+- [x] Step 7-1: DB 스키마 + Alembic 마이그레이션 (2개 테이블)
+  - Notification (인앱 알림: 유형별 분류, ERP 문서 연결, 읽음 처리)
+  - NotificationSetting (사용자별 알림 수신 설정)
+- [x] Step 7-2: 알림 서비스 + 라우터
+  - 백엔드: schemas/notifications.py, services/notification_service.py, routers/notification_router.py
+  - 알림 생성 (다른 모듈에서 호출 가능), 목록 조회, 읽음/전체읽음, 설정 관리
+  - API: /notifications (6개 엔드포인트)
+- [x] Step 7-3: 프론트엔드 UI + Sidebar 활성화
+  - 프론트엔드: NotificationsPage (전체/읽지않음/설정 3탭 + 유형 필터)
+  - 헤더 벨 아이콘 (읽지 않은 알림 뱃지, 30초 자동 갱신)
+  - API: api/notifications.ts
+  - Sidebar M7 활성화 (disabled 제거)
+
 ### AI 기능 (별도 Step, 나중에 추가)
 - [ ] M4-F01: 영수증 OCR (Gemini Vision → 자동 분개)
 - [ ] M4-F01: 계정과목 AI 추천 (적요→계정 매칭)
@@ -227,6 +241,7 @@
 | `src/backend/modules/m2_sales/` | M2 영업/수주 전체 모듈 |
 | `src/backend/modules/m5_production/` | M5 생산/SCM 전체 모듈 |
 | `src/backend/modules/m6_groupware/` | M6 그룹웨어 전체 모듈 |
+| `src/backend/modules/m7_notifications/` | M7 알림센터 전체 모듈 |
 | `src/backend/auth/` | JWT 인증 모듈 |
 | `src/frontend/src/` | React 프론트엔드 코드 |
 

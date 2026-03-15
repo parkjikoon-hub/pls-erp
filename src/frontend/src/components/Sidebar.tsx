@@ -26,7 +26,7 @@ const navItems = [
   { path: '/sales', label: 'M2 영업수주', icon: ShoppingCartIcon, color: '#10b981' },
   { path: '/production', label: 'M5 생산SCM', icon: WrenchScrewdriverIcon, color: '#ef4444' },
   { path: '/groupware', label: 'M6 그룹웨어', icon: ChatBubbleLeftRightIcon, color: '#06b6d4' },
-  { path: '/notifications', label: 'M7 알림센터', icon: BellIcon, color: '#f97316', disabled: true },
+  { path: '/notifications', label: 'M7 알림센터', icon: BellIcon, color: '#f97316' },
 ];
 
 export default function Sidebar() {

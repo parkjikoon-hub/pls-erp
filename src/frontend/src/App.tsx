@@ -40,6 +40,7 @@ import ApprovalFormPage from './pages/ApprovalFormPage';
 import ApprovalDetailPage from './pages/ApprovalDetailPage';
 import ApprovalTemplatesPage from './pages/ApprovalTemplatesPage';
 import NoticesPage from './pages/NoticesPage';
+import NotificationsPage from './pages/NotificationsPage';
 
 /** 인증된 사용자만 접근 가능한 라우트 */
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -108,6 +109,9 @@ export default function App() {
           <Route path="/groupware/approvals/:id" element={<ApprovalDetailPage />} />
           <Route path="/groupware/templates" element={<ApprovalTemplatesPage />} />
           <Route path="/groupware/notices" element={<NoticesPage />} />
+
+          {/* M7 알림센터 */}
+          <Route path="/notifications" element={<NotificationsPage />} />
         </Route>
 
         {/* 그 외 경로 → 대시보드로 이동 */}

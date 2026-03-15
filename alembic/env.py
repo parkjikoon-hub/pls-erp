@@ -38,6 +38,10 @@ from src.backend.modules.m6_groupware.models import (  # noqa: F401
     ApprovalTemplate, ApprovalTemplateLine, ApprovalRequest,
     ApprovalStep, Notice,
 )
+# M7 알림센터
+from src.backend.modules.m7_notifications.models import (  # noqa: F401
+    Notification, NotificationSetting,
+)
 
 config = context.config
 

@@ -85,6 +85,6 @@ app.include_router(m5_router, prefix="/api/v1/production", tags=["M5-생산SCM"]
 from .modules.m6_groupware.routers import router as m6_router
 app.include_router(m6_router, prefix="/api/v1/groupware", tags=["M6-그룹웨어"])
 
-# Phase 7: M7 알림 (M1~M6 완료 후 활성화)
-# from .modules.m7_notification.router import router as m7_router
-# app.include_router(m7_router, prefix="/api/v1/notifications", tags=["M7-알림"])
+# Phase 7: M7 알림센터
+from .modules.m7_notifications.routers import router as m7_router
+app.include_router(m7_router, prefix="/api/v1/notifications", tags=["M7-알림센터"])
