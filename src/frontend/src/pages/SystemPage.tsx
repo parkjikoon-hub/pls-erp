@@ -7,6 +7,7 @@ import {
   BuildingOffice2Icon,
   CubeIcon,
   UserGroupIcon,
+  Cog6ToothIcon,
 } from '@heroicons/react/24/outline';
 
 const menuItems = [
@@ -35,6 +36,15 @@ const menuItems = [
     path: '/system/users',
     color: 'border-purple-400',
     iconColor: 'text-purple-500',
+    enabled: true,
+  },
+  {
+    title: '동적 폼 빌더',
+    desc: '모듈별 커스텀 입력 필드 구성',
+    icon: Cog6ToothIcon,
+    path: '/system/form-builder',
+    color: 'border-amber-400',
+    iconColor: 'text-amber-500',
     enabled: true,
   },
 ];

@@ -23,6 +23,7 @@ from .schemas import (
     DepartmentCreate, DepartmentUpdate, DepartmentResponse,
     PositionCreate, PositionUpdate, PositionResponse,
     UserCreate, UserUpdate, UserResponse, UserPasswordReset,
+    FormConfigCreate, FormConfigUpdate, FormConfigResponse,
 )
 from . import service
 
@@ -580,3 +581,120 @@ async def reset_password(
     return success_response(
         message=f"'{user.name}'의 비밀번호가 초기화되었습니다",
     )
+
+
+# ──────────────────────────────────────────────
+# 동적 폼 빌더 (Step 1-9)
+# ──────────────────────────────────────────────
+
+@router.get("/form-configs", summary="폼 구성 목록 조회")
+async def list_form_configs(
+    module: Optional[str] = Query(None, description="모듈 필터 (M1~M7)"),
+    is_active: Optional[bool] = Query(None, description="활성화 필터"),
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """등록된 폼 구성 목록을 조회합니다. (모듈별 필터 가능)"""
+    configs = await service.list_form_configs(db, module=module, is_active=is_active)
+    return success_response(
+        data=[FormConfigResponse.model_validate(c).model_dump(mode="json") for c in configs],
+    )
+
+
+@router.get("/form-configs/by-name", summary="모듈+폼이름으로 폼 구성 조회")
+async def get_form_config_by_name(
+    module: str = Query(..., description="모듈 코드 (M1~M7)"),
+    form_name: str = Query(..., description="폼 이름"),
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """모듈+폼이름으로 활성 폼 구성을 조회합니다. (프론트엔드 렌더링용)"""
+    config = await service.get_form_config_by_name(db, module, form_name)
+    if not config:
+        return success_response(data=None, message="등록된 폼 구성이 없습니다")
+    return success_response(
+        data=FormConfigResponse.model_validate(config).model_dump(mode="json"),
+    )
+
+
+@router.get("/form-configs/{config_id}", summary="폼 구성 상세 조회")
+async def get_form_config(
+    config_id: uuid.UUID,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """폼 구성 ID로 상세 정보를 조회합니다."""
+    config = await service.get_form_config(db, config_id)
+    return success_response(
+        data=FormConfigResponse.model_validate(config).model_dump(mode="json"),
+    )
+
+
+@router.post("/form-configs", summary="폼 구성 생성")
+async def create_form_config(
+    data: FormConfigCreate,
+    request: Request,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role("admin")),
+):
+    """새 폼 구성을 등록합니다. (관리자 전용)"""
+    ip = request.client.host if request.client else None
+    config = await service.create_form_config(db, data, current_user, ip)
+    return success_response(
+        data=FormConfigResponse.model_validate(config).model_dump(mode="json"),
+        message=f"폼 구성 '{data.module}/{data.form_name}' v{config.version}이(가) 등록되었습니다",
+    )
+
+
+@router.put("/form-configs/{config_id}", summary="폼 구성 수정")
+async def update_form_config(
+    config_id: uuid.UUID,
+    data: FormConfigUpdate,
+    request: Request,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role("admin")),
+):
+    """폼 구성을 수정합니다. (관리자 전용, 필드 전체 교체)"""
+    ip = request.client.host if request.client else None
+    config = await service.update_form_config(db, config_id, data, current_user, ip)
+    return success_response(
+        data=FormConfigResponse.model_validate(config).model_dump(mode="json"),
+        message=f"폼 구성이 수정되었습니다 (필드 {len(data.fields)}개)",
+    )
+
+
+@router.delete("/form-configs/{config_id}", summary="폼 구성 삭제 (비활성화)")
+async def delete_form_config(
+    config_id: uuid.UUID,
+    request: Request,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role("admin")),
+):
+    """폼 구성을 비활성화합니다. (실제 삭제 아님, 관리자 전용)"""
+    ip = request.client.host if request.client else None
+    config = await service.delete_form_config(db, config_id, current_user, ip)
+    return success_response(
+        message=f"폼 구성 '{config.module}/{config.form_name}'이(가) 비활성화되었습니다",
+    )
+
+
+# ──────────────────────────────────────────────
+# AI 챗봇 내비게이션 (Step 1-10)
+# ──────────────────────────────────────────────
+
+from pydantic import BaseModel as PydanticBaseModel
+
+class ChatbotRequest(PydanticBaseModel):
+    """챗봇 질문 요청"""
+    question: str
+
+
+@router.post("/chatbot", summary="AI 챗봇 내비게이션")
+async def chatbot(
+    data: ChatbotRequest,
+    current_user: User = Depends(get_current_user),
+):
+    """자연어 질문을 받아 관련 ERP 메뉴를 안내합니다."""
+    from .chatbot_service import chatbot_answer
+    result = await chatbot_answer(data.question)
+    return success_response(data=result)

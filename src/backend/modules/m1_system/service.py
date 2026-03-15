@@ -11,7 +11,7 @@ from fastapi import HTTPException, status
 
 from passlib.context import CryptContext
 
-from .models import Customer, Product, ProductCategory, User, Department, Position
+from .models import Customer, Product, ProductCategory, User, Department, Position, FormConfig
 from .schemas import (
     CustomerCreate, CustomerUpdate, CustomerResponse,
     ProductCreate, ProductUpdate, ProductResponse,
@@ -19,6 +19,7 @@ from .schemas import (
     DepartmentCreate, DepartmentUpdate, DepartmentResponse,
     PositionCreate, PositionUpdate, PositionResponse,
     UserCreate, UserUpdate, UserResponse,
+    FormConfigCreate, FormConfigUpdate, FormConfigResponse,
 )
 from ...audit.service import log_action, get_changed_fields
 
@@ -810,6 +811,155 @@ async def reset_user_password(
         memo="관리자에 의한 비밀번호 초기화",
     )
     return target_user
+
+
+# ══════════════════════════════════════════════
+# 동적 폼 빌더 (FormConfig) 서비스
+# ══════════════════════════════════════════════
+
+async def list_form_configs(
+    db: AsyncSession,
+    module: Optional[str] = None,
+    is_active: Optional[bool] = None,
+) -> list[FormConfig]:
+    """폼 구성 목록을 반환 (모듈별 필터 가능)"""
+    query = select(FormConfig).order_by(FormConfig.module, FormConfig.form_name)
+
+    if module:
+        query = query.where(FormConfig.module == module)
+    if is_active is not None:
+        query = query.where(FormConfig.is_active == is_active)
+
+    result = await db.execute(query)
+    return list(result.scalars().all())
+
+
+async def get_form_config(db: AsyncSession, config_id: uuid.UUID) -> FormConfig:
+    """폼 구성 ID로 단건 조회. 없으면 404"""
+    result = await db.execute(select(FormConfig).where(FormConfig.id == config_id))
+    config = result.scalar_one_or_none()
+    if not config:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="폼 구성을 찾을 수 없습니다",
+        )
+    return config
+
+
+async def get_form_config_by_name(
+    db: AsyncSession, module: str, form_name: str
+) -> Optional[FormConfig]:
+    """모듈+폼이름으로 활성 폼 구성 조회 (프론트엔드 렌더링용)"""
+    result = await db.execute(
+        select(FormConfig).where(
+            FormConfig.module == module,
+            FormConfig.form_name == form_name,
+            FormConfig.is_active == True,
+        ).order_by(FormConfig.version.desc())
+    )
+    return result.scalar_one_or_none()
+
+
+async def create_form_config(
+    db: AsyncSession,
+    data: FormConfigCreate,
+    current_user: User,
+    ip_address: Optional[str] = None,
+) -> FormConfig:
+    """새 폼 구성을 생성하고 감사 로그를 기록"""
+    # 동일 모듈+폼이름의 최신 버전 확인
+    existing = await db.execute(
+        select(FormConfig).where(
+            FormConfig.module == data.module,
+            FormConfig.form_name == data.form_name,
+        ).order_by(FormConfig.version.desc())
+    )
+    latest = existing.scalar_one_or_none()
+    next_version = (latest.version + 1) if latest else 1
+
+    # 필드 목록을 config_json에 저장
+    fields_data = [f.model_dump() for f in data.fields]
+
+    config = FormConfig(
+        module=data.module,
+        form_name=data.form_name,
+        config_json={"fields": fields_data},
+        version=next_version,
+        created_by=current_user.id,
+    )
+    db.add(config)
+    await db.flush()
+
+    # 감사 로그
+    await log_action(
+        db=db, table_name="form_configs", record_id=config.id,
+        action="INSERT", changed_by=current_user.id,
+        new_values={"module": data.module, "form_name": data.form_name, "version": next_version, "field_count": len(fields_data)},
+        ip_address=ip_address,
+    )
+    return config
+
+
+async def update_form_config(
+    db: AsyncSession,
+    config_id: uuid.UUID,
+    data: FormConfigUpdate,
+    current_user: User,
+    ip_address: Optional[str] = None,
+) -> FormConfig:
+    """폼 구성을 수정 (필드 전체 교체)하고 감사 로그 기록"""
+    config = await get_form_config(db, config_id)
+
+    old_field_count = len(config.config_json.get("fields", []))
+
+    # 필드 교체
+    fields_data = [f.model_dump() for f in data.fields]
+    config.config_json = {"fields": fields_data}
+
+    # 활성화 상태 변경
+    if data.is_active is not None:
+        config.is_active = data.is_active
+
+    await db.flush()
+
+    # 감사 로그
+    await log_action(
+        db=db, table_name="form_configs", record_id=config.id,
+        action="UPDATE", changed_by=current_user.id,
+        old_values={"field_count": old_field_count},
+        new_values={"field_count": len(fields_data), "is_active": config.is_active},
+        ip_address=ip_address,
+    )
+    return config
+
+
+async def delete_form_config(
+    db: AsyncSession,
+    config_id: uuid.UUID,
+    current_user: User,
+    ip_address: Optional[str] = None,
+) -> FormConfig:
+    """폼 구성을 비활성화 (논리 삭제)"""
+    config = await get_form_config(db, config_id)
+
+    if not config.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="이미 비활성화된 폼 구성입니다",
+        )
+
+    config.is_active = False
+    await db.flush()
+
+    await log_action(
+        db=db, table_name="form_configs", record_id=config.id,
+        action="DELETE", changed_by=current_user.id,
+        old_values={"is_active": True},
+        new_values={"is_active": False},
+        ip_address=ip_address,
+        memo="폼 구성 비활성화 (논리 삭제)",
+    )
+    return config
 
 
 # ── 유틸리티 ──

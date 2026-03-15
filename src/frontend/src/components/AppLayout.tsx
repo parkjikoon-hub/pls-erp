@@ -6,6 +6,7 @@ import { Outlet } from 'react-router-dom';
 import { useEffect } from 'react';
 import Sidebar from './Sidebar';
 import Header from './Header';
+import ChatWidget from './ChatWidget';
 import { useAuthStore } from '../stores/authStore';
 
 export default function AppLayout() {
@@ -29,6 +30,9 @@ export default function AppLayout() {
           <Outlet />
         </main>
       </div>
+
+      {/* AI 챗봇 위젯 (플로팅) */}
+      <ChatWidget />
     </div>
   );
 }

@@ -371,3 +371,85 @@ class UserResponse(BaseModel):
     updated_at: datetime
 
     model_config = {"from_attributes": True}
+
+
+# ──────────────────────────────────────────────
+# 동적 폼 빌더 (FormConfig) 스키마
+# ──────────────────────────────────────────────
+
+class FormFieldConfig(BaseModel):
+    """폼 필드 하나의 구성 정보"""
+    key: str = Field(..., min_length=1, max_length=50, description="필드 키 (영문, 언더스코어)")
+    label: str = Field(..., min_length=1, max_length=100, description="필드 표시명 (한국어)")
+    field_type: str = Field(..., description="필드 유형: text, number, date, select, checkbox, textarea, email, phone")
+    required: bool = Field(False, description="필수 여부")
+    placeholder: Optional[str] = Field(None, max_length=200, description="입력 힌트")
+    default_value: Optional[str] = Field(None, description="기본값")
+    options: Optional[list[str]] = Field(None, description="선택지 목록 (select 유형일 때)")
+    min_length: Optional[int] = Field(None, ge=0, description="최소 길이 (text/textarea)")
+    max_length: Optional[int] = Field(None, ge=1, description="최대 길이 (text/textarea)")
+    min_value: Optional[float] = Field(None, description="최소값 (number)")
+    max_value: Optional[float] = Field(None, description="최대값 (number)")
+    sort_order: int = Field(0, ge=0, description="표시 순서")
+    width: str = Field("full", description="너비: full(전체), half(반), third(1/3)")
+    description: Optional[str] = Field(None, max_length=300, description="필드 설명 (도움말)")
+
+    @field_validator("field_type")
+    @classmethod
+    def validate_field_type(cls, v: str) -> str:
+        """허용된 필드 유형 검증"""
+        allowed = ("text", "number", "date", "select", "checkbox", "textarea", "email", "phone")
+        if v not in allowed:
+            raise ValueError(f"허용된 필드 유형: {', '.join(allowed)}")
+        return v
+
+    @field_validator("width")
+    @classmethod
+    def validate_width(cls, v: str) -> str:
+        allowed = ("full", "half", "third")
+        if v not in allowed:
+            raise ValueError(f"허용된 너비: {', '.join(allowed)}")
+        return v
+
+    @field_validator("key")
+    @classmethod
+    def validate_key(cls, v: str) -> str:
+        """키는 영문 소문자 + 언더스코어만 허용"""
+        if not re.match(r"^[a-z][a-z0-9_]*$", v):
+            raise ValueError("키는 영문 소문자로 시작하고, 영문 소문자/숫자/언더스코어만 사용 가능합니다")
+        return v
+
+
+class FormConfigCreate(BaseModel):
+    """폼 구성 생성 요청"""
+    module: str = Field(..., min_length=1, max_length=10, description="모듈 코드 (M1~M7)")
+    form_name: str = Field(..., min_length=1, max_length=100, description="폼 이름 (예: customer_extra, product_extra)")
+    fields: list[FormFieldConfig] = Field(..., min_length=1, description="폼 필드 구성 목록")
+
+    @field_validator("module")
+    @classmethod
+    def validate_module(cls, v: str) -> str:
+        allowed = ("M1", "M2", "M3", "M4", "M5", "M6", "M7")
+        if v not in allowed:
+            raise ValueError(f"허용된 모듈: {', '.join(allowed)}")
+        return v
+
+
+class FormConfigUpdate(BaseModel):
+    """폼 구성 수정 요청 (필드 전체 교체)"""
+    fields: list[FormFieldConfig] = Field(..., min_length=1, description="폼 필드 구성 목록 (전체 교체)")
+    is_active: Optional[bool] = None
+
+
+class FormConfigResponse(BaseModel):
+    """폼 구성 응답"""
+    id: uuid.UUID
+    module: str
+    form_name: str
+    config_json: dict
+    version: int
+    is_active: bool
+    created_at: datetime
+    created_by: Optional[uuid.UUID] = None
+
+    model_config = {"from_attributes": True}
