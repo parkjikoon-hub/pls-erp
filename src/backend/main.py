@@ -7,13 +7,17 @@ from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 
 from .config import settings
-from .database import engine
+from .database import engine, AsyncSessionLocal
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """앱 시작/종료 시 수행 작업"""
-    # 시작: DB 연결 풀 초기화
+    # 시작: M5 창고 시드 데이터
+    from .modules.m5_production.seed import seed_warehouses
+    async with AsyncSessionLocal() as db:
+        await seed_warehouses(db)
+        await db.commit()
     yield
     # 종료: DB 연결 정리
     await engine.dispose()
@@ -73,9 +77,9 @@ app.include_router(m3_router, prefix="/api/v1/hr", tags=["M3-인사급여"])
 from .modules.m2_sales.routers import router as m2_router
 app.include_router(m2_router, prefix="/api/v1/sales", tags=["M2-영업수주"])
 
-# Phase 5: M5 생산/SCM (M1, M2, M4 완료 후 활성화)
-# from .modules.m5_production.router import router as m5_router
-# app.include_router(m5_router, prefix="/api/v1/production", tags=["M5-생산SCM"])
+# Phase 5: M5 생산/SCM
+from .modules.m5_production.routers import router as m5_router
+app.include_router(m5_router, prefix="/api/v1/production", tags=["M5-생산SCM"])
 
 # Phase 6: M6 그룹웨어 (M1~M5 완료 후 활성화)
 # from .modules.m6_groupware.router import router as m6_router

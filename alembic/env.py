@@ -28,6 +28,11 @@ from src.backend.modules.m3_hr.models import (  # noqa: F401
 from src.backend.modules.m2_sales.models import (  # noqa: F401
     Quotation, QuotationLine, SalesOrder, SalesOrderLine,
 )
+# M5 생산/SCM
+from src.backend.modules.m5_production.models import (  # noqa: F401
+    Warehouse, BomHeader, BomLine, Inventory, InventoryTransaction,
+    WorkOrder, QcInspection, Shipment, ShipmentLine,
+)
 
 config = context.config
 

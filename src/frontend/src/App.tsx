@@ -28,6 +28,12 @@ import SalesPage from './pages/SalesPage';
 import QuotationsPage from './pages/QuotationsPage';
 import SalesOrdersPage from './pages/SalesOrdersPage';
 import SalesDashboardPage from './pages/SalesDashboardPage';
+import BomPage from './pages/BomPage';
+import InventoryPage from './pages/InventoryPage';
+import WorkOrdersPage from './pages/WorkOrdersPage';
+import QcPage from './pages/QcPage';
+import ShipmentsPage from './pages/ShipmentsPage';
+import ProductionPage from './pages/ProductionPage';
 
 /** 인증된 사용자만 접근 가능한 라우트 */
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -80,6 +86,14 @@ export default function App() {
           <Route path="/sales/quotations" element={<QuotationsPage />} />
           <Route path="/sales/orders" element={<SalesOrdersPage />} />
           <Route path="/sales/dashboard" element={<SalesDashboardPage />} />
+
+          {/* M5 생산/SCM */}
+          <Route path="/production" element={<ProductionPage />} />
+          <Route path="/production/bom" element={<BomPage />} />
+          <Route path="/production/inventory" element={<InventoryPage />} />
+          <Route path="/production/work-orders" element={<WorkOrdersPage />} />
+          <Route path="/production/qc" element={<QcPage />} />
+          <Route path="/production/shipments" element={<ShipmentsPage />} />
         </Route>
 
         {/* 그 외 경로 → 대시보드로 이동 */}

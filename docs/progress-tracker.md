@@ -3,8 +3,8 @@
 
 ## 현재 상태
 - **최종 업데이트**: 2026-03-15
-- **현재 Phase**: Phase 4 완료 (M2 영업/수주 Step 4-1 ~ 4-4 전체 완료)
-- **전체 진행률**: Phase 0 + 0.5 + Phase 1 (M1) + Phase 2 (M4) + Phase 3 (M3) + Phase 4 (M2) 완료
+- **현재 Phase**: Phase 5 완료 (M5 생산/SCM Step 5-1 ~ 5-7 전체 완료)
+- **전체 진행률**: Phase 0 + 0.5 + Phase 1 (M1) + Phase 2 (M4) + Phase 3 (M3) + Phase 4 (M2) + Phase 5 (M5) 완료
 - **UI 디자인**: 시안 C (하이브리드) 확정
 - **DB**: Neon PostgreSQL (싱가포르 리전, 프로젝트명: pls-erp)
 
@@ -122,6 +122,42 @@
   - 프론트엔드: SalesDashboardPage (요약카드 + 최근 견적/수주 목록)
   - SalesPage (M2 메인 카드 그리드)
 
+### Phase 5: M5 생산/SCM (2026-03-15 완료)
+- [x] Step 5-1: DB 스키마 + Alembic 마이그레이션 (9개 테이블)
+  - Warehouse, BomHeader, BomLine, Inventory, InventoryTransaction
+  - WorkOrder, QcInspection, Shipment, ShipmentLine
+  - 시드 데이터: 4개 창고 (WH-RAW, WH-WIP, WH-FIN, WH-DEF)
+- [x] Step 5-2: BOM 관리 CRUD + 다단계 트리 전개
+  - 백엔드: schemas/bom.py, services/bom_service.py, routers/bom_router.py
+  - 프론트엔드: BomPage (목록/생성/수정 + 재귀 트리 뷰 + 소요자재 계산)
+  - 다단계 BOM 트리 전개 (순환참조 방지), 스크랩율 반영
+  - API: /production/bom (7개 엔드포인트)
+- [x] Step 5-3: 재고 관리 — 창고/입출고/이관/부족 알림
+  - 백엔드: schemas/inventory.py, services/inventory_service.py, routers/inventory_router.py
+  - 프론트엔드: InventoryPage (재고현황/이동이력/부족재고 3탭 + 입출고/이관/조정 모달)
+  - DB 레벨 CHECK 제약 (qty >= 0), 수주 기준 소요량 계산
+  - API: /production/inventory (9개 엔드포인트)
+- [x] Step 5-4: 작업지시서 CRUD + 수주 전환 + 칸반 UI
+  - 백엔드: schemas/work_orders.py, services/work_order_service.py, routers/work_order_router.py
+  - 프론트엔드: WorkOrdersPage (칸반보드 4열 + 리스트뷰 토글 + 수주→WO 전환)
+  - 상태 흐름: pending→in_progress→qc_wait→completed
+  - in_progress 전환 시 BOM 전개 → 원자재 자동 출고
+  - API: /production/work-orders (7개 엔드포인트)
+- [x] Step 5-5: QC 검사 + 합격 시 완제품 자동 이관
+  - 백엔드: schemas/qc.py, services/qc_service.py, routers/qc_router.py
+  - 프론트엔드: QcPage (검사이력 테이블 + 등록 모달 + 합격률 바)
+  - 합격: WIP→완제품 이관 + WO 완료, 불합격: WIP→불량품, 재작업: WO→진행중
+  - API: /production/qc (2개 엔드포인트)
+- [x] Step 5-6: 출하 관리 + 배송 추적 + 거래명세서
+  - 백엔드: schemas/shipments.py, services/shipment_service.py, routers/shipment_router.py
+  - 프론트엔드: ShipmentsPage (목록/상세/수주→출하 전환 + 거래명세서 인쇄)
+  - 상태 흐름: pending→picked→shipped→delivered
+  - picked: 완제품 창고 자동 출고, shipped: 거래명세서 번호 자동 발행
+  - API: /production/shipments (7개 엔드포인트)
+- [x] Step 5-7: 생산 대시보드 + Sidebar 활성화
+  - 프론트엔드: ProductionPage (현황카드 + 하위메뉴 카드 그리드)
+  - Sidebar M5 활성화 (disabled 제거)
+
 ### AI 기능 (별도 Step, 나중에 추가)
 - [ ] M4-F01: 영수증 OCR (Gemini Vision → 자동 분개)
 - [ ] M4-F01: 계정과목 AI 추천 (적요→계정 매칭)
@@ -160,6 +196,7 @@
 | `src/backend/modules/m4_finance/` | M4 재무/회계 전체 모듈 |
 | `src/backend/modules/m3_hr/` | M3 인사/급여 전체 모듈 |
 | `src/backend/modules/m2_sales/` | M2 영업/수주 전체 모듈 |
+| `src/backend/modules/m5_production/` | M5 생산/SCM 전체 모듈 |
 | `src/backend/auth/` | JWT 인증 모듈 |
 | `src/frontend/src/` | React 프론트엔드 코드 |
 
