@@ -47,7 +47,7 @@ function TreeNode({ node, depth = 0 }: { node: BomTreeNode; depth?: number }) {
         <span className="text-sm text-slate-600 ml-auto">
           {node.quantity} {node.unit || 'EA'}
         </span>
-        {node.scrap_rate > 0 && (
+        {(node.scrap_rate ?? 0) > 0 && (
           <span className="text-xs text-orange-500">(스크랩 {node.scrap_rate}%)</span>
         )}
       </div>

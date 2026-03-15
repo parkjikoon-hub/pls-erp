@@ -77,7 +77,7 @@ export default function SystemPage() {
                   <h3 className="font-bold text-slate-700 mb-1">{item.title}</h3>
                   <p className="text-sm text-slate-500 mb-2">{item.desc}</p>
                   {!item.enabled && (
-                    <span className="text-xs text-slate-400">{item.step}에서 구현 예정</span>
+                    <span className="text-xs text-slate-400">개발 예정</span>
                   )}
                 </div>
               </div>

@@ -13,7 +13,7 @@ import {
   type SalesOrderFormData,
   type SalesOrderLine,
 } from '../api/sales/orders';
-import api from '../api/axios';
+import api from '../api/client';
 
 /* ── 상태 라벨/색상 ── */
 const STATUS_MAP: Record<string, { label: string; color: string }> = {

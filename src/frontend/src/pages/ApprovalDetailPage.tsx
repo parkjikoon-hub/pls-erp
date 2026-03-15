@@ -98,11 +98,11 @@ export default function ApprovalDetailPage() {
         </div>
 
         {/* 본문 */}
-        {detail.content?.body && (
+        {detail.content?.body != null && (
           <div className="mt-4 pt-4 border-t border-[#c8ced8]">
             <h3 className="text-sm font-medium text-slate-600 mb-2">내용</h3>
             <div className="text-sm text-slate-700 whitespace-pre-wrap bg-slate-50 rounded-lg p-4">
-              {String(detail.content.body)}
+              {String(detail.content.body as string)}
             </div>
           </div>
         )}

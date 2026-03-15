@@ -54,18 +54,6 @@ export default function Sidebar() {
       <nav className="flex-1 py-2 overflow-y-auto">
         {navItems.map((item) => {
           const Icon = item.icon;
-          if (item.disabled) {
-            return (
-              <div
-                key={item.path}
-                className="flex items-center gap-3 px-4 py-2 mx-2 rounded-lg opacity-30 cursor-not-allowed"
-                title={`${item.label} (개발 예정)`}
-              >
-                <Icon className="w-5 h-5 flex-shrink-0" style={{ color: item.color }} />
-                {!isCollapsed && <span className="text-[13px] whitespace-nowrap">{item.label}</span>}
-              </div>
-            );
-          }
           return (
             <NavLink
               key={item.path}

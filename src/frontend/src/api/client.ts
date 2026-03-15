@@ -4,8 +4,13 @@
  */
 import axios from 'axios';
 
+/* 배포 시 VITE_API_URL 환경변수로 백엔드 주소 지정, 없으면 상대경로(개발용 프록시) */
+const API_BASE = import.meta.env.VITE_API_URL
+  ? `${import.meta.env.VITE_API_URL}/api/v1`
+  : '/api/v1';
+
 const api = axios.create({
-  baseURL: '/api/v1',
+  baseURL: API_BASE,
   headers: { 'Content-Type': 'application/json' },
 });
 

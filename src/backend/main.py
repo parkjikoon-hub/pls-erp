@@ -32,10 +32,11 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# CORS 설정 (프론트엔드에서 API 호출 허용)
+# CORS 설정 (프론트엔드에서 API 호출 허용, 여러 도메인 지원)
+_origins = [o.strip() for o in settings.FRONTEND_URL.split(",") if o.strip()]
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[settings.FRONTEND_URL],
+    allow_origins=_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

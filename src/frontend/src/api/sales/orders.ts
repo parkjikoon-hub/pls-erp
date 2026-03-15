@@ -1,7 +1,7 @@
 /**
  * M2 영업/수주 — 수주 API 호출 함수
  */
-import api from '../axios';
+import api from '../client';
 
 /* ── 타입 정의 ── */
 

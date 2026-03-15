@@ -186,7 +186,7 @@ export default function FormBuilderPage() {
   // 필드 속성 변경
   const handleFieldChange = (index: number, key: keyof FormFieldConfig, value: unknown) => {
     const updated = [...fields];
-    (updated[index] as Record<string, unknown>)[key] = value;
+    (updated[index] as unknown as Record<string, unknown>)[key] = value;
     setFields(updated);
   };
 
