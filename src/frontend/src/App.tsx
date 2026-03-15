@@ -18,6 +18,12 @@ import JournalListPage from './pages/JournalListPage';
 import JournalFormPage from './pages/JournalFormPage';
 import InvoicesPage from './pages/InvoicesPage';
 import ClosingPage from './pages/ClosingPage';
+import HRPage from './pages/HRPage';
+import EmployeesPage from './pages/EmployeesPage';
+import AttendancePage from './pages/AttendancePage';
+import PayrollPage from './pages/PayrollPage';
+import HRReportsPage from './pages/HRReportsPage';
+import TaxFilingPage from './pages/TaxFilingPage';
 
 /** 인증된 사용자만 접근 가능한 라우트 */
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -56,6 +62,14 @@ export default function App() {
           <Route path="/finance/journals/:id/edit" element={<JournalFormPage />} />
           <Route path="/finance/invoices" element={<InvoicesPage />} />
           <Route path="/finance/closing" element={<ClosingPage />} />
+
+          {/* M3 인사/급여 */}
+          <Route path="/hr" element={<HRPage />} />
+          <Route path="/hr/employees" element={<EmployeesPage />} />
+          <Route path="/hr/attendance" element={<AttendancePage />} />
+          <Route path="/hr/payroll" element={<PayrollPage />} />
+          <Route path="/hr/reports" element={<HRReportsPage />} />
+          <Route path="/hr/tax-filing" element={<TaxFilingPage />} />
         </Route>
 
         {/* 그 외 경로 → 대시보드로 이동 */}

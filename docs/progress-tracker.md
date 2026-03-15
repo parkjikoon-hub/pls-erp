@@ -3,8 +3,8 @@
 
 ## 현재 상태
 - **최종 업데이트**: 2026-03-15
-- **현재 Phase**: Phase 2 완료 (M4 재무/회계 Step 2-1 ~ 2-5 전체 완료)
-- **전체 진행률**: Phase 0 + 0.5 + Phase 1 (M1) + Phase 2 (M4) 완료
+- **현재 Phase**: Phase 3 완료 (M3 인사/급여 Step 3-1 ~ 3-6 전체 완료)
+- **전체 진행률**: Phase 0 + 0.5 + Phase 1 (M1) + Phase 2 (M4) + Phase 3 (M3) 완료
 - **UI 디자인**: 시안 C (하이브리드) 확정
 - **DB**: Neon PostgreSQL (싱가포르 리전, 프로젝트명: pls-erp)
 
@@ -72,12 +72,34 @@
 
 ## 다음 단계
 
-### Phase 3: M3 인사 및 급여/세무 관리 (M1, M4 필요)
-- [ ] Step 3-1: M3 DB 스키마 + 마이그레이션
-- [ ] Step 3-2: 사원 정보 관리 (인사카드)
-- [ ] Step 3-3: 급여 관리
-- [ ] Step 3-4: 근태/휴가 관리
-- [ ] Step 3-5: 세무 관련
+### Phase 3: M3 인사/급여 (2026-03-15 완료)
+- [x] Step 3-1: DB 스키마 + Alembic 마이그레이션 (4개 테이블)
+  - Employee (인사카드, M1 User 1:1 연결)
+  - AttendanceRecord (예외 기반 근태: 연차/병가/결근)
+  - PayrollHeader (월별 급여대장)
+  - PayrollDetail (개인별 급여명세: 지급 8항목 + 공제 6항목)
+- [x] Step 3-2: 사원 관리 CRUD (인사카드)
+  - 백엔드: schemas/employees.py, services/employee_service.py, routers/employee_router.py
+  - 프론트엔드: EmployeesPage (검색/필터/CRUD + 3 필드셋 모달)
+  - API: /hr/employees (6개 엔드포인트)
+- [x] Step 3-3: 근태/휴가 관리 (예외 기반)
+  - 백엔드: schemas/attendance.py, services/attendance_service.py, routers/attendance_router.py
+  - 프론트엔드: AttendancePage (연/월/유형 필터, 등록/삭제 + 연차 자동 차감/복원)
+  - API: /hr/attendance (4개 엔드포인트)
+- [x] Step 3-4: 급여 계산 엔진
+  - 4대보험 (국민연금 4.5%, 건강보험 3.545%, 장기요양 12.81%, 고용보험 0.9%)
+  - 소득세 (간이세액표 기반 구간별 계산), 지방소득세 (소득세의 10%)
+  - 비과세 자동 분류 (식대/자가운전/연구활동비/육아수당 각 20만원 한도)
+  - 프론트엔드: PayrollPage (계산/승인/요약카드/상세테이블)
+  - API: /hr/payroll (4개 엔드포인트)
+- [x] Step 3-5: 급여명세서 + 인사 통계 보고서
+  - 백엔드: services/report_service.py, routers/report_router.py
+  - 프론트엔드: HRReportsPage (급여명세서 탭 + 인사통계 탭)
+  - API: /hr/reports (3개 엔드포인트)
+- [x] Step 3-6: 국세청 신고 파일 생성 (수동 다운로드)
+  - CSV 생성 (utf-8-sig BOM, 홈택스 업로드용)
+  - 프론트엔드: TaxFilingPage (연/월 선택 → CSV 다운로드 + 사용 가이드)
+  - API: GET /hr/reports/tax-filing (StreamingResponse)
 
 ### Phase 4: M2 영업 및 수주 관리 (M1, M4 필요)
 - [ ] Step 4-1: M2 DB 스키마 + 마이그레이션
@@ -99,7 +121,7 @@
 - M1-F07: 병행 운영 실시간 동기화
 - M4-F04: 국세청 API 전송 (수동 발행으로 대체)
 - M4-F05: 뱅킹 연동 이체 (수동 입력으로 대체)
-- M3-F04: 국세청 전자신고 파일
+- M3-F04: 국세청 전자신고 자동 전송 (수동 CSV 다운로드로 대체 — Step 3-6 구현 완료)
 
 ---
 
@@ -121,6 +143,7 @@
 | `docs/ui-mockups/design-C-hybrid.html` | 확정된 UI 디자인 시안 |
 | `src/backend/modules/m1_system/` | M1 ORM 모델 + 서비스 + 라우터 |
 | `src/backend/modules/m4_finance/` | M4 재무/회계 전체 모듈 |
+| `src/backend/modules/m3_hr/` | M3 인사/급여 전체 모듈 |
 | `src/backend/auth/` | JWT 인증 모듈 |
 | `src/frontend/src/` | React 프론트엔드 코드 |
 

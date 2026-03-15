@@ -22,6 +22,9 @@ from src.backend.modules.m4_finance.models import (  # noqa: F401
     ChartOfAccounts, FiscalYear, JournalEntry, JournalEntryLine,
     TaxInvoice, BankTransfer, BankTransferLine,
 )
+from src.backend.modules.m3_hr.models import (  # noqa: F401
+    Employee, AttendanceRecord, PayrollHeader, PayrollDetail,
+)
 
 config = context.config
 

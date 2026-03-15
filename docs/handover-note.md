@@ -1,34 +1,36 @@
 # 세션 인수인계 노트
-> 작성 시각: 2026-03-15 (Phase 2 완료 세션)
+> 작성 시각: 2026-03-15 (Phase 3 완료 세션)
 
 ## 이번 세션에서 완료한 작업
 
-### Phase 2: M4 재무/회계 전체 완료
-- **Step 2-1**: DB 스키마 7개 테이블 + Alembic 마이그레이션 + 시드 데이터 (69개 계정과목 + 2026 회계연도)
-- **Step 2-2**: 계정과목 마스터 CRUD + 회계연도 관리 (백엔드 6+3 엔드포인트, 프론트엔드 AccountsPage + FinancePage)
-- **Step 2-3**: 전표 입력/조회/승인 (백엔드 10 엔드포인트, 프론트엔드 JournalListPage + JournalFormPage)
-  - 복식부기 검증 (차변=대변), 전표번호 자동 생성, 상태 워크플로우 (draft→review→approved→posted)
-  - 동적 분개 라인 UI, 계정과목 검색 드롭다운, 차대변 실시간 합계
-- **Step 2-4**: 세금계산서 발행/관리 (백엔드 7 엔드포인트, 프론트엔드 InvoicesPage)
-  - 확정(confirm) 시 자동 전표 생성 (매출: 매출채권/매출/부가세예수금, 매입: 매출원가/부가세대급금/매입채무)
-  - 매출/매입 탭, 부가세 자동 계산 (10%), 기간별 합계
-- **Step 2-5**: 결산 마감 + 재무제표 (백엔드 5 엔드포인트, 프론트엔드 ClosingPage)
-  - 시산표, 손익계산서, 재무상태표, 기간 마감/취소 4탭
+### Phase 3: M3 인사/급여 전체 완료
+- **Step 3-1**: DB 스키마 4개 테이블 + Alembic 마이그레이션
+  - Employee, AttendanceRecord, PayrollHeader, PayrollDetail
+- **Step 3-2**: 사원 관리 CRUD (인사카드)
+  - 백엔드 6 엔드포인트, 프론트엔드 EmployeesPage (검색/필터/3필드셋 모달)
+- **Step 3-3**: 근태/휴가 관리 (예외 기반)
+  - 백엔드 4 엔드포인트, 프론트엔드 AttendancePage (연차 자동 차감/복원)
+- **Step 3-4**: 급여 계산 엔진
+  - 4대보험, 소득세(구간별), 비과세 자동 분류
+  - 백엔드 4 엔드포인트, 프론트엔드 PayrollPage (계산/승인/요약/상세)
+- **Step 3-5**: 급여명세서 + 인사 통계 보고서
+  - 백엔드 3 엔드포인트, 프론트엔드 HRReportsPage (2탭)
+- **Step 3-6**: 국세청 신고 파일 생성 (수동 다운로드)
+  - CSV (utf-8-sig BOM), 프론트엔드 TaxFilingPage
 
 ## 진행 중이던 작업
-- 없음 (Phase 2 전체 완료)
+- 없음 (Phase 3 전체 완료)
 
 ## 다음 세션에서 이어할 작업
-1. Phase 2 코드 git commit (아직 커밋 안 됨)
-2. **Phase 3: M3 인사/급여** 또는 **Phase 4: M2 영업/수주** 시작
-   - CLAUDE.md 개발 순서: Phase 3 (M3) → Phase 4 (M2) → Phase 5 (M5)
-3. 선택: M4 AI 기능 추가 (OCR, 계정추천, R&D 대체분개)
+1. **Phase 4: M2 영업/수주** 시작
+   - CLAUDE.md 개발 순서: Phase 4 (M2) → Phase 5 (M5) → Phase 6 (M6)
+2. 또는 AI 기능 추가 (OCR, 계정추천, R&D 대체분개)
 
 ## 주의사항 / 이슈
-- M4 모듈은 도메인별 파일 분리 구조 (schemas/, services/, routers/)
-  - M1은 단일 파일 구조 — M3/M2도 M4 패턴(도메인 분리)을 따르는 것을 권장
-- BankTransfer/BankTransferLine 테이블은 생성만 (CRUD 의도적 제외)
-- 세금계산서 자동 전표 생성이 계정코드(108,501,307,601,114,301)에 의존 → 시드 데이터 필수
+- M3/M4 모듈은 도메인별 파일 분리 구조 (schemas/, services/, routers/)
+  - M1은 단일 파일 구조 — 향후 모듈도 M4 패턴 따르기 권장
+- 급여 계산은 간이세액표 기반 구간별 근사치 (정밀 간이세액표는 수천 행)
+- Employee-User 관계: 1:1 (user_id unique constraint)
 - Gemini API 키 미설정 — 챗봇은 키워드 매칭으로 동작 중
 - `skills-lock.json`이 untracked 상태 — 무시해도 됨
 
