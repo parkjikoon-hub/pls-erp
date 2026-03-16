@@ -1,11 +1,12 @@
-# Render 배포 설정 — PLS ERP 백엔드 (FastAPI)
+# Render 배포 설정 — PLS ERP 통합 (FastAPI + React)
 # https://render.com/docs/blueprint-spec
+# 프론트엔드 빌드 후 FastAPI에서 직접 정적 파일 서빙
 services:
   - type: web
     name: pls-erp-api
     runtime: python
     plan: free
-    buildCommand: pip install -r requirements.txt
+    buildCommand: cd src/frontend && npm install && npm run build && cd ../.. && pip install -r requirements.txt
     startCommand: uvicorn src.backend.main:app --host 0.0.0.0 --port $PORT
     envVars:
       - key: DATABASE_URL
@@ -13,8 +14,10 @@ services:
       - key: JWT_SECRET_KEY
         generateValue: true
       - key: FRONTEND_URL
-        sync: false  # Vercel 배포 후 URL 입력
+        value: "https://pls-erp-api.onrender.com"
       - key: DEBUG
         value: "false"
       - key: PYTHONPATH
         value: "."
+      - key: NODE_VERSION
+        value: "20.11.0"
