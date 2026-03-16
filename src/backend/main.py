@@ -53,10 +53,14 @@ app.add_middleware(
 @app.get("/api/health", tags=["시스템"])
 async def health_check():
     """서버 상태 확인"""
+    _dist = Path(__file__).resolve().parent.parent / "frontend" / "dist"
     return {
         "status": "healthy",
         "app": settings.APP_NAME,
         "version": settings.APP_VERSION,
+        "frontend_path": str(_dist),
+        "frontend_exists": _dist.is_dir(),
+        "frontend_files": os.listdir(str(_dist)) if _dist.is_dir() else [],
     }
 
 
