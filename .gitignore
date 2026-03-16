@@ -6,7 +6,7 @@ __pycache__/
 venv/
 .venv/
 *.egg-info/
-dist/
+# dist/  — src/frontend/dist/는 Render 배포용으로 git에 포함
 build/
 
 # Node.js
@@ -28,8 +28,8 @@ npm-debug.log*
 .DS_Store
 Thumbs.db
 
-# 빌드 결과물
-src/frontend/dist/
+# 빌드 결과물 (src/frontend/dist/는 Render 통합 배포용으로 포함)
+# src/frontend/dist/
 *.log
 
 # Alembic
