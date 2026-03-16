@@ -17,6 +17,46 @@ from ..services import account_service
 router = APIRouter()
 
 
+@router.get("/debug-test", summary="디버그 테스트")
+async def debug_test(
+    db: AsyncSession = Depends(get_db),
+    current_user=Depends(get_current_user),
+):
+    """재무 모듈 디버그용 임시 엔드포인트"""
+    import traceback
+    errors = []
+
+    # 1. 간단한 SQL 쿼리 테스트
+    try:
+        from sqlalchemy import text
+        result = await db.execute(text("SELECT COUNT(*) FROM chart_of_accounts"))
+        count = result.scalar()
+        errors.append(f"chart_of_accounts table: {count} rows")
+    except Exception as e:
+        errors.append(f"table check error: {e}")
+
+    # 2. ORM 쿼리 테스트
+    try:
+        from sqlalchemy import select
+        from ..models import ChartOfAccounts
+        result = await db.execute(select(ChartOfAccounts).limit(1))
+        items = result.scalars().all()
+        errors.append(f"ORM query OK: {len(items)} items")
+    except Exception as e:
+        errors.append(f"ORM query error: {traceback.format_exc()}")
+
+    # 3. Pydantic 직렬화 테스트
+    try:
+        if items:
+            a = items[0]
+            data = AccountResponse.model_validate(a).model_dump(mode="json")
+            errors.append(f"serialization OK: {data}")
+    except Exception as e:
+        errors.append(f"serialization error: {traceback.format_exc()}")
+
+    return {"debug": errors}
+
+
 @router.get("", summary="계정과목 목록")
 async def list_accounts(
     account_type: Optional[str] = Query(None, description="유형 필터"),
