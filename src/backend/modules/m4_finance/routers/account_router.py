@@ -17,46 +17,6 @@ from ..services import account_service
 router = APIRouter()
 
 
-@router.get("/debug-test", summary="디버그 테스트")
-async def debug_test(
-    db: AsyncSession = Depends(get_db),
-    current_user=Depends(get_current_user),
-):
-    """재무 모듈 디버그용 임시 엔드포인트"""
-    import traceback
-    errors = []
-
-    # 1. 간단한 SQL 쿼리 테스트
-    try:
-        from sqlalchemy import text
-        result = await db.execute(text("SELECT COUNT(*) FROM chart_of_accounts"))
-        count = result.scalar()
-        errors.append(f"chart_of_accounts table: {count} rows")
-    except Exception as e:
-        errors.append(f"table check error: {e}")
-
-    # 2. ORM 쿼리 테스트
-    try:
-        from sqlalchemy import select
-        from ..models import ChartOfAccounts
-        result = await db.execute(select(ChartOfAccounts).limit(1))
-        items = result.scalars().all()
-        errors.append(f"ORM query OK: {len(items)} items")
-    except Exception as e:
-        errors.append(f"ORM query error: {traceback.format_exc()}")
-
-    # 3. Pydantic 직렬화 테스트
-    try:
-        if items:
-            a = items[0]
-            data = AccountResponse.model_validate(a).model_dump(mode="json")
-            errors.append(f"serialization OK: {data}")
-    except Exception as e:
-        errors.append(f"serialization error: {traceback.format_exc()}")
-
-    return {"debug": errors}
-
-
 @router.get("", summary="계정과목 목록")
 async def list_accounts(
     account_type: Optional[str] = Query(None, description="유형 필터"),
@@ -70,27 +30,23 @@ async def list_accounts(
     current_user=Depends(get_current_user),
 ):
     """계정과목 목록을 조회합니다 (검색/필터/페이지네이션)"""
-    import traceback
-    try:
-        result = await account_service.list_accounts(
-            db, account_type=account_type, search=search,
-            is_active=is_active, page=page, size=size,
-            sort_by=sort_by, sort_order=sort_order,
-        )
-        return success_response(
-            data={
-                "items": [
-                    AccountResponse.model_validate(a).model_dump(mode="json")
-                    for a in result["items"]
-                ],
-                "total": result["total"],
-                "page": result["page"],
-                "size": result["size"],
-                "total_pages": result["total_pages"],
-            }
-        )
-    except Exception as e:
-        return {"status": "error", "detail": str(e), "traceback": traceback.format_exc()}
+    result = await account_service.list_accounts(
+        db, account_type=account_type, search=search,
+        is_active=is_active, page=page, size=size,
+        sort_by=sort_by, sort_order=sort_order,
+    )
+    return success_response(
+        data={
+            "items": [
+                AccountResponse.model_validate(a).model_dump(mode="json")
+                for a in result["items"]
+            ],
+            "total": result["total"],
+            "page": result["page"],
+            "size": result["size"],
+            "total_pages": result["total_pages"],
+        }
+    )
 
 
 @router.get("/search", summary="계정과목 검색 (드롭다운용)")
@@ -131,16 +87,12 @@ async def create_account(
     current_user=Depends(require_role("admin", "manager")),
 ):
     """새 계정과목을 등록합니다 (관리자/매니저 전용)"""
-    import traceback
-    try:
-        ip = request.client.host if request.client else None
-        account = await account_service.create_account(db, data, current_user, ip)
-        return success_response(
-            data=AccountResponse.model_validate(account).model_dump(mode="json"),
-            message=f"계정과목 '{account.name}'이(가) 등록되었습니다",
-        )
-    except Exception as e:
-        return {"status": "error", "detail": str(e), "traceback": traceback.format_exc()}
+    ip = request.client.host if request.client else None
+    account = await account_service.create_account(db, data, current_user, ip)
+    return success_response(
+        data=AccountResponse.model_validate(account).model_dump(mode="json"),
+        message=f"계정과목 '{account.name}'이(가) 등록되었습니다",
+    )
 
 
 @router.put("/{account_id}", summary="계정과목 수정")

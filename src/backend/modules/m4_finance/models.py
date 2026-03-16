@@ -50,9 +50,9 @@ class ChartOfAccounts(Base):
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
     )
 
-    # 관계: 계층 구조 (자기참조) — lazy="selectin"으로 async 호환
-    parent = relationship("ChartOfAccounts", back_populates="children", remote_side=[id], lazy="selectin")
-    children = relationship("ChartOfAccounts", back_populates="parent", foreign_keys=[parent_id], lazy="selectin")
+    # 관계: 계층 구조 (자기참조)
+    parent = relationship("ChartOfAccounts", back_populates="children", remote_side=[id])
+    children = relationship("ChartOfAccounts", back_populates="parent", foreign_keys=[parent_id])
 
     __table_args__ = (
         Index("idx_coa_code", "code"),
@@ -88,7 +88,7 @@ class FiscalYear(Base):
     )
 
     # 역참조: 이 회계연도에 속하는 전표들
-    journal_entries = relationship("JournalEntry", back_populates="fiscal_year", lazy="selectin")
+    journal_entries = relationship("JournalEntry", back_populates="fiscal_year")
 
 
 # ── 전표 헤더 ──
@@ -145,11 +145,10 @@ class JournalEntry(Base):
     )
 
     # 관계
-    fiscal_year = relationship("FiscalYear", back_populates="journal_entries", lazy="selectin")
+    fiscal_year = relationship("FiscalYear", back_populates="journal_entries")
     lines = relationship(
         "JournalEntryLine", back_populates="journal_entry",
-        cascade="all, delete-orphan", order_by="JournalEntryLine.line_no",
-        lazy="selectin"
+        cascade="all, delete-orphan", order_by="JournalEntryLine.line_no"
     )
 
     __table_args__ = (
@@ -198,9 +197,9 @@ class JournalEntryLine(Base):
     )
 
     # 관계
-    journal_entry = relationship("JournalEntry", back_populates="lines", lazy="selectin")
-    account = relationship("ChartOfAccounts", lazy="selectin")
-    customer = relationship("Customer", lazy="selectin")
+    journal_entry = relationship("JournalEntry", back_populates="lines")
+    account = relationship("ChartOfAccounts")
+    customer = relationship("Customer")
 
 
 # ── 세금계산서 ──
@@ -258,8 +257,8 @@ class TaxInvoice(Base):
     )
 
     # 관계
-    customer = relationship("Customer", lazy="selectin")
-    journal_entry = relationship("JournalEntry", lazy="selectin")
+    customer = relationship("Customer")
+    journal_entry = relationship("JournalEntry")
 
     __table_args__ = (
         Index("idx_ti_date", "issue_date"),
@@ -308,7 +307,7 @@ class BankTransfer(Base):
 
     lines = relationship(
         "BankTransferLine", back_populates="transfer",
-        cascade="all, delete-orphan", lazy="selectin"
+        cascade="all, delete-orphan"
     )
 
 
@@ -345,4 +344,4 @@ class BankTransferLine(Base):
         UUID(as_uuid=True), comment="원본 ID"
     )
 
-    transfer = relationship("BankTransfer", back_populates="lines", lazy="selectin")
+    transfer = relationship("BankTransfer", back_populates="lines")
