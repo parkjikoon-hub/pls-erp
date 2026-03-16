@@ -30,23 +30,27 @@ async def list_accounts(
     current_user=Depends(get_current_user),
 ):
     """계정과목 목록을 조회합니다 (검색/필터/페이지네이션)"""
-    result = await account_service.list_accounts(
-        db, account_type=account_type, search=search,
-        is_active=is_active, page=page, size=size,
-        sort_by=sort_by, sort_order=sort_order,
-    )
-    return success_response(
-        data={
-            "items": [
-                AccountResponse.model_validate(a).model_dump(mode="json")
-                for a in result["items"]
-            ],
-            "total": result["total"],
-            "page": result["page"],
-            "size": result["size"],
-            "total_pages": result["total_pages"],
-        }
-    )
+    import traceback
+    try:
+        result = await account_service.list_accounts(
+            db, account_type=account_type, search=search,
+            is_active=is_active, page=page, size=size,
+            sort_by=sort_by, sort_order=sort_order,
+        )
+        return success_response(
+            data={
+                "items": [
+                    AccountResponse.model_validate(a).model_dump(mode="json")
+                    for a in result["items"]
+                ],
+                "total": result["total"],
+                "page": result["page"],
+                "size": result["size"],
+                "total_pages": result["total_pages"],
+            }
+        )
+    except Exception as e:
+        return {"status": "error", "detail": str(e), "traceback": traceback.format_exc()}
 
 
 @router.get("/search", summary="계정과목 검색 (드롭다운용)")
@@ -87,12 +91,16 @@ async def create_account(
     current_user=Depends(require_role("admin", "manager")),
 ):
     """새 계정과목을 등록합니다 (관리자/매니저 전용)"""
-    ip = request.client.host if request.client else None
-    account = await account_service.create_account(db, data, current_user, ip)
-    return success_response(
-        data=AccountResponse.model_validate(account).model_dump(mode="json"),
-        message=f"계정과목 '{account.name}'이(가) 등록되었습니다",
-    )
+    import traceback
+    try:
+        ip = request.client.host if request.client else None
+        account = await account_service.create_account(db, data, current_user, ip)
+        return success_response(
+            data=AccountResponse.model_validate(account).model_dump(mode="json"),
+            message=f"계정과목 '{account.name}'이(가) 등록되었습니다",
+        )
+    except Exception as e:
+        return {"status": "error", "detail": str(e), "traceback": traceback.format_exc()}
 
 
 @router.put("/{account_id}", summary="계정과목 수정")
