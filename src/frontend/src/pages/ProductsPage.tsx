@@ -3,7 +3,6 @@
  * 시안 C 기반 디자인 (거래처 관리와 동일한 패턴)
  */
 import { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
 import {
   MagnifyingGlassIcon,
   PlusIcon,
@@ -12,10 +11,10 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
   XMarkIcon,
-  ArrowLeftIcon,
   ArrowUpTrayIcon,
   CubeIcon,
 } from '@heroicons/react/24/outline';
+import BackButton from '../components/BackButton';
 import {
   fetchProducts,
   fetchCategories,
@@ -53,7 +52,6 @@ const EMPTY_FORM: ProductFormData = {
 };
 
 export default function ProductsPage() {
-  const navigate = useNavigate();
   const { user } = useAuthStore();
   const isManager = user?.role === 'admin' || user?.role === 'manager';
 
@@ -258,12 +256,7 @@ export default function ProductsPage() {
     <div>
       {/* 상단: 뒤로가기 + 제목 */}
       <div className="flex items-center gap-3 mb-6">
-        <button
-          onClick={() => navigate('/system')}
-          className="p-1.5 rounded-lg hover:bg-[#dce1e9] transition-colors"
-        >
-          <ArrowLeftIcon className="w-5 h-5 text-slate-500" />
-        </button>
+        <BackButton to="/system" />
         <div>
           <h1 className="text-xl font-bold text-slate-800 flex items-center gap-2">
             <CubeIcon className="w-6 h-6 text-emerald-500" />
@@ -274,7 +267,7 @@ export default function ProductsPage() {
       </div>
 
       {/* 필터 바 */}
-      <div className="bg-[#e8ecf2] rounded-xl p-4 border border-[#c8ced8] mb-4">
+      <div className="bg-(--bg-card) rounded-xl p-4 border border-(--border-main) mb-4">
         <div className="flex flex-wrap items-center gap-3">
           {/* 검색 */}
           <div className="relative flex-1 min-w-[200px]">
@@ -284,7 +277,7 @@ export default function ProductsPage() {
               placeholder="품목명, 코드 검색..."
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
-              className="w-full pl-9 pr-3 py-2 text-sm rounded-lg border border-[#c8ced8] bg-white focus:outline-none focus:border-emerald-500 transition-colors"
+              className="w-full pl-9 pr-3 py-2 text-sm rounded-lg border border-(--border-main) bg-white focus:outline-none focus:border-emerald-500 transition-colors"
             />
           </div>
 
@@ -292,7 +285,7 @@ export default function ProductsPage() {
           <select
             value={typeFilter}
             onChange={(e) => { setTypeFilter(e.target.value); setPage(1); }}
-            className="px-3 py-2 text-sm rounded-lg border border-[#c8ced8] bg-white focus:outline-none focus:border-emerald-500"
+            className="px-3 py-2 text-sm rounded-lg border border-(--border-main) bg-white focus:outline-none focus:border-emerald-500"
           >
             <option value="">전체 유형</option>
             <option value="product">제품</option>
@@ -304,7 +297,7 @@ export default function ProductsPage() {
           <select
             value={categoryFilter}
             onChange={(e) => { setCategoryFilter(e.target.value); setPage(1); }}
-            className="px-3 py-2 text-sm rounded-lg border border-[#c8ced8] bg-white focus:outline-none focus:border-emerald-500"
+            className="px-3 py-2 text-sm rounded-lg border border-(--border-main) bg-white focus:outline-none focus:border-emerald-500"
           >
             <option value="">전체 카테고리</option>
             {categories.map((cat) => (
@@ -316,7 +309,7 @@ export default function ProductsPage() {
           <select
             value={activeFilter}
             onChange={(e) => { setActiveFilter(e.target.value); setPage(1); }}
-            className="px-3 py-2 text-sm rounded-lg border border-[#c8ced8] bg-white focus:outline-none focus:border-emerald-500"
+            className="px-3 py-2 text-sm rounded-lg border border-(--border-main) bg-white focus:outline-none focus:border-emerald-500"
           >
             <option value="">전체 상태</option>
             <option value="true">활성</option>
@@ -328,7 +321,7 @@ export default function ProductsPage() {
             <>
               <button
                 onClick={() => setShowExcelModal(true)}
-                className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-[#c8ced8] rounded-lg hover:bg-[#dce1e9] transition-colors"
+                className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-(--border-main) rounded-lg hover:bg-(--bg-main) transition-colors"
               >
                 <ArrowUpTrayIcon className="w-4 h-4" />
                 Excel 업로드
@@ -346,11 +339,11 @@ export default function ProductsPage() {
       </div>
 
       {/* 테이블 */}
-      <div className="bg-[#e8ecf2] rounded-xl border border-[#c8ced8] overflow-hidden">
+      <div className="bg-(--bg-card) rounded-xl border border-(--border-main) overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="bg-[#dce1e9] text-slate-600">
+              <tr className="bg-(--bg-main) text-slate-600">
                 <th className="text-left px-4 py-3 font-semibold cursor-pointer hover:text-slate-800" onClick={() => handleSort('code')}>
                   코드{sortIcon('code')}
                 </th>
@@ -387,7 +380,7 @@ export default function ProductsPage() {
                 </tr>
               ) : (
                 data.items.map((p) => (
-                  <tr key={p.id} className="border-t border-[#c8ced8] hover:bg-[#dce1e9]/50 transition-colors">
+                  <tr key={p.id} className="border-t border-(--border-main) hover:bg-(--bg-main)/50 transition-colors">
                     <td className="px-4 py-3 font-mono text-xs text-slate-600">{p.code}</td>
                     <td className="px-4 py-3 font-medium text-slate-800">{p.name}</td>
                     <td className="px-4 py-3 text-slate-600">{getCategoryName(p.category_id)}</td>
@@ -437,7 +430,7 @@ export default function ProductsPage() {
 
         {/* 페이지네이션 */}
         {data && data.total_pages > 1 && (
-          <div className="flex items-center justify-between px-4 py-3 border-t border-[#c8ced8]">
+          <div className="flex items-center justify-between px-4 py-3 border-t border-(--border-main)">
             <span className="text-xs text-slate-500">
               전체 {data.total}건 중 {(data.page - 1) * data.size + 1}-{Math.min(data.page * data.size, data.total)}건
             </span>
@@ -445,7 +438,7 @@ export default function ProductsPage() {
               <button
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
                 disabled={page <= 1}
-                className="p-1.5 rounded-lg hover:bg-[#dce1e9] disabled:opacity-30 transition-colors"
+                className="p-1.5 rounded-lg hover:bg-(--bg-main) disabled:opacity-30 transition-colors"
               >
                 <ChevronLeftIcon className="w-4 h-4" />
               </button>
@@ -461,7 +454,7 @@ export default function ProductsPage() {
                     className={`w-8 h-8 rounded-lg text-xs font-medium transition-colors ${
                       pageNum === page
                         ? 'bg-emerald-500 text-white'
-                        : 'hover:bg-[#dce1e9] text-slate-600'
+                        : 'hover:bg-(--bg-main) text-slate-600'
                     }`}
                   >
                     {pageNum}
@@ -471,7 +464,7 @@ export default function ProductsPage() {
               <button
                 onClick={() => setPage((p) => Math.min(data.total_pages, p + 1))}
                 disabled={page >= data.total_pages}
-                className="p-1.5 rounded-lg hover:bg-[#dce1e9] disabled:opacity-30 transition-colors"
+                className="p-1.5 rounded-lg hover:bg-(--bg-main) disabled:opacity-30 transition-colors"
               >
                 <ChevronRightIcon className="w-4 h-4" />
               </button>
@@ -483,13 +476,13 @@ export default function ProductsPage() {
       {/* ── 등록/수정 모달 ── */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-          <div className="bg-[#e8ecf2] rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto border border-[#c8ced8]">
+          <div className="bg-(--bg-card) rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto border border-(--border-main)">
             {/* 모달 헤더 */}
-            <div className="flex items-center justify-between px-6 py-4 border-b border-[#c8ced8]">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-(--border-main)">
               <h2 className="text-lg font-bold text-slate-800">
                 {editingId ? '품목 수정' : '품목 등록'}
               </h2>
-              <button onClick={() => setShowModal(false)} className="p-1 hover:bg-[#dce1e9] rounded-lg transition-colors">
+              <button onClick={() => setShowModal(false)} className="p-1 hover:bg-(--bg-main) rounded-lg transition-colors">
                 <XMarkIcon className="w-5 h-5 text-slate-500" />
               </button>
             </div>
@@ -503,7 +496,7 @@ export default function ProductsPage() {
               )}
 
               {/* 기본 정보 */}
-              <fieldset className="border border-[#c8ced8] rounded-xl p-4">
+              <fieldset className="border border-(--border-main) rounded-xl p-4">
                 <legend className="text-sm font-semibold text-slate-600 px-2">기본 정보</legend>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <FormField
@@ -527,7 +520,7 @@ export default function ProductsPage() {
                       <select
                         value={form.category_id || ''}
                         onChange={(e) => handleChange('category_id', e.target.value || null)}
-                        className="flex-1 px-3 py-2 text-sm rounded-lg border border-[#c8ced8] bg-white focus:outline-none focus:border-emerald-500"
+                        className="flex-1 px-3 py-2 text-sm rounded-lg border border-(--border-main) bg-white focus:outline-none focus:border-emerald-500"
                       >
                         <option value="">미분류</option>
                         {categories.map((cat) => (
@@ -538,7 +531,7 @@ export default function ProductsPage() {
                         <button
                           type="button"
                           onClick={() => setShowCategoryModal(true)}
-                          className="px-2 py-2 text-sm rounded-lg border border-[#c8ced8] bg-white hover:bg-[#dce1e9] transition-colors text-slate-500"
+                          className="px-2 py-2 text-sm rounded-lg border border-(--border-main) bg-white hover:bg-(--bg-main) transition-colors text-slate-500"
                           title="새 카테고리 추가"
                         >
                           <PlusIcon className="w-4 h-4" />
@@ -553,7 +546,7 @@ export default function ProductsPage() {
                     <select
                       value={form.product_type}
                       onChange={(e) => handleChange('product_type', e.target.value)}
-                      className="w-full px-3 py-2 text-sm rounded-lg border border-[#c8ced8] bg-white focus:outline-none focus:border-emerald-500"
+                      className="w-full px-3 py-2 text-sm rounded-lg border border-(--border-main) bg-white focus:outline-none focus:border-emerald-500"
                     >
                       <option value="product">제품</option>
                       <option value="material">자재</option>
@@ -575,7 +568,7 @@ export default function ProductsPage() {
                     <select
                       value={form.inventory_method}
                       onChange={(e) => handleChange('inventory_method', e.target.value)}
-                      className="w-full px-3 py-2 text-sm rounded-lg border border-[#c8ced8] bg-white focus:outline-none focus:border-emerald-500"
+                      className="w-full px-3 py-2 text-sm rounded-lg border border-(--border-main) bg-white focus:outline-none focus:border-emerald-500"
                     >
                       <option value="fifo">선입선출 (FIFO)</option>
                       <option value="avg">이동평균</option>
@@ -585,7 +578,7 @@ export default function ProductsPage() {
               </fieldset>
 
               {/* 가격 및 재고 */}
-              <fieldset className="border border-[#c8ced8] rounded-xl p-4">
+              <fieldset className="border border-(--border-main) rounded-xl p-4">
                 <legend className="text-sm font-semibold text-slate-600 px-2">가격 및 재고</legend>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <NumberField
@@ -620,10 +613,10 @@ export default function ProductsPage() {
             </div>
 
             {/* 모달 푸터 */}
-            <div className="flex items-center justify-end gap-2 px-6 py-4 border-t border-[#c8ced8]">
+            <div className="flex items-center justify-end gap-2 px-6 py-4 border-t border-(--border-main)">
               <button
                 onClick={() => setShowModal(false)}
-                className="px-4 py-2 text-sm text-slate-600 hover:bg-[#dce1e9] rounded-lg transition-colors"
+                className="px-4 py-2 text-sm text-slate-600 hover:bg-(--bg-main) rounded-lg transition-colors"
               >
                 취소
               </button>
@@ -642,7 +635,7 @@ export default function ProductsPage() {
       {/* ── 카테고리 추가 모달 ── */}
       {showCategoryModal && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40">
-          <div className="bg-[#e8ecf2] rounded-2xl shadow-xl w-full max-w-sm p-6 border border-[#c8ced8]">
+          <div className="bg-(--bg-card) rounded-2xl shadow-xl w-full max-w-sm p-6 border border-(--border-main)">
             <h3 className="text-lg font-bold text-slate-800 mb-4">새 카테고리 추가</h3>
             <div className="space-y-3">
               <FormField
@@ -661,7 +654,7 @@ export default function ProductsPage() {
             <div className="flex justify-end gap-2 mt-4">
               <button
                 onClick={() => setShowCategoryModal(false)}
-                className="px-4 py-2 text-sm text-slate-600 hover:bg-[#dce1e9] rounded-lg transition-colors"
+                className="px-4 py-2 text-sm text-slate-600 hover:bg-(--bg-main) rounded-lg transition-colors"
               >
                 취소
               </button>
@@ -690,7 +683,7 @@ export default function ProductsPage() {
       {/* ── 삭제 확인 다이얼로그 ── */}
       {deleteTarget && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-          <div className="bg-[#e8ecf2] rounded-2xl shadow-xl w-full max-w-sm p-6 border border-[#c8ced8]">
+          <div className="bg-(--bg-card) rounded-2xl shadow-xl w-full max-w-sm p-6 border border-(--border-main)">
             <h3 className="text-lg font-bold text-slate-800 mb-2">품목 비활성화</h3>
             <p className="text-sm text-slate-600 mb-1">
               <strong>{deleteTarget.name}</strong> ({deleteTarget.code})
@@ -702,7 +695,7 @@ export default function ProductsPage() {
             <div className="flex justify-end gap-2">
               <button
                 onClick={() => setDeleteTarget(null)}
-                className="px-4 py-2 text-sm text-slate-600 hover:bg-[#dce1e9] rounded-lg transition-colors"
+                className="px-4 py-2 text-sm text-slate-600 hover:bg-(--bg-main) rounded-lg transition-colors"
               >
                 취소
               </button>
@@ -744,7 +737,7 @@ function FormField({
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         disabled={disabled}
-        className="w-full px-3 py-2 text-sm rounded-lg border border-[#c8ced8] bg-white focus:outline-none focus:border-emerald-500 disabled:bg-slate-100 disabled:text-slate-400 transition-colors"
+        className="w-full px-3 py-2 text-sm rounded-lg border border-(--border-main) bg-white focus:outline-none focus:border-emerald-500 disabled:bg-slate-100 disabled:text-slate-400 transition-colors"
       />
     </div>
   );
@@ -777,7 +770,7 @@ function NumberField({
         min={min}
         max={max}
         step={step}
-        className="w-full px-3 py-2 text-sm rounded-lg border border-[#c8ced8] bg-white focus:outline-none focus:border-emerald-500 transition-colors"
+        className="w-full px-3 py-2 text-sm rounded-lg border border-(--border-main) bg-white focus:outline-none focus:border-emerald-500 transition-colors"
       />
     </div>
   );

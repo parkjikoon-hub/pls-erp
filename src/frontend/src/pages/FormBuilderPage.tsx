@@ -4,19 +4,18 @@
  * 시안 C 기반 디자인 (슬레이트 블루그레이 + 에메랄드 액센트)
  */
 import { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
 import {
   PlusIcon,
   PencilSquareIcon,
   TrashIcon,
   XMarkIcon,
-  ArrowLeftIcon,
   ArrowUpIcon,
   ArrowDownIcon,
   DocumentDuplicateIcon,
   Cog6ToothIcon,
   EyeIcon,
 } from '@heroicons/react/24/outline';
+import BackButton from '../components/BackButton';
 import {
   fetchFormConfigs,
   createFormConfig,
@@ -73,7 +72,6 @@ const EMPTY_FIELD: FormFieldConfig = {
 };
 
 export default function FormBuilderPage() {
-  const navigate = useNavigate();
   const { user } = useAuthStore();
   const isAdmin = user?.role === 'admin';
 
@@ -248,9 +246,7 @@ export default function FormBuilderPage() {
     <div>
       {/* 헤더 */}
       <div className="flex items-center gap-3 mb-4">
-        <button onClick={() => navigate('/system')} className="p-1.5 hover:bg-[#d0d6de] rounded-lg transition-colors">
-          <ArrowLeftIcon className="w-5 h-5 text-slate-600" />
-        </button>
+        <BackButton to="/system" />
         <div>
           <h1 className="text-xl font-bold text-slate-800">동적 폼 빌더</h1>
           <p className="text-sm text-slate-500">모듈별 커스텀 입력 필드를 구성합니다</p>
@@ -262,7 +258,7 @@ export default function FormBuilderPage() {
         <select
           value={moduleFilter}
           onChange={(e) => setModuleFilter(e.target.value)}
-          className="px-3 py-2 rounded-lg border border-[#c8ced8] bg-[#e8ecf2] text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-400"
+          className="px-3 py-2 rounded-lg border border-(--border-main) bg-(--bg-card) text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-400"
         >
           <option value="">전체 모듈</option>
           {Object.entries(MODULE_LABELS).map(([k, v]) => (
@@ -295,7 +291,7 @@ export default function FormBuilderPage() {
           {configs.map((config) => (
             <div
               key={config.id}
-              className={`bg-[#e8ecf2] rounded-xl p-5 border border-[#c8ced8] ${
+              className={`bg-(--bg-card) rounded-xl p-5 border border-(--border-main) ${
                 config.is_active ? '' : 'opacity-50'
               }`}
             >
@@ -334,10 +330,10 @@ export default function FormBuilderPage() {
               </div>
 
               {/* 카드 액션 */}
-              <div className="flex items-center gap-2 pt-2 border-t border-[#c8ced8]">
+              <div className="flex items-center gap-2 pt-2 border-t border-(--border-main)">
                 <button
                   onClick={() => handlePreview(config)}
-                  className="flex items-center gap-1 px-2.5 py-1.5 text-xs text-slate-600 hover:bg-[#d0d6de] rounded-lg transition-colors"
+                  className="flex items-center gap-1 px-2.5 py-1.5 text-xs text-slate-600 hover:bg-(--border-light) rounded-lg transition-colors"
                 >
                   <EyeIcon className="w-3.5 h-3.5" />
                   미리보기
@@ -371,13 +367,13 @@ export default function FormBuilderPage() {
       {/* ─── 폼 편집기 모달 ─── */}
       {showEditor && (
         <div className="fixed inset-0 bg-black/50 flex items-start justify-center z-50 overflow-y-auto py-8">
-          <div className="bg-[#eef1f5] rounded-2xl shadow-2xl w-full max-w-4xl mx-4">
+          <div className="bg-(--bg-elevated) rounded-2xl shadow-2xl w-full max-w-4xl mx-4">
             {/* 모달 헤더 */}
-            <div className="flex items-center justify-between px-6 py-4 border-b border-[#c8ced8]">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-(--border-main)">
               <h2 className="text-lg font-bold text-slate-800">
                 {editingConfig ? '폼 구성 편집' : '새 폼 구성 만들기'}
               </h2>
-              <button onClick={() => setShowEditor(false)} className="p-1 hover:bg-[#d0d6de] rounded-lg">
+              <button onClick={() => setShowEditor(false)} className="p-1 hover:bg-(--border-light) rounded-lg">
                 <XMarkIcon className="w-5 h-5 text-slate-500" />
               </button>
             </div>
@@ -396,7 +392,7 @@ export default function FormBuilderPage() {
                     value={formModule}
                     onChange={(e) => setFormModule(e.target.value)}
                     disabled={!!editingConfig}
-                    className="w-full px-3 py-2 rounded-lg border border-[#c8ced8] bg-white text-sm disabled:opacity-50"
+                    className="w-full px-3 py-2 rounded-lg border border-(--border-main) bg-white text-sm disabled:opacity-50"
                   >
                     {Object.entries(MODULE_LABELS).map(([k, v]) => (
                       <option key={k} value={k}>{k} — {v}</option>
@@ -411,7 +407,7 @@ export default function FormBuilderPage() {
                     onChange={(e) => setFormName(e.target.value)}
                     disabled={!!editingConfig}
                     placeholder="예: customer_extra, product_spec"
-                    className="w-full px-3 py-2 rounded-lg border border-[#c8ced8] bg-white text-sm disabled:opacity-50"
+                    className="w-full px-3 py-2 rounded-lg border border-(--border-main) bg-white text-sm disabled:opacity-50"
                   />
                 </div>
               </div>
@@ -432,7 +428,7 @@ export default function FormBuilderPage() {
                   </div>
 
                   {fields.length === 0 ? (
-                    <div className="text-center py-8 text-slate-400 text-sm border border-dashed border-[#c8ced8] rounded-lg">
+                    <div className="text-center py-8 text-slate-400 text-sm border border-dashed border-(--border-main) rounded-lg">
                       <DocumentDuplicateIcon className="w-8 h-8 mx-auto mb-2 opacity-40" />
                       필드를 추가하세요
                     </div>
@@ -445,7 +441,7 @@ export default function FormBuilderPage() {
                           className={`flex items-center gap-2 p-2.5 rounded-lg border cursor-pointer transition-colors ${
                             editingFieldIndex === index
                               ? 'border-blue-400 bg-blue-50'
-                              : 'border-[#c8ced8] bg-white hover:bg-slate-50'
+                              : 'border-(--border-main) bg-white hover:bg-slate-50'
                           }`}
                         >
                           {/* 순서 변경 버튼 */}
@@ -498,7 +494,7 @@ export default function FormBuilderPage() {
                       onChange={(key, value) => handleFieldChange(editingFieldIndex, key, value)}
                     />
                   ) : (
-                    <div className="flex items-center justify-center h-full text-slate-400 text-sm border border-dashed border-[#c8ced8] rounded-lg min-h-[200px]">
+                    <div className="flex items-center justify-center h-full text-slate-400 text-sm border border-dashed border-(--border-main) rounded-lg min-h-[200px]">
                       왼쪽에서 필드를 선택하면 속성을 편집할 수 있습니다
                     </div>
                   )}
@@ -507,10 +503,10 @@ export default function FormBuilderPage() {
             </div>
 
             {/* 모달 푸터 */}
-            <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-[#c8ced8]">
+            <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-(--border-main)">
               <button
                 onClick={() => setShowEditor(false)}
-                className="px-4 py-2 text-sm text-slate-600 hover:bg-[#d0d6de] rounded-lg transition-colors"
+                className="px-4 py-2 text-sm text-slate-600 hover:bg-(--border-light) rounded-lg transition-colors"
               >
                 취소
               </button>
@@ -529,12 +525,12 @@ export default function FormBuilderPage() {
       {/* ─── 미리보기 모달 ─── */}
       {showPreview && previewConfig && (
         <div className="fixed inset-0 bg-black/50 flex items-start justify-center z-50 overflow-y-auto py-8">
-          <div className="bg-[#eef1f5] rounded-2xl shadow-2xl w-full max-w-2xl mx-4">
-            <div className="flex items-center justify-between px-6 py-4 border-b border-[#c8ced8]">
+          <div className="bg-(--bg-elevated) rounded-2xl shadow-2xl w-full max-w-2xl mx-4">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-(--border-main)">
               <h2 className="text-lg font-bold text-slate-800">
                 폼 미리보기 — {previewConfig.module}/{previewConfig.form_name}
               </h2>
-              <button onClick={() => setShowPreview(false)} className="p-1 hover:bg-[#d0d6de] rounded-lg">
+              <button onClick={() => setShowPreview(false)} className="p-1 hover:bg-(--border-light) rounded-lg">
                 <XMarkIcon className="w-5 h-5 text-slate-500" />
               </button>
             </div>
@@ -543,10 +539,10 @@ export default function FormBuilderPage() {
               <FormPreview fields={previewConfig.config_json.fields || []} />
             </div>
 
-            <div className="flex justify-end px-6 py-4 border-t border-[#c8ced8]">
+            <div className="flex justify-end px-6 py-4 border-t border-(--border-main)">
               <button
                 onClick={() => setShowPreview(false)}
-                className="px-4 py-2 text-sm text-slate-600 hover:bg-[#d0d6de] rounded-lg"
+                className="px-4 py-2 text-sm text-slate-600 hover:bg-(--border-light) rounded-lg"
               >
                 닫기
               </button>
@@ -568,7 +564,7 @@ function FieldPropertyEditor({
   onChange: (key: keyof FormFieldConfig, value: unknown) => void;
 }) {
   return (
-    <div className="bg-white rounded-lg border border-[#c8ced8] p-4 space-y-3">
+    <div className="bg-white rounded-lg border border-(--border-main) p-4 space-y-3">
       <h3 className="text-sm font-bold text-slate-700 mb-3">필드 속성</h3>
 
       {/* 키 + 표시명 */}
@@ -580,7 +576,7 @@ function FieldPropertyEditor({
             value={field.key}
             onChange={(e) => onChange('key', e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''))}
             placeholder="예: manager_name"
-            className="w-full px-3 py-1.5 rounded-lg border border-[#c8ced8] text-sm"
+            className="w-full px-3 py-1.5 rounded-lg border border-(--border-main) text-sm"
           />
         </div>
         <div>
@@ -590,7 +586,7 @@ function FieldPropertyEditor({
             value={field.label}
             onChange={(e) => onChange('label', e.target.value)}
             placeholder="예: 담당 영업사원"
-            className="w-full px-3 py-1.5 rounded-lg border border-[#c8ced8] text-sm"
+            className="w-full px-3 py-1.5 rounded-lg border border-(--border-main) text-sm"
           />
         </div>
       </div>
@@ -602,7 +598,7 @@ function FieldPropertyEditor({
           <select
             value={field.field_type}
             onChange={(e) => onChange('field_type', e.target.value)}
-            className="w-full px-3 py-1.5 rounded-lg border border-[#c8ced8] text-sm"
+            className="w-full px-3 py-1.5 rounded-lg border border-(--border-main) text-sm"
           >
             {Object.entries(FIELD_TYPE_LABELS).map(([k, v]) => (
               <option key={k} value={k}>{v}</option>
@@ -614,7 +610,7 @@ function FieldPropertyEditor({
           <select
             value={field.width}
             onChange={(e) => onChange('width', e.target.value)}
-            className="w-full px-3 py-1.5 rounded-lg border border-[#c8ced8] text-sm"
+            className="w-full px-3 py-1.5 rounded-lg border border-(--border-main) text-sm"
           >
             {Object.entries(WIDTH_LABELS).map(([k, v]) => (
               <option key={k} value={k}>{v}</option>
@@ -641,7 +637,7 @@ function FieldPropertyEditor({
             type="text"
             value={field.default_value || ''}
             onChange={(e) => onChange('default_value', e.target.value)}
-            className="w-full px-3 py-1.5 rounded-lg border border-[#c8ced8] text-sm"
+            className="w-full px-3 py-1.5 rounded-lg border border-(--border-main) text-sm"
           />
         </div>
       </div>
@@ -653,7 +649,7 @@ function FieldPropertyEditor({
           type="text"
           value={field.placeholder || ''}
           onChange={(e) => onChange('placeholder', e.target.value)}
-          className="w-full px-3 py-1.5 rounded-lg border border-[#c8ced8] text-sm"
+          className="w-full px-3 py-1.5 rounded-lg border border-(--border-main) text-sm"
         />
       </div>
 
@@ -664,7 +660,7 @@ function FieldPropertyEditor({
           type="text"
           value={field.description || ''}
           onChange={(e) => onChange('description', e.target.value)}
-          className="w-full px-3 py-1.5 rounded-lg border border-[#c8ced8] text-sm"
+          className="w-full px-3 py-1.5 rounded-lg border border-(--border-main) text-sm"
         />
       </div>
 
@@ -679,7 +675,7 @@ function FieldPropertyEditor({
             value={(field.options || []).join(', ')}
             onChange={(e) => onChange('options', e.target.value.split(',').map(s => s.trim()).filter(Boolean))}
             placeholder="예: 옵션1, 옵션2, 옵션3"
-            className="w-full px-3 py-1.5 rounded-lg border border-[#c8ced8] text-sm"
+            className="w-full px-3 py-1.5 rounded-lg border border-(--border-main) text-sm"
           />
         </div>
       )}
@@ -694,7 +690,7 @@ function FieldPropertyEditor({
               value={field.min_length ?? ''}
               onChange={(e) => onChange('min_length', e.target.value ? Number(e.target.value) : undefined)}
               min={0}
-              className="w-full px-3 py-1.5 rounded-lg border border-[#c8ced8] text-sm"
+              className="w-full px-3 py-1.5 rounded-lg border border-(--border-main) text-sm"
             />
           </div>
           <div>
@@ -704,7 +700,7 @@ function FieldPropertyEditor({
               value={field.max_length ?? ''}
               onChange={(e) => onChange('max_length', e.target.value ? Number(e.target.value) : undefined)}
               min={1}
-              className="w-full px-3 py-1.5 rounded-lg border border-[#c8ced8] text-sm"
+              className="w-full px-3 py-1.5 rounded-lg border border-(--border-main) text-sm"
             />
           </div>
         </div>
@@ -719,7 +715,7 @@ function FieldPropertyEditor({
               type="number"
               value={field.min_value ?? ''}
               onChange={(e) => onChange('min_value', e.target.value ? Number(e.target.value) : undefined)}
-              className="w-full px-3 py-1.5 rounded-lg border border-[#c8ced8] text-sm"
+              className="w-full px-3 py-1.5 rounded-lg border border-(--border-main) text-sm"
             />
           </div>
           <div>
@@ -728,7 +724,7 @@ function FieldPropertyEditor({
               type="number"
               value={field.max_value ?? ''}
               onChange={(e) => onChange('max_value', e.target.value ? Number(e.target.value) : undefined)}
-              className="w-full px-3 py-1.5 rounded-lg border border-[#c8ced8] text-sm"
+              className="w-full px-3 py-1.5 rounded-lg border border-(--border-main) text-sm"
             />
           </div>
         </div>
@@ -767,10 +763,10 @@ function FormPreview({ fields }: { fields: FormFieldConfig[] }) {
               placeholder={field.placeholder || ''}
               defaultValue={field.default_value || ''}
               rows={3}
-              className="w-full px-3 py-2 rounded-lg border border-[#c8ced8] bg-white text-sm"
+              className="w-full px-3 py-2 rounded-lg border border-(--border-main) bg-white text-sm"
             />
           ) : field.field_type === 'select' ? (
-            <select className="w-full px-3 py-2 rounded-lg border border-[#c8ced8] bg-white text-sm">
+            <select className="w-full px-3 py-2 rounded-lg border border-(--border-main) bg-white text-sm">
               <option value="">선택하세요</option>
               {(field.options || []).map((opt) => (
                 <option key={opt} value={opt}>{opt}</option>
@@ -790,7 +786,7 @@ function FormPreview({ fields }: { fields: FormFieldConfig[] }) {
               type={field.field_type === 'number' ? 'number' : field.field_type === 'date' ? 'date' : 'text'}
               placeholder={field.placeholder || ''}
               defaultValue={field.default_value || ''}
-              className="w-full px-3 py-2 rounded-lg border border-[#c8ced8] bg-white text-sm"
+              className="w-full px-3 py-2 rounded-lg border border-(--border-main) bg-white text-sm"
             />
           )}
 

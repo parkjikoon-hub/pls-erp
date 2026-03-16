@@ -12,12 +12,12 @@ import {
   EyeIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
-  ArrowLeftIcon,
   CheckIcon,
   XMarkIcon,
   ArrowUpTrayIcon,
   DocumentCheckIcon,
 } from '@heroicons/react/24/outline';
+import BackButton from '../components/BackButton';
 import {
   fetchJournals,
   deleteJournal,
@@ -196,12 +196,7 @@ export default function JournalListPage() {
       {/* 헤더 */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <button
-            onClick={() => navigate('/finance')}
-            className="p-2 rounded-lg hover:bg-gray-100 transition"
-          >
-            <ArrowLeftIcon className="w-5 h-5 text-gray-600" />
-          </button>
+          <BackButton to="/finance" />
           <div>
             <h1 className="text-2xl font-bold text-gray-900">전표 관리</h1>
             <p className="text-sm text-gray-500 mt-0.5">

@@ -154,7 +154,7 @@ export default function ShipmentsPage() {
             className={`px-3 py-1.5 rounded-lg text-sm font-medium transition ${
               statusFilter === f.value
                 ? 'bg-blue-600 text-white'
-                : 'bg-white text-slate-600 border border-[#c8ced8] hover:bg-slate-50'
+                : 'bg-white text-slate-600 border border-(--border-main) hover:bg-slate-50'
             }`}
           >
             {f.label}
@@ -163,10 +163,10 @@ export default function ShipmentsPage() {
       </div>
 
       {/* ── 출하 목록 테이블 ── */}
-      <div className="bg-white rounded-xl border border-[#c8ced8] overflow-hidden">
+      <div className="bg-white rounded-xl border border-(--border-main) overflow-hidden">
         <table className="w-full text-sm">
           <thead>
-            <tr className="bg-[#e8ecf2] text-slate-700">
+            <tr className="bg-(--bg-card) text-slate-700">
               <th className="text-left px-4 py-3 font-semibold">출하번호</th>
               <th className="text-left px-4 py-3 font-semibold">수주번호</th>
               <th className="text-left px-4 py-3 font-semibold">거래처</th>
@@ -235,7 +235,7 @@ export default function ShipmentsPage() {
             <button
               disabled={page <= 1}
               onClick={() => setPage(p => p - 1)}
-              className="px-3 py-1 rounded border border-[#c8ced8] text-sm disabled:opacity-40"
+              className="px-3 py-1 rounded border border-(--border-main) text-sm disabled:opacity-40"
             >
               이전
             </button>
@@ -243,7 +243,7 @@ export default function ShipmentsPage() {
             <button
               disabled={page * 30 >= total}
               onClick={() => setPage(p => p + 1)}
-              className="px-3 py-1 rounded border border-[#c8ced8] text-sm disabled:opacity-40"
+              className="px-3 py-1 rounded border border-(--border-main) text-sm disabled:opacity-40"
             >
               다음
             </button>
@@ -276,9 +276,9 @@ export default function ShipmentsPage() {
             </div>
 
             {/* 출하 품목 */}
-            <table className="w-full text-sm border border-[#c8ced8] rounded-lg overflow-hidden">
+            <table className="w-full text-sm border border-(--border-main) rounded-lg overflow-hidden">
               <thead>
-                <tr className="bg-[#e8ecf2]">
+                <tr className="bg-(--bg-card)">
                   <th className="text-left px-3 py-2 font-semibold">No</th>
                   <th className="text-left px-3 py-2 font-semibold">품목</th>
                   <th className="text-right px-3 py-2 font-semibold">수량</th>
@@ -300,7 +300,7 @@ export default function ShipmentsPage() {
                 ))}
               </tbody>
               <tfoot>
-                <tr className="bg-[#e8ecf2] font-semibold">
+                <tr className="bg-(--bg-card) font-semibold">
                   <td colSpan={4} className="px-3 py-2 text-right">합계</td>
                   <td className="px-3 py-2 text-right">{detail.total_amount?.toLocaleString()}원</td>
                   <td />
@@ -328,7 +328,7 @@ export default function ShipmentsPage() {
               )}
               <button
                 onClick={() => setShowDetail(false)}
-                className="px-4 py-2 text-sm text-slate-600 border border-[#c8ced8] rounded-lg hover:bg-slate-50"
+                className="px-4 py-2 text-sm text-slate-600 border border-(--border-main) rounded-lg hover:bg-slate-50"
               >
                 닫기
               </button>
@@ -350,7 +350,7 @@ export default function ShipmentsPage() {
                   <div
                     key={o.id}
                     onClick={() => handleFromOrder(o.id)}
-                    className="flex items-center justify-between p-3 rounded-lg border border-[#c8ced8] hover:bg-blue-50 cursor-pointer transition"
+                    className="flex items-center justify-between p-3 rounded-lg border border-(--border-main) hover:bg-blue-50 cursor-pointer transition"
                   >
                     <div>
                       <div className="font-medium text-sm">{o.order_no}</div>
@@ -367,7 +367,7 @@ export default function ShipmentsPage() {
             <div className="flex justify-end">
               <button
                 onClick={() => setShowOrderModal(false)}
-                className="px-4 py-2 text-sm text-slate-600 border border-[#c8ced8] rounded-lg hover:bg-slate-50"
+                className="px-4 py-2 text-sm text-slate-600 border border-(--border-main) rounded-lg hover:bg-slate-50"
               >
                 취소
               </button>
@@ -450,7 +450,7 @@ export default function ShipmentsPage() {
               </button>
               <button
                 onClick={() => setShowDn(false)}
-                className="px-4 py-2 text-sm text-slate-600 border border-[#c8ced8] rounded-lg hover:bg-slate-50"
+                className="px-4 py-2 text-sm text-slate-600 border border-(--border-main) rounded-lg hover:bg-slate-50"
               >
                 닫기
               </button>

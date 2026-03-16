@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createApproval, listTemplates, type Template } from '../api/groupware/approvals';
 import api from '../api/client';
+import BackButton from '../components/BackButton';
 
 interface StepRow {
   step_type: string;
@@ -120,16 +121,19 @@ export default function ApprovalFormPage() {
 
   return (
     <div className="max-w-3xl mx-auto space-y-6">
-      <h1 className="text-2xl font-bold text-slate-800">새 기안 작성</h1>
+      <div className="flex items-center gap-3">
+        <BackButton to="/groupware/approvals" />
+        <h1 className="text-2xl font-bold text-slate-800">새 기안 작성</h1>
+      </div>
 
       {/* 기본 정보 */}
-      <div className="bg-white rounded-xl border border-[#c8ced8] p-5 space-y-4">
+      <div className="bg-white rounded-xl border border-(--border-main) p-5 space-y-4">
         <div>
           <label className="block text-sm font-medium text-slate-600 mb-1">제목</label>
           <input
             value={title}
             onChange={e => setTitle(e.target.value)}
-            className="w-full border border-[#c8ced8] rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
+            className="w-full border border-(--border-main) rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
             placeholder="결재 제목을 입력하세요"
           />
         </div>
@@ -139,7 +143,7 @@ export default function ApprovalFormPage() {
             <select
               value={documentType}
               onChange={e => setDocumentType(e.target.value)}
-              className="w-full border border-[#c8ced8] rounded-lg px-3 py-2 text-sm"
+              className="w-full border border-(--border-main) rounded-lg px-3 py-2 text-sm"
             >
               {DOC_TYPES.map(d => <option key={d.value} value={d.value}>{d.label}</option>)}
             </select>
@@ -150,7 +154,7 @@ export default function ApprovalFormPage() {
               type="number"
               value={amount}
               onChange={e => setAmount(e.target.value)}
-              className="w-full border border-[#c8ced8] rounded-lg px-3 py-2 text-sm"
+              className="w-full border border-(--border-main) rounded-lg px-3 py-2 text-sm"
               placeholder="0"
             />
           </div>
@@ -161,14 +165,14 @@ export default function ApprovalFormPage() {
             value={contentText}
             onChange={e => setContentText(e.target.value)}
             rows={5}
-            className="w-full border border-[#c8ced8] rounded-lg px-3 py-2 text-sm resize-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
+            className="w-full border border-(--border-main) rounded-lg px-3 py-2 text-sm resize-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
             placeholder="품의 내용을 입력하세요"
           />
         </div>
       </div>
 
       {/* 결재선 설정 */}
-      <div className="bg-white rounded-xl border border-[#c8ced8] p-5 space-y-4">
+      <div className="bg-white rounded-xl border border-(--border-main) p-5 space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="font-bold text-slate-700">결재선 / 참조선</h2>
           {templates.length > 0 && (
@@ -177,7 +181,7 @@ export default function ApprovalFormPage() {
                 const tpl = templates.find(t => t.id === e.target.value);
                 if (tpl) applyTemplate(tpl);
               }}
-              className="border border-[#c8ced8] rounded-lg px-2 py-1 text-xs"
+              className="border border-(--border-main) rounded-lg px-2 py-1 text-xs"
               defaultValue=""
             >
               <option value="" disabled>템플릿 불러오기</option>
@@ -206,7 +210,7 @@ export default function ApprovalFormPage() {
                     updated[idx] = { ...updated[idx], approver_id: e.target.value, approver_name: user?.name };
                     setSteps(updated);
                   }}
-                  className="flex-1 border border-[#c8ced8] rounded px-2 py-1 text-sm"
+                  className="flex-1 border border-(--border-main) rounded px-2 py-1 text-sm"
                 >
                   <option value="">결재자 선택</option>
                   {users.map(u => <option key={u.id} value={u.id}>{u.name}</option>)}
@@ -218,7 +222,7 @@ export default function ApprovalFormPage() {
                     updated[idx] = { ...updated[idx], role_label: e.target.value };
                     setSteps(updated);
                   }}
-                  className="w-24 border border-[#c8ced8] rounded px-2 py-1 text-sm"
+                  className="w-24 border border-(--border-main) rounded px-2 py-1 text-sm"
                   placeholder="역할명"
                 />
                 <button onClick={() => removeStep(idx)} className="text-red-400 hover:text-red-600 text-sm">
@@ -249,7 +253,7 @@ export default function ApprovalFormPage() {
       <div className="flex gap-3 justify-end">
         <button
           onClick={() => navigate('/groupware/approvals')}
-          className="px-4 py-2 border border-[#c8ced8] text-slate-600 rounded-lg hover:bg-slate-50 text-sm"
+          className="px-4 py-2 border border-(--border-main) text-slate-600 rounded-lg hover:bg-slate-50 text-sm"
         >
           취소
         </button>

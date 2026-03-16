@@ -3,7 +3,6 @@
  * 목록/검색/필터/등록/수정/비활성화
  */
 import { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
 import {
   MagnifyingGlassIcon,
   PlusIcon,
@@ -12,8 +11,8 @@ import {
   XMarkIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
-  ArrowLeftIcon,
 } from '@heroicons/react/24/outline';
+import BackButton from '../components/BackButton';
 import {
   fetchAccounts,
   createAccount,
@@ -62,7 +61,6 @@ const DEFAULT_BALANCE: Record<string, string> = {
 };
 
 export default function AccountsPage() {
-  const navigate = useNavigate();
   const { user } = useAuthStore();
   const isManager = user?.role === 'admin' || user?.role === 'manager';
 
@@ -215,12 +213,7 @@ export default function AccountsPage() {
     <div>
       {/* 페이지 헤더 */}
       <div className="flex items-center gap-3 mb-4">
-        <button
-          onClick={() => navigate('/finance')}
-          className="p-1.5 rounded-lg hover:bg-[#c8ced8] transition-colors"
-        >
-          <ArrowLeftIcon className="w-5 h-5 text-slate-600" />
-        </button>
+        <BackButton to="/finance" />
         <div>
           <h1 className="text-xl font-bold text-slate-800">계정과목 관리</h1>
           <p className="text-sm text-slate-500">
@@ -230,7 +223,7 @@ export default function AccountsPage() {
       </div>
 
       {/* 필터 바 */}
-      <div className="bg-[#e8ecf2] rounded-xl p-4 border border-[#c8ced8] mb-4">
+      <div className="bg-(--bg-card) rounded-xl p-4 border border-(--border-main) mb-4">
         <div className="flex flex-wrap items-center gap-3">
           {/* 검색 */}
           <div className="relative flex-1 min-w-[200px]">
@@ -240,7 +233,7 @@ export default function AccountsPage() {
               placeholder="계정 코드 또는 이름 검색..."
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
-              className="w-full pl-9 pr-3 py-2 text-sm rounded-lg border border-[#c8ced8] bg-white focus:outline-none focus:border-amber-500 transition-colors"
+              className="w-full pl-9 pr-3 py-2 text-sm rounded-lg border border-(--border-main) bg-white focus:outline-none focus:border-amber-500 transition-colors"
             />
           </div>
 
@@ -251,7 +244,7 @@ export default function AccountsPage() {
               setTypeFilter(e.target.value);
               setPage(1);
             }}
-            className="px-3 py-2 text-sm rounded-lg border border-[#c8ced8] bg-white focus:outline-none focus:border-amber-500"
+            className="px-3 py-2 text-sm rounded-lg border border-(--border-main) bg-white focus:outline-none focus:border-amber-500"
           >
             <option value="">전체 유형</option>
             <option value="asset">자산</option>
@@ -268,7 +261,7 @@ export default function AccountsPage() {
               setActiveFilter(e.target.value);
               setPage(1);
             }}
-            className="px-3 py-2 text-sm rounded-lg border border-[#c8ced8] bg-white focus:outline-none focus:border-amber-500"
+            className="px-3 py-2 text-sm rounded-lg border border-(--border-main) bg-white focus:outline-none focus:border-amber-500"
           >
             <option value="">전체 상태</option>
             <option value="true">활성</option>
@@ -289,11 +282,11 @@ export default function AccountsPage() {
       </div>
 
       {/* 테이블 */}
-      <div className="bg-[#e8ecf2] rounded-xl border border-[#c8ced8] overflow-hidden">
+      <div className="bg-(--bg-card) rounded-xl border border-(--border-main) overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="bg-[#dce1e9] text-slate-600">
+              <tr className="bg-(--bg-main) text-slate-600">
                 <th
                   className="text-left px-4 py-3 font-semibold cursor-pointer hover:text-slate-800 w-20"
                   onClick={() => handleSort('code')}
@@ -332,7 +325,7 @@ export default function AccountsPage() {
                 data.items.map((a) => (
                   <tr
                     key={a.id}
-                    className={`border-t border-[#c8ced8] hover:bg-[#dce1e9]/50 transition-colors ${
+                    className={`border-t border-(--border-main) hover:bg-(--bg-main)/50 transition-colors ${
                       !a.is_active ? 'opacity-50' : ''
                     }`}
                   >
@@ -365,7 +358,7 @@ export default function AccountsPage() {
                         <div className="flex items-center justify-center gap-1">
                           <button
                             onClick={() => openEditModal(a)}
-                            className="p-1 rounded hover:bg-[#c8ced8] transition-colors"
+                            className="p-1 rounded hover:bg-(--border-main) transition-colors"
                             title="수정"
                           >
                             <PencilSquareIcon className="w-4 h-4 text-slate-500" />
@@ -391,7 +384,7 @@ export default function AccountsPage() {
 
         {/* 페이지네이션 */}
         {data && data.total_pages > 1 && (
-          <div className="flex items-center justify-between px-4 py-3 border-t border-[#c8ced8]">
+          <div className="flex items-center justify-between px-4 py-3 border-t border-(--border-main)">
             <span className="text-xs text-slate-500">
               전체 {data.total}건 중 {(data.page - 1) * data.size + 1}-
               {Math.min(data.page * data.size, data.total)}건
@@ -400,7 +393,7 @@ export default function AccountsPage() {
               <button
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
                 disabled={page <= 1}
-                className="p-1 rounded hover:bg-[#c8ced8] disabled:opacity-30"
+                className="p-1 rounded hover:bg-(--border-main) disabled:opacity-30"
               >
                 <ChevronLeftIcon className="w-4 h-4" />
               </button>
@@ -419,7 +412,7 @@ export default function AccountsPage() {
                       className={`w-8 h-8 text-xs rounded-lg transition-colors ${
                         pageNum === page
                           ? 'bg-amber-500 text-white font-bold'
-                          : 'hover:bg-[#c8ced8]'
+                          : 'hover:bg-(--border-main)'
                       }`}
                     >
                       {pageNum}
@@ -430,7 +423,7 @@ export default function AccountsPage() {
               <button
                 onClick={() => setPage((p) => Math.min(data.total_pages, p + 1))}
                 disabled={page >= data.total_pages}
-                className="p-1 rounded hover:bg-[#c8ced8] disabled:opacity-30"
+                className="p-1 rounded hover:bg-(--border-main) disabled:opacity-30"
               >
                 <ChevronRightIcon className="w-4 h-4" />
               </button>
@@ -442,15 +435,15 @@ export default function AccountsPage() {
       {/* ── 등록/수정 모달 ── */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-          <div className="bg-[#e8ecf2] rounded-2xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto border border-[#c8ced8]">
+          <div className="bg-(--bg-card) rounded-2xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto border border-(--border-main)">
             {/* 헤더 */}
-            <div className="flex items-center justify-between px-6 py-4 border-b border-[#c8ced8]">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-(--border-main)">
               <h2 className="text-lg font-bold text-slate-800">
                 {editingId ? '계정과목 수정' : '계정과목 등록'}
               </h2>
               <button
                 onClick={() => setShowModal(false)}
-                className="p-1 rounded-lg hover:bg-[#c8ced8]"
+                className="p-1 rounded-lg hover:bg-(--border-main)"
               >
                 <XMarkIcon className="w-5 h-5 text-slate-500" />
               </button>
@@ -464,7 +457,7 @@ export default function AccountsPage() {
                 </div>
               )}
 
-              <fieldset className="border border-[#c8ced8] rounded-xl p-4">
+              <fieldset className="border border-(--border-main) rounded-xl p-4">
                 <legend className="text-sm font-semibold text-slate-600 px-2">
                   기본 정보
                 </legend>
@@ -482,7 +475,7 @@ export default function AccountsPage() {
                       }
                       disabled={!!editingId}
                       placeholder="예: 101"
-                      className="w-full px-3 py-2 text-sm rounded-lg border border-[#c8ced8] bg-white focus:outline-none focus:border-amber-500 disabled:bg-slate-100 disabled:text-slate-400"
+                      className="w-full px-3 py-2 text-sm rounded-lg border border-(--border-main) bg-white focus:outline-none focus:border-amber-500 disabled:bg-slate-100 disabled:text-slate-400"
                     />
                   </div>
 
@@ -498,7 +491,7 @@ export default function AccountsPage() {
                         setForm((f) => ({ ...f, name: e.target.value }))
                       }
                       placeholder="예: 현금"
-                      className="w-full px-3 py-2 text-sm rounded-lg border border-[#c8ced8] bg-white focus:outline-none focus:border-amber-500"
+                      className="w-full px-3 py-2 text-sm rounded-lg border border-(--border-main) bg-white focus:outline-none focus:border-amber-500"
                     />
                   </div>
 
@@ -510,7 +503,7 @@ export default function AccountsPage() {
                     <select
                       value={form.account_type}
                       onChange={(e) => handleTypeChange(e.target.value)}
-                      className="w-full px-3 py-2 text-sm rounded-lg border border-[#c8ced8] bg-white focus:outline-none focus:border-amber-500"
+                      className="w-full px-3 py-2 text-sm rounded-lg border border-(--border-main) bg-white focus:outline-none focus:border-amber-500"
                     >
                       <option value="asset">자산</option>
                       <option value="liability">부채</option>
@@ -530,7 +523,7 @@ export default function AccountsPage() {
                       onChange={(e) =>
                         setForm((f) => ({ ...f, normal_balance: e.target.value }))
                       }
-                      className="w-full px-3 py-2 text-sm rounded-lg border border-[#c8ced8] bg-white focus:outline-none focus:border-amber-500"
+                      className="w-full px-3 py-2 text-sm rounded-lg border border-(--border-main) bg-white focus:outline-none focus:border-amber-500"
                     >
                       <option value="debit">차변</option>
                       <option value="credit">대변</option>
@@ -549,7 +542,7 @@ export default function AccountsPage() {
                         setForm((f) => ({ ...f, account_group: e.target.value }))
                       }
                       placeholder="예: 유동자산"
-                      className="w-full px-3 py-2 text-sm rounded-lg border border-[#c8ced8] bg-white focus:outline-none focus:border-amber-500"
+                      className="w-full px-3 py-2 text-sm rounded-lg border border-(--border-main) bg-white focus:outline-none focus:border-amber-500"
                     />
                   </div>
 
@@ -567,7 +560,7 @@ export default function AccountsPage() {
                           sort_order: Number(e.target.value),
                         }))
                       }
-                      className="w-full px-3 py-2 text-sm rounded-lg border border-[#c8ced8] bg-white focus:outline-none focus:border-amber-500"
+                      className="w-full px-3 py-2 text-sm rounded-lg border border-(--border-main) bg-white focus:outline-none focus:border-amber-500"
                     />
                   </div>
                 </div>
@@ -575,10 +568,10 @@ export default function AccountsPage() {
             </div>
 
             {/* 푸터 */}
-            <div className="flex items-center justify-end gap-2 px-6 py-4 border-t border-[#c8ced8]">
+            <div className="flex items-center justify-end gap-2 px-6 py-4 border-t border-(--border-main)">
               <button
                 onClick={() => setShowModal(false)}
-                className="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-[#c8ced8] rounded-lg hover:bg-[#dce1e9] transition-colors"
+                className="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-(--border-main) rounded-lg hover:bg-(--bg-main) transition-colors"
               >
                 취소
               </button>
@@ -597,7 +590,7 @@ export default function AccountsPage() {
       {/* ── 비활성화 확인 모달 ── */}
       {deleteTarget && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-          <div className="bg-[#e8ecf2] rounded-2xl shadow-xl w-full max-w-sm p-6 border border-[#c8ced8]">
+          <div className="bg-(--bg-card) rounded-2xl shadow-xl w-full max-w-sm p-6 border border-(--border-main)">
             <h3 className="text-lg font-bold text-slate-800 mb-2">
               계정과목 비활성화
             </h3>
@@ -616,7 +609,7 @@ export default function AccountsPage() {
             <div className="flex justify-end gap-2">
               <button
                 onClick={() => setDeleteTarget(null)}
-                className="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-[#c8ced8] rounded-lg hover:bg-[#dce1e9]"
+                className="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-(--border-main) rounded-lg hover:bg-(--bg-main)"
               >
                 취소
               </button>

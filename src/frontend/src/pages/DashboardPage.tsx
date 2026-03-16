@@ -162,7 +162,7 @@ export default function DashboardPage() {
         {cards.map((card) => {
           const Icon = card.icon;
           return (
-            <div key={card.label} className="bg-[#e8ecf2] rounded-xl p-4 border border-[#c8ced8] hover:shadow-md transition-shadow">
+            <div key={card.label} className="bg-(--bg-card) rounded-xl p-4 border border-(--border-main) hover:shadow-md transition-shadow">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-xs font-medium text-slate-500">{card.label}</span>
                 <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${card.gradient} flex items-center justify-center shadow-sm`}>
@@ -177,13 +177,13 @@ export default function DashboardPage() {
       </div>
 
       {/* ── 월별 매출 차트 ── */}
-      <div className="bg-[#e8ecf2] rounded-xl p-5 border border-[#c8ced8]">
+      <div className="bg-(--bg-card) rounded-xl p-5 border border-(--border-main)">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-base font-bold text-slate-700">월별 매출 현황</h2>
           <div className="flex items-center gap-2">
             <button
               onClick={() => setSelectedYear((y) => y - 1)}
-              className="px-2 py-1 text-xs rounded-lg border border-[#c8ced8] bg-white hover:bg-[#dce1e9] transition-colors"
+              className="px-2 py-1 text-xs rounded-lg border border-(--border-main) bg-white hover:bg-(--bg-main) transition-colors"
             >
               ◀
             </button>
@@ -193,7 +193,7 @@ export default function DashboardPage() {
             <button
               onClick={() => setSelectedYear((y) => Math.min(y + 1, currentYear))}
               disabled={selectedYear >= currentYear}
-              className="px-2 py-1 text-xs rounded-lg border border-[#c8ced8] bg-white hover:bg-[#dce1e9] disabled:opacity-30 transition-colors"
+              className="px-2 py-1 text-xs rounded-lg border border-(--border-main) bg-white hover:bg-(--bg-main) disabled:opacity-30 transition-colors"
             >
               ▶
             </button>
@@ -260,14 +260,14 @@ export default function DashboardPage() {
 
       {/* ── 제품별 매출 상세 패널 (월 클릭 시 표시) ── */}
       {selectedMonth !== null && (
-        <div className="bg-[#e8ecf2] rounded-xl border border-[#c8ced8] overflow-hidden">
-          <div className="flex items-center justify-between px-5 py-3 border-b border-[#c8ced8] bg-[#dce1e9]">
+        <div className="bg-(--bg-card) rounded-xl border border-(--border-main) overflow-hidden">
+          <div className="flex items-center justify-between px-5 py-3 border-b border-(--border-main) bg-(--bg-main)">
             <h3 className="text-sm font-bold text-slate-700">
               {selectedYear}년 {selectedMonth}월 — 제품별 매출 TOP 10
             </h3>
             <button
               onClick={() => { setSelectedMonth(null); setProductSales([]); }}
-              className="p-1 hover:bg-[#c8ced8] rounded-lg transition-colors"
+              className="p-1 hover:bg-(--border-main) rounded-lg transition-colors"
             >
               <XMarkIcon className="w-4 h-4 text-slate-500" />
             </button>
@@ -298,7 +298,7 @@ export default function DashboardPage() {
                     return productSales.map((p, i) => {
                       const pct = totalAmount > 0 ? (p.total_amount / totalAmount) * 100 : 0;
                       return (
-                        <tr key={i} className="border-t border-[#c8ced8] hover:bg-[#dce1e9]/50">
+                        <tr key={i} className="border-t border-(--border-main) hover:bg-(--bg-main)/50">
                           <td className="px-5 py-2.5">
                             <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold ${
                               i === 0 ? 'bg-amber-100 text-amber-700' :

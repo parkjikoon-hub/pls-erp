@@ -4,6 +4,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { myRequests, myApprovals, myReferences, type ApprovalListItem } from '../api/groupware/approvals';
+import BackButton from '../components/BackButton';
 
 const TABS = [
   { key: 'requests', label: '내 기안' },
@@ -52,7 +53,10 @@ export default function ApprovalsPage() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-slate-800">전자결재</h1>
+        <div className="flex items-center gap-3">
+          <BackButton to="/groupware" />
+          <h1 className="text-2xl font-bold text-slate-800">전자결재</h1>
+        </div>
         <button
           onClick={() => navigate('/groupware/approvals/new')}
           className="px-4 py-2 bg-cyan-600 text-white rounded-lg hover:bg-cyan-700 transition text-sm font-medium"
@@ -77,10 +81,10 @@ export default function ApprovalsPage() {
       </div>
 
       {/* 결재 목록 테이블 */}
-      <div className="bg-white rounded-xl border border-[#c8ced8] overflow-hidden">
+      <div className="bg-white rounded-xl border border-(--border-main) overflow-hidden">
         <table className="w-full text-sm">
           <thead>
-            <tr className="bg-[#e8ecf2] text-slate-600 text-xs uppercase">
+            <tr className="bg-(--bg-card) text-slate-600 text-xs uppercase">
               <th className="text-left py-3 px-4 font-semibold">결재번호</th>
               <th className="text-left py-3 px-4 font-semibold">제목</th>
               <th className="text-left py-3 px-4 font-semibold">유형</th>
@@ -103,7 +107,7 @@ export default function ApprovalsPage() {
                   <tr
                     key={item.id}
                     onClick={() => navigate(`/groupware/approvals/${item.id}`)}
-                    className="border-t border-[#c8ced8] hover:bg-slate-50 cursor-pointer transition"
+                    className="border-t border-(--border-main) hover:bg-slate-50 cursor-pointer transition"
                   >
                     <td className="py-3 px-4 text-slate-500 font-mono text-xs">{item.request_no}</td>
                     <td className="py-3 px-4 font-medium text-slate-800">{item.title}</td>

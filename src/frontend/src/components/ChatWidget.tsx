@@ -121,7 +121,7 @@ export default function ChatWidget() {
 
       {/* 채팅 패널 */}
       {isOpen && (
-        <div className="fixed bottom-6 right-6 w-96 h-[520px] bg-[#eef1f5] rounded-2xl shadow-2xl border border-[#c8ced8] flex flex-col z-50 overflow-hidden">
+        <div className="fixed bottom-6 right-6 w-96 h-[520px] bg-(--bg-elevated) rounded-2xl shadow-2xl border border-(--border-main) flex flex-col z-50 overflow-hidden">
           {/* 헤더 */}
           <div className="flex items-center justify-between px-4 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-t-2xl">
             <div className="flex items-center gap-2">
@@ -143,7 +143,7 @@ export default function ChatWidget() {
                 <div className={`max-w-[85%] ${
                   msg.role === 'user'
                     ? 'bg-blue-600 text-white rounded-2xl rounded-br-md'
-                    : 'bg-white text-slate-700 border border-[#c8ced8] rounded-2xl rounded-bl-md'
+                    : 'bg-white text-slate-700 border border-(--border-main) rounded-2xl rounded-bl-md'
                 } px-3.5 py-2.5 text-sm`}>
                   {/* 메시지 텍스트 */}
                   <p className="whitespace-pre-line">{msg.text}</p>
@@ -197,7 +197,7 @@ export default function ChatWidget() {
             {/* 로딩 표시 */}
             {loading && (
               <div className="flex justify-start">
-                <div className="bg-white border border-[#c8ced8] rounded-2xl rounded-bl-md px-4 py-3">
+                <div className="bg-white border border-(--border-main) rounded-2xl rounded-bl-md px-4 py-3">
                   <div className="flex gap-1">
                     <span className="w-2 h-2 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
                     <span className="w-2 h-2 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
@@ -217,7 +217,7 @@ export default function ChatWidget() {
                 <button
                   key={q}
                   onClick={() => handleSend(q)}
-                  className="px-2.5 py-1 text-xs bg-white border border-[#c8ced8] rounded-full text-slate-600 hover:bg-blue-50 hover:border-blue-300 hover:text-blue-600 transition-colors"
+                  className="px-2.5 py-1 text-xs bg-white border border-(--border-main) rounded-full text-slate-600 hover:bg-blue-50 hover:border-blue-300 hover:text-blue-600 transition-colors"
                 >
                   {q}
                 </button>
@@ -226,7 +226,7 @@ export default function ChatWidget() {
           )}
 
           {/* 입력 영역 */}
-          <div className="px-4 py-3 border-t border-[#c8ced8] bg-white rounded-b-2xl">
+          <div className="px-4 py-3 border-t border-(--border-main) bg-white rounded-b-2xl">
             <div className="flex items-center gap-2">
               <input
                 ref={inputRef}
@@ -236,7 +236,7 @@ export default function ChatWidget() {
                 onKeyDown={handleKeyDown}
                 placeholder="질문을 입력하세요..."
                 disabled={loading}
-                className="flex-1 px-3 py-2 rounded-lg border border-[#c8ced8] bg-[#f5f7fa] text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 disabled:opacity-50"
+                className="flex-1 px-3 py-2 rounded-lg border border-(--border-main) bg-(--bg-hover) text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 disabled:opacity-50"
               />
               <button
                 onClick={() => handleSend()}

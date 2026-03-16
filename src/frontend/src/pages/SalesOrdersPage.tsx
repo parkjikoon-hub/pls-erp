@@ -266,7 +266,7 @@ export default function SalesOrdersPage() {
         <select
           value={statusFilter}
           onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
-          className="border border-[#c8ced8] rounded-lg px-3 py-1.5 text-sm bg-white"
+          className="border border-(--border-main) rounded-lg px-3 py-1.5 text-sm bg-white"
         >
           <option value="">전체 상태</option>
           <option value="confirmed">수주확정</option>
@@ -279,14 +279,14 @@ export default function SalesOrdersPage() {
           placeholder="수주번호 검색..."
           value={search}
           onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-          className="border border-[#c8ced8] rounded-lg px-3 py-1.5 text-sm flex-1 max-w-xs"
+          className="border border-(--border-main) rounded-lg px-3 py-1.5 text-sm flex-1 max-w-xs"
         />
       </div>
 
       {/* 테이블 */}
-      <div className="bg-white rounded-xl border border-[#c8ced8] overflow-hidden">
+      <div className="bg-white rounded-xl border border-(--border-main) overflow-hidden">
         <table className="w-full text-sm">
-          <thead className="bg-[#e8ecf2] text-slate-600">
+          <thead className="bg-(--bg-card) text-slate-600">
             <tr>
               <th className="px-4 py-2 text-left">수주번호</th>
               <th className="px-4 py-2 text-left">수주일</th>
@@ -308,7 +308,7 @@ export default function SalesOrdersPage() {
                 const st = STATUS_MAP[o.status] || STATUS_MAP.confirmed;
                 const nextStatuses = getNextStatuses(o.status);
                 return (
-                  <tr key={o.id} className="border-t border-[#e8ecf2] hover:bg-[#f1f4f8]">
+                  <tr key={o.id} className="border-t border-[#e8ecf2] hover:bg-(--bg-hover)">
                     <td className="px-4 py-2 font-medium text-slate-700">{o.order_no}</td>
                     <td className="px-4 py-2 text-slate-600">{o.order_date}</td>
                     <td className="px-4 py-2 text-slate-600">{o.customer_name || '-'}</td>
@@ -376,7 +376,7 @@ export default function SalesOrdersPage() {
               key={p}
               onClick={() => setPage(p)}
               className={`px-3 py-1 rounded text-sm ${
-                p === page ? 'bg-blue-600 text-white' : 'bg-white border border-[#c8ced8] text-slate-600 hover:bg-[#e8ecf2]'
+                p === page ? 'bg-blue-600 text-white' : 'bg-white border border-(--border-main) text-slate-600 hover:bg-(--bg-card)'
               }`}
             >{p}</button>
           ))}
@@ -398,7 +398,7 @@ export default function SalesOrdersPage() {
                   type="date"
                   value={form.order_date}
                   onChange={(e) => setForm({ ...form, order_date: e.target.value })}
-                  className="w-full border border-[#c8ced8] rounded-lg px-3 py-1.5 text-sm"
+                  className="w-full border border-(--border-main) rounded-lg px-3 py-1.5 text-sm"
                 />
               </div>
               <div>
@@ -407,7 +407,7 @@ export default function SalesOrdersPage() {
                   type="date"
                   value={form.delivery_date || ''}
                   onChange={(e) => setForm({ ...form, delivery_date: e.target.value || undefined })}
-                  className="w-full border border-[#c8ced8] rounded-lg px-3 py-1.5 text-sm"
+                  className="w-full border border-(--border-main) rounded-lg px-3 py-1.5 text-sm"
                 />
               </div>
               <div>
@@ -415,7 +415,7 @@ export default function SalesOrdersPage() {
                 <select
                   value={form.customer_id}
                   onChange={(e) => setForm({ ...form, customer_id: e.target.value })}
-                  className="w-full border border-[#c8ced8] rounded-lg px-3 py-1.5 text-sm"
+                  className="w-full border border-(--border-main) rounded-lg px-3 py-1.5 text-sm"
                 >
                   <option value="">선택</option>
                   {customers.map((c) => (
@@ -428,7 +428,7 @@ export default function SalesOrdersPage() {
                 <input
                   value={form.notes || ''}
                   onChange={(e) => setForm({ ...form, notes: e.target.value })}
-                  className="w-full border border-[#c8ced8] rounded-lg px-3 py-1.5 text-sm"
+                  className="w-full border border-(--border-main) rounded-lg px-3 py-1.5 text-sm"
                   placeholder="특이사항 입력"
                 />
               </div>
@@ -444,13 +444,13 @@ export default function SalesOrdersPage() {
               </div>
               <div className="space-y-2">
                 {form.lines.map((line, idx) => (
-                  <div key={idx} className="flex gap-2 items-end bg-[#f1f4f8] rounded-lg p-3">
+                  <div key={idx} className="flex gap-2 items-end bg-(--bg-hover) rounded-lg p-3">
                     <div className="flex-1">
                       <label className="block text-xs text-slate-500 mb-0.5">품목명</label>
                       <input
                         value={line.product_name}
                         onChange={(e) => updateLine(idx, 'product_name', e.target.value)}
-                        className="w-full border border-[#c8ced8] rounded px-2 py-1 text-sm"
+                        className="w-full border border-(--border-main) rounded px-2 py-1 text-sm"
                       />
                     </div>
                     <div className="w-20">
@@ -459,7 +459,7 @@ export default function SalesOrdersPage() {
                         type="number"
                         value={line.quantity}
                         onChange={(e) => updateLine(idx, 'quantity', Number(e.target.value))}
-                        className="w-full border border-[#c8ced8] rounded px-2 py-1 text-sm text-right"
+                        className="w-full border border-(--border-main) rounded px-2 py-1 text-sm text-right"
                       />
                     </div>
                     <div className="w-28">
@@ -468,7 +468,7 @@ export default function SalesOrdersPage() {
                         type="number"
                         value={line.unit_price}
                         onChange={(e) => updateLine(idx, 'unit_price', Number(e.target.value))}
-                        className="w-full border border-[#c8ced8] rounded px-2 py-1 text-sm text-right"
+                        className="w-full border border-(--border-main) rounded px-2 py-1 text-sm text-right"
                       />
                     </div>
                     <div className="w-28 text-right">
@@ -494,7 +494,7 @@ export default function SalesOrdersPage() {
             </div>
 
             <div className="flex justify-end gap-2">
-              <button onClick={() => setShowModal(false)} className="px-4 py-2 border border-[#c8ced8] rounded-lg text-sm text-slate-600 hover:bg-slate-50">취소</button>
+              <button onClick={() => setShowModal(false)} className="px-4 py-2 border border-(--border-main) rounded-lg text-sm text-slate-600 hover:bg-slate-50">취소</button>
               <button
                 onClick={handleSave}
                 disabled={!form.customer_id || form.lines.every((l) => !l.product_name)}
@@ -518,7 +518,7 @@ export default function SalesOrdersPage() {
               <select
                 value={newStatus}
                 onChange={(e) => setNewStatus(e.target.value)}
-                className="w-full border border-[#c8ced8] rounded-lg px-3 py-1.5 text-sm"
+                className="w-full border border-(--border-main) rounded-lg px-3 py-1.5 text-sm"
               >
                 <option value="">선택</option>
                 {getNextStatuses(statusModal.current).map((s) => (
@@ -531,12 +531,12 @@ export default function SalesOrdersPage() {
               <input
                 value={statusMemo}
                 onChange={(e) => setStatusMemo(e.target.value)}
-                className="w-full border border-[#c8ced8] rounded-lg px-3 py-1.5 text-sm"
+                className="w-full border border-(--border-main) rounded-lg px-3 py-1.5 text-sm"
                 placeholder="상태 변경 사유"
               />
             </div>
             <div className="flex justify-end gap-2">
-              <button onClick={() => setStatusModal(null)} className="px-4 py-2 border border-[#c8ced8] rounded-lg text-sm text-slate-600 hover:bg-slate-50">취소</button>
+              <button onClick={() => setStatusModal(null)} className="px-4 py-2 border border-(--border-main) rounded-lg text-sm text-slate-600 hover:bg-slate-50">취소</button>
               <button
                 onClick={handleStatusChange}
                 disabled={!newStatus}
@@ -770,7 +770,7 @@ export default function SalesOrdersPage() {
             <div className="flex justify-end mt-5">
               <button
                 onClick={() => setTrackingOrder(null)}
-                className="px-4 py-2 border border-[#c8ced8] rounded-lg text-sm text-slate-600 hover:bg-slate-50"
+                className="px-4 py-2 border border-(--border-main) rounded-lg text-sm text-slate-600 hover:bg-slate-50"
               >닫기</button>
             </div>
           </div>

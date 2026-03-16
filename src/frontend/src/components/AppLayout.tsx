@@ -26,7 +26,7 @@ export default function AppLayout() {
         <Header />
 
         {/* 콘텐츠 영역 — 슬레이트 블루그레이 배경 */}
-        <main className="flex-1 overflow-y-auto p-6 bg-[#dce1e9]">
+        <main className="flex-1 overflow-y-auto p-6 bg-(--bg-main)">
           <Outlet />
         </main>
       </div>

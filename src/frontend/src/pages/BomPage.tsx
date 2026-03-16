@@ -229,9 +229,9 @@ export default function BomPage() {
       </div>
 
       {/* 테이블 */}
-      <div className="bg-white rounded-xl border border-[#c8ced8] overflow-hidden">
+      <div className="bg-white rounded-xl border border-(--border-main) overflow-hidden">
         <table className="w-full text-sm">
-          <thead className="bg-[#e8ecf2] text-slate-600">
+          <thead className="bg-(--bg-card) text-slate-600">
             <tr>
               <th className="px-4 py-2 text-left">품목명</th>
               <th className="px-4 py-2 text-left">품목코드</th>
@@ -249,7 +249,7 @@ export default function BomPage() {
               <tr><td colSpan={7} className="px-4 py-8 text-center text-slate-400">등록된 BOM이 없습니다</td></tr>
             ) : (
               items.map((b) => (
-                <tr key={b.id} className="border-t border-[#e8ecf2] hover:bg-[#f1f4f8]">
+                <tr key={b.id} className="border-t border-[#e8ecf2] hover:bg-(--bg-hover)">
                   <td className="px-4 py-2 font-medium text-slate-700">{b.product_name || '-'}</td>
                   <td className="px-4 py-2 text-slate-500">{b.product_code || '-'}</td>
                   <td className="px-4 py-2 text-center">v{b.version}</td>
@@ -301,7 +301,7 @@ export default function BomPage() {
               key={p}
               onClick={() => setPage(p)}
               className={`px-3 py-1 rounded text-sm ${
-                p === page ? 'bg-emerald-600 text-white' : 'bg-white border border-[#c8ced8] text-slate-600 hover:bg-slate-50'
+                p === page ? 'bg-emerald-600 text-white' : 'bg-white border border-(--border-main) text-slate-600 hover:bg-slate-50'
               }`}
             >
               {p}
@@ -325,7 +325,7 @@ export default function BomPage() {
                 <select
                   value={form.product_id}
                   onChange={(e) => setForm({ ...form, product_id: e.target.value })}
-                  className="w-full border border-[#c8ced8] rounded-lg px-3 py-2 text-sm"
+                  className="w-full border border-(--border-main) rounded-lg px-3 py-2 text-sm"
                   disabled={!!editId}
                 >
                   <option value="">선택...</option>
@@ -343,7 +343,7 @@ export default function BomPage() {
                   min={1}
                   value={form.version}
                   onChange={(e) => setForm({ ...form, version: Number(e.target.value) })}
-                  className="w-full border border-[#c8ced8] rounded-lg px-3 py-2 text-sm"
+                  className="w-full border border-(--border-main) rounded-lg px-3 py-2 text-sm"
                 />
               </div>
             </div>
@@ -356,9 +356,9 @@ export default function BomPage() {
                   + 부품 추가
                 </button>
               </div>
-              <div className="border border-[#c8ced8] rounded-lg overflow-hidden">
+              <div className="border border-(--border-main) rounded-lg overflow-hidden">
                 <table className="w-full text-sm">
-                  <thead className="bg-[#e8ecf2] text-slate-600">
+                  <thead className="bg-(--bg-card) text-slate-600">
                     <tr>
                       <th className="px-3 py-1.5 text-left">구성 자재 *</th>
                       <th className="px-3 py-1.5 text-center w-24">수량 *</th>
@@ -374,7 +374,7 @@ export default function BomPage() {
                           <select
                             value={line.material_id}
                             onChange={(e) => updateLine(idx, 'material_id', e.target.value)}
-                            className="w-full border border-[#c8ced8] rounded px-2 py-1 text-sm"
+                            className="w-full border border-(--border-main) rounded px-2 py-1 text-sm"
                           >
                             <option value="">선택...</option>
                             {materialProducts.map((p) => (
@@ -391,7 +391,7 @@ export default function BomPage() {
                             step={0.01}
                             value={line.quantity}
                             onChange={(e) => updateLine(idx, 'quantity', Number(e.target.value))}
-                            className="w-full border border-[#c8ced8] rounded px-2 py-1 text-sm text-center"
+                            className="w-full border border-(--border-main) rounded px-2 py-1 text-sm text-center"
                           />
                         </td>
                         <td className="px-3 py-1.5">
@@ -399,7 +399,7 @@ export default function BomPage() {
                             type="text"
                             value={line.unit || ''}
                             onChange={(e) => updateLine(idx, 'unit', e.target.value)}
-                            className="w-full border border-[#c8ced8] rounded px-2 py-1 text-sm text-center"
+                            className="w-full border border-(--border-main) rounded px-2 py-1 text-sm text-center"
                           />
                         </td>
                         <td className="px-3 py-1.5">
@@ -410,7 +410,7 @@ export default function BomPage() {
                             step={0.1}
                             value={line.scrap_rate || 0}
                             onChange={(e) => updateLine(idx, 'scrap_rate', Number(e.target.value))}
-                            className="w-full border border-[#c8ced8] rounded px-2 py-1 text-sm text-center"
+                            className="w-full border border-(--border-main) rounded px-2 py-1 text-sm text-center"
                           />
                         </td>
                         <td className="px-3 py-1.5 text-center">
@@ -433,7 +433,7 @@ export default function BomPage() {
             <div className="flex justify-end gap-2">
               <button
                 onClick={() => setShowModal(false)}
-                className="px-4 py-2 border border-[#c8ced8] rounded-lg text-sm text-slate-600 hover:bg-slate-50"
+                className="px-4 py-2 border border-(--border-main) rounded-lg text-sm text-slate-600 hover:bg-slate-50"
               >
                 취소
               </button>
@@ -460,7 +460,7 @@ export default function BomPage() {
             </div>
 
             {/* 트리 뷰 */}
-            <div className="border border-[#c8ced8] rounded-lg p-3 mb-4 max-h-[300px] overflow-y-auto bg-slate-50">
+            <div className="border border-(--border-main) rounded-lg p-3 mb-4 max-h-[300px] overflow-y-auto bg-slate-50">
               <TreeNode node={treeData} />
             </div>
 
@@ -473,7 +473,7 @@ export default function BomPage() {
                   min={1}
                   value={treeQty}
                   onChange={(e) => setTreeQty(Number(e.target.value))}
-                  className="w-20 border border-[#c8ced8] rounded px-2 py-1 text-sm text-center"
+                  className="w-20 border border-(--border-main) rounded px-2 py-1 text-sm text-center"
                 />
                 <span className="text-sm text-slate-700">개)</span>
                 <button
@@ -483,9 +483,9 @@ export default function BomPage() {
                   계산
                 </button>
               </div>
-              <div className="border border-[#c8ced8] rounded-lg overflow-hidden">
+              <div className="border border-(--border-main) rounded-lg overflow-hidden">
                 <table className="w-full text-sm">
-                  <thead className="bg-[#e8ecf2] text-slate-600">
+                  <thead className="bg-(--bg-card) text-slate-600">
                     <tr>
                       <th className="px-4 py-2 text-left">원자재명</th>
                       <th className="px-4 py-2 text-left">코드</th>
@@ -516,7 +516,7 @@ export default function BomPage() {
             <div className="flex justify-end">
               <button
                 onClick={() => setShowTree(false)}
-                className="px-4 py-2 border border-[#c8ced8] rounded-lg text-sm text-slate-600 hover:bg-slate-50"
+                className="px-4 py-2 border border-(--border-main) rounded-lg text-sm text-slate-600 hover:bg-slate-50"
               >
                 닫기
               </button>

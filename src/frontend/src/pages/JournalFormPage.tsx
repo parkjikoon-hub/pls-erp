@@ -5,13 +5,13 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
-  ArrowLeftIcon,
   PlusIcon,
   TrashIcon,
   MagnifyingGlassIcon,
   CheckCircleIcon,
   ExclamationTriangleIcon,
 } from '@heroicons/react/24/outline';
+import BackButton from '../components/BackButton';
 import {
   fetchJournal,
   createJournal,
@@ -267,12 +267,7 @@ export default function JournalFormPage() {
 
       {/* 헤더 */}
       <div className="flex items-center gap-3">
-        <button
-          onClick={() => navigate('/finance/journals')}
-          className="p-2 rounded-lg hover:bg-gray-100 transition"
-        >
-          <ArrowLeftIcon className="w-5 h-5 text-gray-600" />
-        </button>
+        <BackButton to="/finance/journals" />
         <div>
           <h1 className="text-2xl font-bold text-gray-900">
             {isEdit ? '전표 수정' : '전표 등록'}

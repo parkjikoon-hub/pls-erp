@@ -65,9 +65,9 @@ export default function SystemPage() {
               key={item.title}
               onClick={() => item.enabled && navigate(item.path)}
               disabled={!item.enabled}
-              className={`text-left bg-[#e8ecf2] rounded-xl p-6 border-l-4 ${item.color} border border-[#c8ced8] transition-all ${
+              className={`text-left bg-(--bg-card) rounded-xl p-6 border-l-4 ${item.color} border border-(--border-main) transition-all ${
                 item.enabled
-                  ? 'hover:shadow-md hover:bg-[#dce1e9] cursor-pointer'
+                  ? 'hover:shadow-md hover:bg-(--bg-main) cursor-pointer'
                   : 'opacity-50 cursor-not-allowed'
               }`}
             >

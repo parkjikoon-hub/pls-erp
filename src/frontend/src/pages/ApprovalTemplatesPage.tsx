@@ -4,6 +4,7 @@
 import { useState, useEffect } from 'react';
 import { listTemplates, createTemplate, deleteTemplate, type Template } from '../api/groupware/approvals';
 import api from '../api/client';
+import BackButton from '../components/BackButton';
 
 interface UserOption { id: string; name: string; }
 
@@ -77,7 +78,10 @@ export default function ApprovalTemplatesPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-slate-800">결재선 템플릿</h1>
+        <div className="flex items-center gap-3">
+          <BackButton to="/groupware" />
+          <h1 className="text-2xl font-bold text-slate-800">결재선 템플릿</h1>
+        </div>
         <button
           onClick={() => setShowForm(!showForm)}
           className="px-4 py-2 bg-violet-600 text-white rounded-lg hover:bg-violet-700 transition text-sm font-medium"
@@ -88,23 +92,23 @@ export default function ApprovalTemplatesPage() {
 
       {/* 생성 폼 */}
       {showForm && (
-        <div className="bg-white rounded-xl border border-[#c8ced8] p-5 space-y-4">
+        <div className="bg-white rounded-xl border border-(--border-main) p-5 space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-slate-600 mb-1">템플릿 이름</label>
               <input value={name} onChange={e => setName(e.target.value)}
-                className="w-full border border-[#c8ced8] rounded-lg px-3 py-2 text-sm" placeholder="예: 일반품의 결재선" />
+                className="w-full border border-(--border-main) rounded-lg px-3 py-2 text-sm" placeholder="예: 일반품의 결재선" />
             </div>
             <div>
               <label className="block text-sm font-medium text-slate-600 mb-1">문서 유형 (선택)</label>
               <input value={docType} onChange={e => setDocType(e.target.value)}
-                className="w-full border border-[#c8ced8] rounded-lg px-3 py-2 text-sm" placeholder="general" />
+                className="w-full border border-(--border-main) rounded-lg px-3 py-2 text-sm" placeholder="general" />
             </div>
           </div>
           <div>
             <label className="block text-sm font-medium text-slate-600 mb-1">설명</label>
             <input value={desc} onChange={e => setDesc(e.target.value)}
-              className="w-full border border-[#c8ced8] rounded-lg px-3 py-2 text-sm" placeholder="템플릿 설명" />
+              className="w-full border border-(--border-main) rounded-lg px-3 py-2 text-sm" placeholder="템플릿 설명" />
           </div>
 
           {/* 라인 */}
@@ -119,13 +123,13 @@ export default function ApprovalTemplatesPage() {
                   </span>
                   <select value={ln.approver_id} onChange={e => {
                     const updated = [...lines]; updated[idx] = { ...updated[idx], approver_id: e.target.value }; setLines(updated);
-                  }} className="flex-1 border border-[#c8ced8] rounded px-2 py-1 text-sm">
+                  }} className="flex-1 border border-(--border-main) rounded px-2 py-1 text-sm">
                     <option value="">선택</option>
                     {users.map(u => <option key={u.id} value={u.id}>{u.name}</option>)}
                   </select>
                   <input value={ln.role_label} onChange={e => {
                     const updated = [...lines]; updated[idx] = { ...updated[idx], role_label: e.target.value }; setLines(updated);
-                  }} className="w-24 border border-[#c8ced8] rounded px-2 py-1 text-sm" placeholder="역할명" />
+                  }} className="w-24 border border-(--border-main) rounded px-2 py-1 text-sm" placeholder="역할명" />
                   <button onClick={() => removeLine(idx)} className="text-red-400 hover:text-red-600 text-sm">삭제</button>
                 </div>
               ))}
@@ -147,7 +151,7 @@ export default function ApprovalTemplatesPage() {
           <p className="text-slate-400 col-span-2 text-center py-10">등록된 템플릿이 없습니다</p>
         ) : (
           templates.map(tpl => (
-            <div key={tpl.id} className="bg-white rounded-xl border border-[#c8ced8] p-4">
+            <div key={tpl.id} className="bg-white rounded-xl border border-(--border-main) p-4">
               <div className="flex items-start justify-between">
                 <div>
                   <h3 className="font-bold text-slate-800">{tpl.name}</h3>

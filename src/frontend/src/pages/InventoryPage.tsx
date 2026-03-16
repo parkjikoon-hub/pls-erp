@@ -158,7 +158,7 @@ export default function InventoryPage() {
             className={`p-3 rounded-lg border cursor-pointer transition ${
               zoneFilter === wh.zone_type
                 ? ZONE_COLORS[wh.zone_type] + ' border-2'
-                : 'bg-white border-[#c8ced8] hover:bg-slate-50'
+                : 'bg-white border-(--border-main) hover:bg-slate-50'
             }`}
           >
             <div className="text-xs text-slate-500">{ZONE_LABELS[wh.zone_type]}</div>
@@ -169,7 +169,7 @@ export default function InventoryPage() {
       </div>
 
       {/* 탭 */}
-      <div className="flex gap-1 mb-4 border-b border-[#c8ced8]">
+      <div className="flex gap-1 mb-4 border-b border-(--border-main)">
         {(['inventory', 'transactions', 'shortage'] as const).map((t) => (
           <button
             key={t}
@@ -196,12 +196,12 @@ export default function InventoryPage() {
               placeholder="품목명/코드 검색..."
               value={search}
               onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-              className="border border-[#c8ced8] rounded-lg px-3 py-1.5 text-sm flex-1 max-w-xs"
+              className="border border-(--border-main) rounded-lg px-3 py-1.5 text-sm flex-1 max-w-xs"
             />
           </div>
-          <div className="bg-white rounded-xl border border-[#c8ced8] overflow-hidden">
+          <div className="bg-white rounded-xl border border-(--border-main) overflow-hidden">
             <table className="w-full text-sm">
-              <thead className="bg-[#e8ecf2] text-slate-600">
+              <thead className="bg-(--bg-card) text-slate-600">
                 <tr>
                   <th className="px-4 py-2 text-left">품목코드</th>
                   <th className="px-4 py-2 text-left">품목명</th>
@@ -221,7 +221,7 @@ export default function InventoryPage() {
                   items.map((inv) => {
                     const isShortage = inv.safety_stock > 0 && inv.quantity < inv.safety_stock;
                     return (
-                      <tr key={inv.id} className={`border-t border-[#e8ecf2] ${isShortage ? 'bg-red-50' : 'hover:bg-[#f1f4f8]'}`}>
+                      <tr key={inv.id} className={`border-t border-[#e8ecf2] ${isShortage ? 'bg-red-50' : 'hover:bg-(--bg-hover)'}`}>
                         <td className="px-4 py-2 text-slate-500">{inv.product_code}</td>
                         <td className="px-4 py-2 font-medium text-slate-700">{inv.product_name}</td>
                         <td className="px-4 py-2 text-slate-600">{inv.warehouse_name}</td>
@@ -249,9 +249,9 @@ export default function InventoryPage() {
 
       {/* 이동 이력 탭 */}
       {tab === 'transactions' && (
-        <div className="bg-white rounded-xl border border-[#c8ced8] overflow-hidden">
+        <div className="bg-white rounded-xl border border-(--border-main) overflow-hidden">
           <table className="w-full text-sm">
-            <thead className="bg-[#e8ecf2] text-slate-600">
+            <thead className="bg-(--bg-card) text-slate-600">
               <tr>
                 <th className="px-4 py-2 text-left">일시</th>
                 <th className="px-4 py-2 text-center">유형</th>
@@ -267,7 +267,7 @@ export default function InventoryPage() {
                 <tr><td colSpan={7} className="px-4 py-8 text-center text-slate-400">이력 없음</td></tr>
               ) : (
                 transactions.map((tx: any) => (
-                  <tr key={tx.id} className="border-t border-[#e8ecf2] hover:bg-[#f1f4f8]">
+                  <tr key={tx.id} className="border-t border-[#e8ecf2] hover:bg-(--bg-hover)">
                     <td className="px-4 py-2 text-slate-500 text-xs">
                       {tx.created_at ? new Date(tx.created_at).toLocaleString('ko') : '-'}
                     </td>
@@ -291,9 +291,9 @@ export default function InventoryPage() {
 
       {/* 부족 알림 탭 */}
       {tab === 'shortage' && (
-        <div className="bg-white rounded-xl border border-[#c8ced8] overflow-hidden">
+        <div className="bg-white rounded-xl border border-(--border-main) overflow-hidden">
           <table className="w-full text-sm">
-            <thead className="bg-[#e8ecf2] text-slate-600">
+            <thead className="bg-(--bg-card) text-slate-600">
               <tr>
                 <th className="px-4 py-2 text-left">품목코드</th>
                 <th className="px-4 py-2 text-left">품목명</th>
@@ -335,7 +335,7 @@ export default function InventoryPage() {
               <select
                 value={modalForm.product_id}
                 onChange={(e) => setModalForm({ ...modalForm, product_id: e.target.value })}
-                className="w-full border border-[#c8ced8] rounded-lg px-3 py-2 text-sm"
+                className="w-full border border-(--border-main) rounded-lg px-3 py-2 text-sm"
               >
                 <option value="">선택...</option>
                 {products.map((p) => (
@@ -352,7 +352,7 @@ export default function InventoryPage() {
                   <select
                     value={modalForm.from_warehouse_id}
                     onChange={(e) => setModalForm({ ...modalForm, from_warehouse_id: e.target.value })}
-                    className="w-full border border-[#c8ced8] rounded-lg px-3 py-2 text-sm"
+                    className="w-full border border-(--border-main) rounded-lg px-3 py-2 text-sm"
                   >
                     <option value="">선택...</option>
                     {warehouses.map((w) => (
@@ -365,7 +365,7 @@ export default function InventoryPage() {
                   <select
                     value={modalForm.to_warehouse_id}
                     onChange={(e) => setModalForm({ ...modalForm, to_warehouse_id: e.target.value })}
-                    className="w-full border border-[#c8ced8] rounded-lg px-3 py-2 text-sm"
+                    className="w-full border border-(--border-main) rounded-lg px-3 py-2 text-sm"
                   >
                     <option value="">선택...</option>
                     {warehouses.map((w) => (
@@ -380,7 +380,7 @@ export default function InventoryPage() {
                 <select
                   value={modalForm.warehouse_id}
                   onChange={(e) => setModalForm({ ...modalForm, warehouse_id: e.target.value })}
-                  className="w-full border border-[#c8ced8] rounded-lg px-3 py-2 text-sm"
+                  className="w-full border border-(--border-main) rounded-lg px-3 py-2 text-sm"
                 >
                   <option value="">선택...</option>
                   {warehouses.map((w) => (
@@ -404,7 +404,7 @@ export default function InventoryPage() {
                   ...modalForm,
                   [modalType === 'adjust' ? 'new_quantity' : 'quantity']: Number(e.target.value),
                 })}
-                className="w-full border border-[#c8ced8] rounded-lg px-3 py-2 text-sm"
+                className="w-full border border-(--border-main) rounded-lg px-3 py-2 text-sm"
               />
             </div>
 
@@ -417,7 +417,7 @@ export default function InventoryPage() {
                   min={0}
                   value={modalForm.unit_cost}
                   onChange={(e) => setModalForm({ ...modalForm, unit_cost: Number(e.target.value) })}
-                  className="w-full border border-[#c8ced8] rounded-lg px-3 py-2 text-sm"
+                  className="w-full border border-(--border-main) rounded-lg px-3 py-2 text-sm"
                 />
               </div>
             )}
@@ -431,7 +431,7 @@ export default function InventoryPage() {
                 type="text"
                 value={modalForm.notes}
                 onChange={(e) => setModalForm({ ...modalForm, notes: e.target.value })}
-                className="w-full border border-[#c8ced8] rounded-lg px-3 py-2 text-sm"
+                className="w-full border border-(--border-main) rounded-lg px-3 py-2 text-sm"
                 placeholder={modalType === 'adjust' ? '조정 사유를 입력하세요' : '메모'}
               />
             </div>
@@ -439,7 +439,7 @@ export default function InventoryPage() {
             <div className="flex justify-end gap-2">
               <button
                 onClick={() => setModalType(null)}
-                className="px-4 py-2 border border-[#c8ced8] rounded-lg text-sm text-slate-600 hover:bg-slate-50"
+                className="px-4 py-2 border border-(--border-main) rounded-lg text-sm text-slate-600 hover:bg-slate-50"
               >
                 취소
               </button>

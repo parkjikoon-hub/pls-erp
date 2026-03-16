@@ -131,7 +131,7 @@ export default function QcPage() {
             className={`px-3 py-1.5 rounded-lg text-sm font-medium transition ${
               resultFilter === f.value
                 ? 'bg-blue-600 text-white'
-                : 'bg-white text-slate-600 border border-[#c8ced8] hover:bg-slate-50'
+                : 'bg-white text-slate-600 border border-(--border-main) hover:bg-slate-50'
             }`}
           >
             {f.label}
@@ -140,10 +140,10 @@ export default function QcPage() {
       </div>
 
       {/* ── 검사 이력 테이블 ── */}
-      <div className="bg-white rounded-xl border border-[#c8ced8] overflow-hidden">
+      <div className="bg-white rounded-xl border border-(--border-main) overflow-hidden">
         <table className="w-full text-sm">
           <thead>
-            <tr className="bg-[#e8ecf2] text-slate-700">
+            <tr className="bg-(--bg-card) text-slate-700">
               <th className="text-left px-4 py-3 font-semibold">작업지시번호</th>
               <th className="text-left px-4 py-3 font-semibold">품목</th>
               <th className="text-right px-4 py-3 font-semibold">검사수량</th>
@@ -198,7 +198,7 @@ export default function QcPage() {
             <div>
               <label className="block text-sm font-medium text-slate-600 mb-1">작업지시서 (QC대기)</label>
               <select
-                className="w-full border border-[#c8ced8] rounded-lg px-3 py-2 text-sm"
+                className="w-full border border-(--border-main) rounded-lg px-3 py-2 text-sm"
                 value={form.work_order_id}
                 onChange={(e) => handleWoSelect(e.target.value)}
               >
@@ -220,7 +220,7 @@ export default function QcPage() {
                 <label className="block text-sm font-medium text-slate-600 mb-1">검사수량</label>
                 <input
                   type="number" min={0}
-                  className="w-full border border-[#c8ced8] rounded-lg px-3 py-2 text-sm"
+                  className="w-full border border-(--border-main) rounded-lg px-3 py-2 text-sm"
                   value={form.inspected_qty}
                   onChange={(e) => {
                     const v = Number(e.target.value);
@@ -232,7 +232,7 @@ export default function QcPage() {
                 <label className="block text-sm font-medium text-slate-600 mb-1">합격수량</label>
                 <input
                   type="number" min={0} max={form.inspected_qty}
-                  className="w-full border border-[#c8ced8] rounded-lg px-3 py-2 text-sm"
+                  className="w-full border border-(--border-main) rounded-lg px-3 py-2 text-sm"
                   value={form.passed_qty}
                   onChange={(e) => handlePassedChange(Number(e.target.value))}
                 />
@@ -241,7 +241,7 @@ export default function QcPage() {
                 <label className="block text-sm font-medium text-slate-600 mb-1">불합격수량</label>
                 <input
                   type="number" readOnly
-                  className="w-full border border-[#c8ced8] rounded-lg px-3 py-2 text-sm bg-slate-50"
+                  className="w-full border border-(--border-main) rounded-lg px-3 py-2 text-sm bg-slate-50"
                   value={form.failed_qty}
                 />
               </div>
@@ -275,7 +275,7 @@ export default function QcPage() {
                       className={`flex-1 py-2 rounded-lg text-sm font-medium border transition ${
                         form.result === r
                           ? `${rs.bg} ${rs.color} border-current`
-                          : 'bg-white text-slate-500 border-[#c8ced8] hover:bg-slate-50'
+                          : 'bg-white text-slate-500 border-(--border-main) hover:bg-slate-50'
                       }`}
                     >
                       {rs.label}
@@ -289,7 +289,7 @@ export default function QcPage() {
             <div>
               <label className="block text-sm font-medium text-slate-600 mb-1">비고</label>
               <textarea
-                className="w-full border border-[#c8ced8] rounded-lg px-3 py-2 text-sm resize-none"
+                className="w-full border border-(--border-main) rounded-lg px-3 py-2 text-sm resize-none"
                 rows={2}
                 value={form.notes}
                 onChange={(e) => setForm(prev => ({ ...prev, notes: e.target.value }))}
@@ -301,7 +301,7 @@ export default function QcPage() {
             <div className="flex justify-end gap-2 pt-2">
               <button
                 onClick={() => setShowCreate(false)}
-                className="px-4 py-2 text-sm text-slate-600 border border-[#c8ced8] rounded-lg hover:bg-slate-50"
+                className="px-4 py-2 text-sm text-slate-600 border border-(--border-main) rounded-lg hover:bg-slate-50"
               >
                 취소
               </button>

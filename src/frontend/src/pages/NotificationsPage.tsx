@@ -94,7 +94,7 @@ export default function NotificationsPage() {
         {tab !== 'settings' && (
           <button
             onClick={handleMarkAllRead}
-            className="px-3 py-1.5 text-sm text-slate-500 hover:text-slate-700 border border-[#c8ced8] rounded-lg hover:bg-slate-50 transition"
+            className="px-3 py-1.5 text-sm text-slate-500 hover:text-slate-700 border border-(--border-main) rounded-lg hover:bg-slate-50 transition"
           >
             전체 읽음
           </button>
@@ -121,7 +121,7 @@ export default function NotificationsPage() {
           <select
             value={typeFilter}
             onChange={e => { setTypeFilter(e.target.value); setPage(1); }}
-            className="border border-[#c8ced8] rounded-lg px-2 py-1.5 text-sm"
+            className="border border-(--border-main) rounded-lg px-2 py-1.5 text-sm"
           >
             <option value="">전체 유형</option>
             {Object.entries(TYPE_BADGE).map(([k, v]) => (
@@ -133,7 +133,7 @@ export default function NotificationsPage() {
 
       {/* 알림 목록 */}
       {tab !== 'settings' && (
-        <div className="bg-white rounded-xl border border-[#c8ced8] divide-y divide-[#c8ced8]">
+        <div className="bg-white rounded-xl border border-(--border-main) divide-y divide-[#c8ced8]">
           {loading ? (
             <div className="text-center py-12 text-slate-400">불러오는 중...</div>
           ) : items.length === 0 ? (
@@ -180,19 +180,19 @@ export default function NotificationsPage() {
       {tab !== 'settings' && total > 30 && (
         <div className="flex justify-center gap-2">
           <button disabled={page <= 1} onClick={() => setPage(p => p - 1)}
-            className="px-3 py-1 border border-[#c8ced8] rounded text-sm disabled:opacity-30">이전</button>
+            className="px-3 py-1 border border-(--border-main) rounded text-sm disabled:opacity-30">이전</button>
           <span className="text-sm text-slate-500 py-1">{page} / {Math.ceil(total / 30)}</span>
           <button disabled={page >= Math.ceil(total / 30)} onClick={() => setPage(p => p + 1)}
-            className="px-3 py-1 border border-[#c8ced8] rounded text-sm disabled:opacity-30">다음</button>
+            className="px-3 py-1 border border-(--border-main) rounded text-sm disabled:opacity-30">다음</button>
         </div>
       )}
 
       {/* 알림 설정 */}
       {tab === 'settings' && (
-        <div className="bg-white rounded-xl border border-[#c8ced8] overflow-hidden">
+        <div className="bg-white rounded-xl border border-(--border-main) overflow-hidden">
           <table className="w-full text-sm">
             <thead>
-              <tr className="bg-[#e8ecf2] text-slate-600 text-xs uppercase">
+              <tr className="bg-(--bg-card) text-slate-600 text-xs uppercase">
                 <th className="text-left py-3 px-5 font-semibold">알림 유형</th>
                 <th className="text-center py-3 px-5 font-semibold">인앱 알림</th>
                 <th className="text-center py-3 px-5 font-semibold">이메일 알림</th>
@@ -200,7 +200,7 @@ export default function NotificationsPage() {
             </thead>
             <tbody>
               {settings.map(s => (
-                <tr key={s.notification_type} className="border-t border-[#c8ced8]">
+                <tr key={s.notification_type} className="border-t border-(--border-main)">
                   <td className="py-3 px-5 font-medium text-slate-700">{s.label}</td>
                   <td className="py-3 px-5 text-center">
                     <button

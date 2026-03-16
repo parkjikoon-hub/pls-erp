@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getApproval, approveRequest, rejectRequest, type ApprovalDetail } from '../api/groupware/approvals';
 import { useAuthStore } from '../stores/authStore';
+import BackButton from '../components/BackButton';
 
 const STATUS_BADGE: Record<string, { text: string; cls: string }> = {
   draft:    { text: '임시저장', cls: 'bg-slate-100 text-slate-600' },
@@ -63,9 +64,12 @@ export default function ApprovalDetailPage() {
     <div className="max-w-3xl mx-auto space-y-6">
       {/* 헤더 */}
       <div className="flex items-center justify-between">
-        <div>
-          <p className="text-xs text-slate-400 font-mono">{detail.request_no}</p>
-          <h1 className="text-2xl font-bold text-slate-800 mt-1">{detail.title}</h1>
+        <div className="flex items-center gap-3">
+          <BackButton to="/groupware/approvals" />
+          <div>
+            <p className="text-xs text-slate-400 font-mono">{detail.request_no}</p>
+            <h1 className="text-2xl font-bold text-slate-800 mt-1">{detail.title}</h1>
+          </div>
         </div>
         <span className={`px-3 py-1 rounded-full text-sm font-medium ${badge.cls}`}>
           {badge.text}
@@ -73,7 +77,7 @@ export default function ApprovalDetailPage() {
       </div>
 
       {/* 기본 정보 */}
-      <div className="bg-white rounded-xl border border-[#c8ced8] p-5">
+      <div className="bg-white rounded-xl border border-(--border-main) p-5">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
           <div>
             <span className="text-slate-400">문서 유형</span>
@@ -99,7 +103,7 @@ export default function ApprovalDetailPage() {
 
         {/* 본문 */}
         {detail.content?.body != null && (
-          <div className="mt-4 pt-4 border-t border-[#c8ced8]">
+          <div className="mt-4 pt-4 border-t border-(--border-main)">
             <h3 className="text-sm font-medium text-slate-600 mb-2">내용</h3>
             <div className="text-sm text-slate-700 whitespace-pre-wrap bg-slate-50 rounded-lg p-4">
               {String(detail.content.body as string)}
@@ -109,7 +113,7 @@ export default function ApprovalDetailPage() {
       </div>
 
       {/* 결재선 */}
-      <div className="bg-white rounded-xl border border-[#c8ced8] p-5">
+      <div className="bg-white rounded-xl border border-(--border-main) p-5">
         <h3 className="font-bold text-slate-700 mb-4">결재선</h3>
         <div className="space-y-3">
           {detail.steps.filter(s => s.step_type === 'approval').map(step => {
@@ -119,7 +123,7 @@ export default function ApprovalDetailPage() {
               <div
                 key={step.id}
                 className={`flex items-center gap-3 p-3 rounded-lg border ${
-                  isCurrent ? 'border-cyan-300 bg-cyan-50' : 'border-[#c8ced8]'
+                  isCurrent ? 'border-cyan-300 bg-cyan-50' : 'border-(--border-main)'
                 }`}
               >
                 <div className="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center text-sm font-bold text-slate-600">
@@ -163,13 +167,13 @@ export default function ApprovalDetailPage() {
 
       {/* 승인/반려 액션 */}
       {canAct && (
-        <div className="bg-white rounded-xl border border-[#c8ced8] p-5 space-y-3">
+        <div className="bg-white rounded-xl border border-(--border-main) p-5 space-y-3">
           <h3 className="font-bold text-slate-700">결재 의견</h3>
           <textarea
             value={comment}
             onChange={e => setComment(e.target.value)}
             rows={3}
-            className="w-full border border-[#c8ced8] rounded-lg px-3 py-2 text-sm resize-none"
+            className="w-full border border-(--border-main) rounded-lg px-3 py-2 text-sm resize-none"
             placeholder="의견을 입력하세요 (선택사항)"
           />
           <div className="flex gap-3 justify-end">

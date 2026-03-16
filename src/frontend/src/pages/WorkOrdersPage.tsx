@@ -142,7 +142,7 @@ export default function WorkOrdersPage() {
     const nextStatus = NEXT_STATUS[wo.status];
 
     return (
-      <div className={`p-3 rounded-lg border ${isOverdue ? 'border-red-300 bg-red-50' : 'border-[#c8ced8] bg-white'} mb-2`}>
+      <div className={`p-3 rounded-lg border ${isOverdue ? 'border-red-300 bg-red-50' : 'border-(--border-main) bg-white'} mb-2`}>
         <div className="flex items-center justify-between mb-1">
           <span className="text-xs font-mono text-slate-500">{wo.wo_no}</span>
           <span className={`text-xs px-1.5 py-0.5 rounded ${
@@ -207,7 +207,7 @@ export default function WorkOrdersPage() {
         <div className="flex gap-2">
           <button
             onClick={() => setViewMode(viewMode === 'kanban' ? 'list' : 'kanban')}
-            className="px-3 py-2 border border-[#c8ced8] rounded-lg text-sm text-slate-600 hover:bg-slate-50"
+            className="px-3 py-2 border border-(--border-main) rounded-lg text-sm text-slate-600 hover:bg-slate-50"
           >
             {viewMode === 'kanban' ? '리스트 뷰' : '칸반 뷰'}
           </button>
@@ -252,9 +252,9 @@ export default function WorkOrdersPage() {
 
       {/* 리스트 뷰 */}
       {viewMode === 'list' && (
-        <div className="bg-white rounded-xl border border-[#c8ced8] overflow-hidden">
+        <div className="bg-white rounded-xl border border-(--border-main) overflow-hidden">
           <table className="w-full text-sm">
-            <thead className="bg-[#e8ecf2] text-slate-600">
+            <thead className="bg-(--bg-card) text-slate-600">
               <tr>
                 <th className="px-4 py-2 text-left">지시번호</th>
                 <th className="px-4 py-2 text-center">유형</th>
@@ -272,7 +272,7 @@ export default function WorkOrdersPage() {
                 const st = STATUS_MAP[wo.status] || STATUS_MAP.pending;
                 const isOverdue = new Date(wo.due_date) < new Date() && wo.status !== 'completed';
                 return (
-                  <tr key={wo.id} className={`border-t border-[#e8ecf2] ${isOverdue ? 'bg-red-50' : 'hover:bg-[#f1f4f8]'}`}>
+                  <tr key={wo.id} className={`border-t border-[#e8ecf2] ${isOverdue ? 'bg-red-50' : 'hover:bg-(--bg-hover)'}`}>
                     <td className="px-4 py-2 font-mono text-slate-700">{wo.wo_no}</td>
                     <td className="px-4 py-2 text-center">
                       <span className={`text-xs px-1.5 py-0.5 rounded ${
@@ -327,7 +327,7 @@ export default function WorkOrdersPage() {
                 <select
                   value={form.product_id}
                   onChange={(e) => setForm({ ...form, product_id: e.target.value })}
-                  className="w-full border border-[#c8ced8] rounded-lg px-3 py-2 text-sm"
+                  className="w-full border border-(--border-main) rounded-lg px-3 py-2 text-sm"
                 >
                   <option value="">선택...</option>
                   {products.map((p) => (
@@ -340,7 +340,7 @@ export default function WorkOrdersPage() {
                 <input
                   type="number" min={1} value={form.planned_qty}
                   onChange={(e) => setForm({ ...form, planned_qty: Number(e.target.value) })}
-                  className="w-full border border-[#c8ced8] rounded-lg px-3 py-2 text-sm"
+                  className="w-full border border-(--border-main) rounded-lg px-3 py-2 text-sm"
                 />
               </div>
               <div>
@@ -348,7 +348,7 @@ export default function WorkOrdersPage() {
                 <input
                   type="date" value={form.due_date}
                   onChange={(e) => setForm({ ...form, due_date: e.target.value })}
-                  className="w-full border border-[#c8ced8] rounded-lg px-3 py-2 text-sm"
+                  className="w-full border border-(--border-main) rounded-lg px-3 py-2 text-sm"
                 />
               </div>
               <div>
@@ -356,12 +356,12 @@ export default function WorkOrdersPage() {
                 <input
                   type="text" value={form.notes || ''}
                   onChange={(e) => setForm({ ...form, notes: e.target.value })}
-                  className="w-full border border-[#c8ced8] rounded-lg px-3 py-2 text-sm"
+                  className="w-full border border-(--border-main) rounded-lg px-3 py-2 text-sm"
                 />
               </div>
             </div>
             <div className="flex justify-end gap-2 mt-4">
-              <button onClick={() => setShowCreate(false)} className="px-4 py-2 border border-[#c8ced8] rounded-lg text-sm">취소</button>
+              <button onClick={() => setShowCreate(false)} className="px-4 py-2 border border-(--border-main) rounded-lg text-sm">취소</button>
               <button onClick={handleCreate} className="px-4 py-2 bg-emerald-600 text-white rounded-lg text-sm hover:bg-emerald-700">생성</button>
             </div>
           </div>
@@ -413,7 +413,7 @@ export default function WorkOrdersPage() {
             ) : (
               <div>
                 <table className="w-full text-sm mb-4">
-                  <thead className="bg-[#e8ecf2] text-slate-600">
+                  <thead className="bg-(--bg-card) text-slate-600">
                     <tr>
                       <th className="px-3 py-2 text-left">수주번호</th>
                       <th className="px-3 py-2 text-left">거래처</th>
@@ -427,7 +427,7 @@ export default function WorkOrdersPage() {
                       <tr><td colSpan={5} className="px-3 py-4 text-center text-slate-400">전환 가능한 수주가 없습니다</td></tr>
                     ) : (
                       orders.map((o: any) => (
-                        <tr key={o.id} className="border-t border-[#e8ecf2] hover:bg-[#f1f4f8]">
+                        <tr key={o.id} className="border-t border-[#e8ecf2] hover:bg-(--bg-hover)">
                           <td className="px-3 py-2 font-medium">{o.order_no}</td>
                           <td className="px-3 py-2 text-slate-600">{o.customer_name}</td>
                           <td className="px-3 py-2 text-slate-500">{o.order_date}</td>
@@ -446,7 +446,7 @@ export default function WorkOrdersPage() {
                   </tbody>
                 </table>
                 <div className="flex justify-end">
-                  <button onClick={() => setShowOrderModal(false)} className="px-4 py-2 border border-[#c8ced8] rounded-lg text-sm">닫기</button>
+                  <button onClick={() => setShowOrderModal(false)} className="px-4 py-2 border border-(--border-main) rounded-lg text-sm">닫기</button>
                 </div>
               </div>
             )}
@@ -468,11 +468,11 @@ export default function WorkOrdersPage() {
                 type="number" min={0} max={progressWo.planned_qty}
                 value={progressQty}
                 onChange={(e) => setProgressQty(Number(e.target.value))}
-                className="w-full border border-[#c8ced8] rounded-lg px-3 py-2 text-sm"
+                className="w-full border border-(--border-main) rounded-lg px-3 py-2 text-sm"
               />
             </div>
             <div className="flex justify-end gap-2">
-              <button onClick={() => setShowProgress(false)} className="px-4 py-2 border border-[#c8ced8] rounded-lg text-sm">취소</button>
+              <button onClick={() => setShowProgress(false)} className="px-4 py-2 border border-(--border-main) rounded-lg text-sm">취소</button>
               <button onClick={handleProgress} className="px-4 py-2 bg-emerald-600 text-white rounded-lg text-sm hover:bg-emerald-700">보고</button>
             </div>
           </div>

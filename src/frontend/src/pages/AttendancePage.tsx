@@ -3,13 +3,12 @@
  * 예외 기반: 정상출근은 기록하지 않고, 휴가/병가/결근만 입력
  */
 import { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
 import {
   PlusIcon,
   TrashIcon,
   XMarkIcon,
-  ArrowLeftIcon,
 } from '@heroicons/react/24/outline';
+import BackButton from '../components/BackButton';
 import {
   fetchAttendance,
   createAttendance,
@@ -45,7 +44,6 @@ const LEAVE_TYPE_LABELS: Record<string, string> = {
 };
 
 export default function AttendancePage() {
-  const navigate = useNavigate();
   const { user } = useAuthStore();
   const isManager = user?.role === 'admin' || user?.role === 'manager';
   const now = new Date();
@@ -187,12 +185,7 @@ export default function AttendancePage() {
     <div>
       {/* 페이지 헤더 */}
       <div className="flex items-center gap-3 mb-4">
-        <button
-          onClick={() => navigate('/hr')}
-          className="p-1.5 rounded-lg hover:bg-[#c8ced8] transition-colors"
-        >
-          <ArrowLeftIcon className="w-5 h-5 text-slate-600" />
-        </button>
+        <BackButton to="/hr" />
         <div>
           <h1 className="text-xl font-bold text-slate-800">근태/휴가 관리</h1>
           <p className="text-sm text-slate-500">
@@ -202,12 +195,12 @@ export default function AttendancePage() {
       </div>
 
       {/* 필터 바 */}
-      <div className="bg-[#e8ecf2] rounded-xl p-4 border border-[#c8ced8] mb-4">
+      <div className="bg-(--bg-card) rounded-xl p-4 border border-(--border-main) mb-4">
         <div className="flex flex-wrap items-center gap-3">
           <select
             value={yearFilter}
             onChange={(e) => setYearFilter(Number(e.target.value))}
-            className="px-3 py-2 text-sm rounded-lg border border-[#c8ced8] bg-white focus:outline-none focus:border-violet-500"
+            className="px-3 py-2 text-sm rounded-lg border border-(--border-main) bg-white focus:outline-none focus:border-violet-500"
           >
             {[2024, 2025, 2026, 2027].map((y) => (
               <option key={y} value={y}>{y}년</option>
@@ -216,7 +209,7 @@ export default function AttendancePage() {
           <select
             value={monthFilter}
             onChange={(e) => setMonthFilter(Number(e.target.value))}
-            className="px-3 py-2 text-sm rounded-lg border border-[#c8ced8] bg-white focus:outline-none focus:border-violet-500"
+            className="px-3 py-2 text-sm rounded-lg border border-(--border-main) bg-white focus:outline-none focus:border-violet-500"
           >
             {Array.from({ length: 12 }, (_, i) => (
               <option key={i + 1} value={i + 1}>{i + 1}월</option>
@@ -225,7 +218,7 @@ export default function AttendancePage() {
           <select
             value={typeFilter}
             onChange={(e) => setTypeFilter(e.target.value)}
-            className="px-3 py-2 text-sm rounded-lg border border-[#c8ced8] bg-white focus:outline-none focus:border-violet-500"
+            className="px-3 py-2 text-sm rounded-lg border border-(--border-main) bg-white focus:outline-none focus:border-violet-500"
           >
             <option value="">전체 유형</option>
             <option value="leave">연차</option>
@@ -248,11 +241,11 @@ export default function AttendancePage() {
       </div>
 
       {/* 테이블 */}
-      <div className="bg-[#e8ecf2] rounded-xl border border-[#c8ced8] overflow-hidden">
+      <div className="bg-(--bg-card) rounded-xl border border-(--border-main) overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="bg-[#dce1e9] text-slate-600">
+              <tr className="bg-(--bg-main) text-slate-600">
                 <th className="text-left px-4 py-3 font-semibold w-24">날짜</th>
                 <th className="text-left px-4 py-3 font-semibold w-20">사번</th>
                 <th className="text-left px-4 py-3 font-semibold">이름</th>
@@ -280,7 +273,7 @@ export default function AttendancePage() {
                 </tr>
               ) : (
                 data.items.map((rec) => (
-                  <tr key={rec.id} className="border-t border-[#c8ced8] hover:bg-[#dce1e9]/50 transition-colors">
+                  <tr key={rec.id} className="border-t border-(--border-main) hover:bg-(--bg-main)/50 transition-colors">
                     <td className="px-4 py-3 text-xs text-slate-600">{rec.work_date}</td>
                     <td className="px-4 py-3 font-mono text-xs">{rec.employee_no}</td>
                     <td className="px-4 py-3 font-medium text-slate-700">{rec.employee_name}</td>
@@ -318,10 +311,10 @@ export default function AttendancePage() {
       {/* ── 등록 모달 ── */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-          <div className="bg-[#e8ecf2] rounded-2xl shadow-xl w-full max-w-md border border-[#c8ced8]">
-            <div className="flex items-center justify-between px-6 py-4 border-b border-[#c8ced8]">
+          <div className="bg-(--bg-card) rounded-2xl shadow-xl w-full max-w-md border border-(--border-main)">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-(--border-main)">
               <h2 className="text-lg font-bold text-slate-800">근태 등록</h2>
-              <button onClick={() => setShowModal(false)} className="p-1 rounded-lg hover:bg-[#c8ced8]">
+              <button onClick={() => setShowModal(false)} className="p-1 rounded-lg hover:bg-(--border-main)">
                 <XMarkIcon className="w-5 h-5 text-slate-500" />
               </button>
             </div>
@@ -354,10 +347,10 @@ export default function AttendancePage() {
                       value={empSearch}
                       onChange={(e) => setEmpSearch(e.target.value)}
                       placeholder="이름 또는 사번 검색..."
-                      className="w-full px-3 py-2 text-sm rounded-lg border border-[#c8ced8] bg-white focus:outline-none focus:border-violet-500"
+                      className="w-full px-3 py-2 text-sm rounded-lg border border-(--border-main) bg-white focus:outline-none focus:border-violet-500"
                     />
                     {empResults.length > 0 && (
-                      <div className="absolute z-10 mt-1 w-full bg-white border border-[#c8ced8] rounded-lg shadow-lg max-h-40 overflow-y-auto">
+                      <div className="absolute z-10 mt-1 w-full bg-white border border-(--border-main) rounded-lg shadow-lg max-h-40 overflow-y-auto">
                         {empResults.map((e) => (
                           <button
                             key={e.id}
@@ -366,7 +359,7 @@ export default function AttendancePage() {
                               setForm((f) => ({ ...f, employee_id: e.id }));
                               setEmpResults([]);
                             }}
-                            className="w-full text-left px-3 py-2 text-sm hover:bg-violet-50 border-b border-[#c8ced8] last:border-0"
+                            className="w-full text-left px-3 py-2 text-sm hover:bg-violet-50 border-b border-(--border-main) last:border-0"
                           >
                             <span className="font-mono text-xs text-slate-500 mr-2">{e.employee_no}</span>
                             <span className="font-medium">{e.name}</span>
@@ -388,7 +381,7 @@ export default function AttendancePage() {
                   type="date"
                   value={form.work_date}
                   onChange={(e) => setForm((f) => ({ ...f, work_date: e.target.value }))}
-                  className="w-full px-3 py-2 text-sm rounded-lg border border-[#c8ced8] bg-white focus:outline-none focus:border-violet-500"
+                  className="w-full px-3 py-2 text-sm rounded-lg border border-(--border-main) bg-white focus:outline-none focus:border-violet-500"
                 />
               </div>
 
@@ -399,7 +392,7 @@ export default function AttendancePage() {
                   <select
                     value={form.attendance_type}
                     onChange={(e) => handleTypeChange(e.target.value)}
-                    className="w-full px-3 py-2 text-sm rounded-lg border border-[#c8ced8] bg-white focus:outline-none focus:border-violet-500"
+                    className="w-full px-3 py-2 text-sm rounded-lg border border-(--border-main) bg-white focus:outline-none focus:border-violet-500"
                   >
                     <option value="leave">연차</option>
                     <option value="half">반차</option>
@@ -414,7 +407,7 @@ export default function AttendancePage() {
                     <select
                       value={form.leave_type || ''}
                       onChange={(e) => setForm((f) => ({ ...f, leave_type: e.target.value }))}
-                      className="w-full px-3 py-2 text-sm rounded-lg border border-[#c8ced8] bg-white focus:outline-none focus:border-violet-500"
+                      className="w-full px-3 py-2 text-sm rounded-lg border border-(--border-main) bg-white focus:outline-none focus:border-violet-500"
                     >
                       {form.attendance_type === 'half' ? (
                         <>
@@ -440,15 +433,15 @@ export default function AttendancePage() {
                   onChange={(e) => setForm((f) => ({ ...f, memo: e.target.value }))}
                   rows={2}
                   placeholder="사유를 입력하세요 (선택)"
-                  className="w-full px-3 py-2 text-sm rounded-lg border border-[#c8ced8] bg-white focus:outline-none focus:border-violet-500 resize-none"
+                  className="w-full px-3 py-2 text-sm rounded-lg border border-(--border-main) bg-white focus:outline-none focus:border-violet-500 resize-none"
                 />
               </div>
             </div>
 
-            <div className="flex items-center justify-end gap-2 px-6 py-4 border-t border-[#c8ced8]">
+            <div className="flex items-center justify-end gap-2 px-6 py-4 border-t border-(--border-main)">
               <button
                 onClick={() => setShowModal(false)}
-                className="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-[#c8ced8] rounded-lg hover:bg-[#dce1e9]"
+                className="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-(--border-main) rounded-lg hover:bg-(--bg-main)"
               >
                 취소
               </button>
@@ -467,7 +460,7 @@ export default function AttendancePage() {
       {/* ── 삭제 확인 모달 ── */}
       {deleteTarget && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-          <div className="bg-[#e8ecf2] rounded-2xl shadow-xl w-full max-w-sm p-6 border border-[#c8ced8]">
+          <div className="bg-(--bg-card) rounded-2xl shadow-xl w-full max-w-sm p-6 border border-(--border-main)">
             <h3 className="text-lg font-bold text-slate-800 mb-2">근태 기록 삭제</h3>
             <p className="text-sm text-slate-600 mb-1">
               <strong>{deleteTarget.employee_name}</strong> — {deleteTarget.work_date}
@@ -481,7 +474,7 @@ export default function AttendancePage() {
             <div className="flex justify-end gap-2">
               <button
                 onClick={() => setDeleteTarget(null)}
-                className="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-[#c8ced8] rounded-lg hover:bg-[#dce1e9]"
+                className="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-(--border-main) rounded-lg hover:bg-(--bg-main)"
               >
                 취소
               </button>

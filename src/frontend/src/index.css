@@ -1,13 +1,48 @@
 @import "tailwindcss";
 
-/* PLS ERP 기본 스타일 — 시안 C 기반 */
+/* ── 테마 CSS 변수 ── */
+:root {
+  --bg-main: #dce1e9;
+  --bg-card: #e8ecf2;
+  --bg-hover: #f1f4f8;
+  --bg-input: #e8ecf2;
+  --bg-elevated: #eef1f5;
+  --border-main: #c8ced8;
+  --border-light: #d0d6de;
+  --text-primary: #1e293b;
+  --text-secondary: #475569;
+  --text-muted: #64748b;
+  --scrollbar-thumb: #b0b8c4;
+  --scrollbar-hover: #8e96a4;
+  --shadow-color: rgba(0,0,0,0.10);
+  --modal-overlay: rgba(0,0,0,0.3);
+}
+
+.dark {
+  --bg-main: #0f172a;
+  --bg-card: #1e293b;
+  --bg-hover: #334155;
+  --bg-input: #1e293b;
+  --bg-elevated: #1e293b;
+  --border-main: #334155;
+  --border-light: #475569;
+  --text-primary: #e2e8f0;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --scrollbar-thumb: #475569;
+  --scrollbar-hover: #64748b;
+  --shadow-color: rgba(0,0,0,0.3);
+  --modal-overlay: rgba(0,0,0,0.6);
+}
+
+/* PLS ERP 기본 스타일 */
 body {
   margin: 0;
   font-family: 'Pretendard', 'Malgun Gothic', system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
   font-size: 13px;
-  color: #1c1917;
-  background: #dce1e9;
+  color: var(--text-primary);
+  background: var(--bg-main);
   line-height: 1.5;
 }
 
@@ -15,8 +50,23 @@ body {
   min-height: 100vh;
 }
 
+/* 다크모드: bg-white 카드/테이블을 자동 변환 */
+.dark .bg-white { background-color: var(--bg-card) !important; }
+.dark .text-slate-800 { color: var(--text-primary); }
+.dark .text-slate-700 { color: var(--text-primary); }
+.dark .text-slate-600 { color: var(--text-secondary); }
+.dark .text-slate-500 { color: var(--text-muted); }
+.dark .text-slate-400 { color: var(--text-muted); }
+.dark .border-slate-200 { border-color: var(--border-main); }
+.dark .border-slate-100 { border-color: var(--border-main); }
+.dark .bg-slate-50 { background-color: var(--bg-elevated); }
+.dark .bg-slate-100 { background-color: var(--bg-hover); }
+.dark .bg-gray-100 { background-color: var(--bg-hover); }
+.dark .hover\:bg-gray-100:hover { background-color: var(--bg-hover); }
+.dark .hover\:bg-slate-50:hover { background-color: var(--bg-elevated); }
+
 /* 스크롤바 스타일 */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #b0b8c4; border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: #8e96a4; }
+::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--scrollbar-hover); }

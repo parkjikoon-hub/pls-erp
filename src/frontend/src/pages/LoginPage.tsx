@@ -60,7 +60,7 @@ export default function LoginPage() {
       </div>
 
       {/* 우측: 로그인 폼 */}
-      <div className="flex-1 bg-[#dce1e9] flex items-center justify-center px-8">
+      <div className="flex-1 bg-(--bg-main) flex items-center justify-center px-8">
         <form onSubmit={handleSubmit} className="w-full max-w-[380px]">
           <h2 className="text-2xl font-bold text-slate-800 mb-1">로그인</h2>
           <p className="text-sm text-slate-500 mb-8">PLS ERP에 로그인하세요</p>
@@ -81,7 +81,7 @@ export default function LoginPage() {
               onChange={(e) => setEmail(e.target.value)}
               placeholder="admin@pls-erp.com"
               required
-              className="w-full px-3.5 py-2.5 border-[1.5px] border-[#c8ced8] rounded-lg text-sm bg-[#e8ecf2] outline-none focus:border-emerald-500 focus:shadow-[0_0_0_3px_rgba(16,185,129,0.1)] focus:bg-[#edf1f7] transition-all"
+              className="w-full px-3.5 py-2.5 border-[1.5px] border-(--border-main) rounded-lg text-sm bg-(--bg-card) outline-none focus:border-emerald-500 focus:shadow-[0_0_0_3px_rgba(16,185,129,0.1)] focus:bg-(--bg-elevated) transition-all"
             />
           </div>
 
@@ -95,7 +95,7 @@ export default function LoginPage() {
               onChange={(e) => setPassword(e.target.value)}
               placeholder="비밀번호를 입력하세요"
               required
-              className="w-full px-3.5 py-2.5 border-[1.5px] border-[#c8ced8] rounded-lg text-sm bg-[#e8ecf2] outline-none focus:border-emerald-500 focus:shadow-[0_0_0_3px_rgba(16,185,129,0.1)] focus:bg-[#edf1f7] transition-all"
+              className="w-full px-3.5 py-2.5 border-[1.5px] border-(--border-main) rounded-lg text-sm bg-(--bg-card) outline-none focus:border-emerald-500 focus:shadow-[0_0_0_3px_rgba(16,185,129,0.1)] focus:bg-(--bg-elevated) transition-all"
             />
           </div>
 

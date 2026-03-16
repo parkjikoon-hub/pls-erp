@@ -3,7 +3,6 @@
  * 시안 C 기반 디자인 (슬레이트 블루그레이 + 에메랄드 액센트)
  */
 import { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
 import {
   MagnifyingGlassIcon,
   PlusIcon,
@@ -12,10 +11,10 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
   XMarkIcon,
-  ArrowLeftIcon,
   ArrowUpTrayIcon,
   BuildingOffice2Icon,
 } from '@heroicons/react/24/outline';
+import BackButton from '../components/BackButton';
 import {
   fetchCustomers,
   createCustomer,
@@ -57,7 +56,6 @@ const EMPTY_FORM: CustomerFormData = {
 };
 
 export default function CustomersPage() {
-  const navigate = useNavigate();
   const { user } = useAuthStore();
   const isManager = user?.role === 'admin' || user?.role === 'manager';
 
@@ -218,12 +216,7 @@ export default function CustomersPage() {
     <div>
       {/* 상단: 뒤로가기 + 제목 */}
       <div className="flex items-center gap-3 mb-6">
-        <button
-          onClick={() => navigate('/system')}
-          className="p-1.5 rounded-lg hover:bg-[#dce1e9] transition-colors"
-        >
-          <ArrowLeftIcon className="w-5 h-5 text-slate-500" />
-        </button>
+        <BackButton to="/system" />
         <div>
           <h1 className="text-xl font-bold text-slate-800 flex items-center gap-2">
             <BuildingOffice2Icon className="w-6 h-6 text-blue-500" />
@@ -234,7 +227,7 @@ export default function CustomersPage() {
       </div>
 
       {/* 필터 바 */}
-      <div className="bg-[#e8ecf2] rounded-xl p-4 border border-[#c8ced8] mb-4">
+      <div className="bg-(--bg-card) rounded-xl p-4 border border-(--border-main) mb-4">
         <div className="flex flex-wrap items-center gap-3">
           {/* 검색 */}
           <div className="relative flex-1 min-w-[200px]">
@@ -244,7 +237,7 @@ export default function CustomersPage() {
               placeholder="거래처명, 코드, 사업자번호 검색..."
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
-              className="w-full pl-9 pr-3 py-2 text-sm rounded-lg border border-[#c8ced8] bg-white focus:outline-none focus:border-emerald-500 transition-colors"
+              className="w-full pl-9 pr-3 py-2 text-sm rounded-lg border border-(--border-main) bg-white focus:outline-none focus:border-emerald-500 transition-colors"
             />
           </div>
 
@@ -252,7 +245,7 @@ export default function CustomersPage() {
           <select
             value={typeFilter}
             onChange={(e) => { setTypeFilter(e.target.value); setPage(1); }}
-            className="px-3 py-2 text-sm rounded-lg border border-[#c8ced8] bg-white focus:outline-none focus:border-emerald-500"
+            className="px-3 py-2 text-sm rounded-lg border border-(--border-main) bg-white focus:outline-none focus:border-emerald-500"
           >
             <option value="">전체 유형</option>
             <option value="customer">매출처</option>
@@ -264,7 +257,7 @@ export default function CustomersPage() {
           <select
             value={activeFilter}
             onChange={(e) => { setActiveFilter(e.target.value); setPage(1); }}
-            className="px-3 py-2 text-sm rounded-lg border border-[#c8ced8] bg-white focus:outline-none focus:border-emerald-500"
+            className="px-3 py-2 text-sm rounded-lg border border-(--border-main) bg-white focus:outline-none focus:border-emerald-500"
           >
             <option value="">전체 상태</option>
             <option value="true">활성</option>
@@ -276,7 +269,7 @@ export default function CustomersPage() {
             <>
               <button
                 onClick={() => setShowExcelModal(true)}
-                className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-[#c8ced8] rounded-lg hover:bg-[#dce1e9] transition-colors"
+                className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-(--border-main) rounded-lg hover:bg-(--bg-main) transition-colors"
               >
                 <ArrowUpTrayIcon className="w-4 h-4" />
                 Excel 업로드
@@ -294,11 +287,11 @@ export default function CustomersPage() {
       </div>
 
       {/* 테이블 */}
-      <div className="bg-[#e8ecf2] rounded-xl border border-[#c8ced8] overflow-hidden">
+      <div className="bg-(--bg-card) rounded-xl border border-(--border-main) overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="bg-[#dce1e9] text-slate-600">
+              <tr className="bg-(--bg-main) text-slate-600">
                 <th className="text-left px-4 py-3 font-semibold cursor-pointer hover:text-slate-800" onClick={() => handleSort('code')}>
                   코드{sortIcon('code')}
                 </th>
@@ -332,7 +325,7 @@ export default function CustomersPage() {
                 </tr>
               ) : (
                 data.items.map((c) => (
-                  <tr key={c.id} className="border-t border-[#c8ced8] hover:bg-[#dce1e9]/50 transition-colors">
+                  <tr key={c.id} className="border-t border-(--border-main) hover:bg-(--bg-main)/50 transition-colors">
                     <td className="px-4 py-3 font-mono text-xs text-slate-600">{c.code}</td>
                     <td className="px-4 py-3 font-medium text-slate-800">{c.name}</td>
                     <td className="px-4 py-3 text-slate-600">{c.business_no || '-'}</td>
@@ -381,7 +374,7 @@ export default function CustomersPage() {
 
         {/* 페이지네이션 */}
         {data && data.total_pages > 1 && (
-          <div className="flex items-center justify-between px-4 py-3 border-t border-[#c8ced8]">
+          <div className="flex items-center justify-between px-4 py-3 border-t border-(--border-main)">
             <span className="text-xs text-slate-500">
               전체 {data.total}건 중 {(data.page - 1) * data.size + 1}-{Math.min(data.page * data.size, data.total)}건
             </span>
@@ -389,7 +382,7 @@ export default function CustomersPage() {
               <button
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
                 disabled={page <= 1}
-                className="p-1.5 rounded-lg hover:bg-[#dce1e9] disabled:opacity-30 transition-colors"
+                className="p-1.5 rounded-lg hover:bg-(--bg-main) disabled:opacity-30 transition-colors"
               >
                 <ChevronLeftIcon className="w-4 h-4" />
               </button>
@@ -406,7 +399,7 @@ export default function CustomersPage() {
                     className={`w-8 h-8 rounded-lg text-xs font-medium transition-colors ${
                       pageNum === page
                         ? 'bg-emerald-500 text-white'
-                        : 'hover:bg-[#dce1e9] text-slate-600'
+                        : 'hover:bg-(--bg-main) text-slate-600'
                     }`}
                   >
                     {pageNum}
@@ -416,7 +409,7 @@ export default function CustomersPage() {
               <button
                 onClick={() => setPage((p) => Math.min(data.total_pages, p + 1))}
                 disabled={page >= data.total_pages}
-                className="p-1.5 rounded-lg hover:bg-[#dce1e9] disabled:opacity-30 transition-colors"
+                className="p-1.5 rounded-lg hover:bg-(--bg-main) disabled:opacity-30 transition-colors"
               >
                 <ChevronRightIcon className="w-4 h-4" />
               </button>
@@ -428,13 +421,13 @@ export default function CustomersPage() {
       {/* ── 등록/수정 모달 ── */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-          <div className="bg-[#e8ecf2] rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto border border-[#c8ced8]">
+          <div className="bg-(--bg-card) rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto border border-(--border-main)">
             {/* 모달 헤더 */}
-            <div className="flex items-center justify-between px-6 py-4 border-b border-[#c8ced8]">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-(--border-main)">
               <h2 className="text-lg font-bold text-slate-800">
                 {editingId ? '거래처 수정' : '거래처 등록'}
               </h2>
-              <button onClick={() => setShowModal(false)} className="p-1 hover:bg-[#dce1e9] rounded-lg transition-colors">
+              <button onClick={() => setShowModal(false)} className="p-1 hover:bg-(--bg-main) rounded-lg transition-colors">
                 <XMarkIcon className="w-5 h-5 text-slate-500" />
               </button>
             </div>
@@ -448,7 +441,7 @@ export default function CustomersPage() {
               )}
 
               {/* 기본 정보 */}
-              <fieldset className="border border-[#c8ced8] rounded-xl p-4">
+              <fieldset className="border border-(--border-main) rounded-xl p-4">
                 <legend className="text-sm font-semibold text-slate-600 px-2">기본 정보</legend>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <FormField
@@ -492,7 +485,7 @@ export default function CustomersPage() {
                     <select
                       value={form.customer_type}
                       onChange={(e) => handleChange('customer_type', e.target.value)}
-                      className="w-full px-3 py-2 text-sm rounded-lg border border-[#c8ced8] bg-white focus:outline-none focus:border-emerald-500"
+                      className="w-full px-3 py-2 text-sm rounded-lg border border-(--border-main) bg-white focus:outline-none focus:border-emerald-500"
                     >
                       <option value="both">겸용 (매출+매입)</option>
                       <option value="customer">매출처</option>
@@ -503,7 +496,7 @@ export default function CustomersPage() {
               </fieldset>
 
               {/* 연락처 정보 */}
-              <fieldset className="border border-[#c8ced8] rounded-xl p-4">
+              <fieldset className="border border-(--border-main) rounded-xl p-4">
                 <legend className="text-sm font-semibold text-slate-600 px-2">연락처</legend>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <FormField label="전화번호" value={form.phone || ''} onChange={(v) => handleChange('phone', v)} placeholder="02-1234-5678" />
@@ -517,7 +510,7 @@ export default function CustomersPage() {
               </fieldset>
 
               {/* 거래 조건 */}
-              <fieldset className="border border-[#c8ced8] rounded-xl p-4">
+              <fieldset className="border border-(--border-main) rounded-xl p-4">
                 <legend className="text-sm font-semibold text-slate-600 px-2">거래 조건</legend>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <div>
@@ -527,7 +520,7 @@ export default function CustomersPage() {
                       value={form.credit_limit}
                       onChange={(e) => handleChange('credit_limit', Number(e.target.value))}
                       min={0}
-                      className="w-full px-3 py-2 text-sm rounded-lg border border-[#c8ced8] bg-white focus:outline-none focus:border-emerald-500"
+                      className="w-full px-3 py-2 text-sm rounded-lg border border-(--border-main) bg-white focus:outline-none focus:border-emerald-500"
                     />
                   </div>
                   <div>
@@ -538,14 +531,14 @@ export default function CustomersPage() {
                       onChange={(e) => handleChange('payment_terms', Number(e.target.value))}
                       min={0}
                       max={365}
-                      className="w-full px-3 py-2 text-sm rounded-lg border border-[#c8ced8] bg-white focus:outline-none focus:border-emerald-500"
+                      className="w-full px-3 py-2 text-sm rounded-lg border border-(--border-main) bg-white focus:outline-none focus:border-emerald-500"
                     />
                   </div>
                 </div>
               </fieldset>
 
               {/* 은행 정보 */}
-              <fieldset className="border border-[#c8ced8] rounded-xl p-4">
+              <fieldset className="border border-(--border-main) rounded-xl p-4">
                 <legend className="text-sm font-semibold text-slate-600 px-2">은행 정보</legend>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                   <FormField label="은행명" value={form.bank_name || ''} onChange={(v) => handleChange('bank_name', v)} placeholder="국민은행" />
@@ -556,10 +549,10 @@ export default function CustomersPage() {
             </div>
 
             {/* 모달 푸터 */}
-            <div className="flex items-center justify-end gap-2 px-6 py-4 border-t border-[#c8ced8]">
+            <div className="flex items-center justify-end gap-2 px-6 py-4 border-t border-(--border-main)">
               <button
                 onClick={() => setShowModal(false)}
-                className="px-4 py-2 text-sm text-slate-600 hover:bg-[#dce1e9] rounded-lg transition-colors"
+                className="px-4 py-2 text-sm text-slate-600 hover:bg-(--bg-main) rounded-lg transition-colors"
               >
                 취소
               </button>
@@ -588,7 +581,7 @@ export default function CustomersPage() {
 
       {deleteTarget && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-          <div className="bg-[#e8ecf2] rounded-2xl shadow-xl w-full max-w-sm p-6 border border-[#c8ced8]">
+          <div className="bg-(--bg-card) rounded-2xl shadow-xl w-full max-w-sm p-6 border border-(--border-main)">
             <h3 className="text-lg font-bold text-slate-800 mb-2">거래처 비활성화</h3>
             <p className="text-sm text-slate-600 mb-1">
               <strong>{deleteTarget.name}</strong> ({deleteTarget.code})
@@ -600,7 +593,7 @@ export default function CustomersPage() {
             <div className="flex justify-end gap-2">
               <button
                 onClick={() => setDeleteTarget(null)}
-                className="px-4 py-2 text-sm text-slate-600 hover:bg-[#dce1e9] rounded-lg transition-colors"
+                className="px-4 py-2 text-sm text-slate-600 hover:bg-(--bg-main) rounded-lg transition-colors"
               >
                 취소
               </button>
@@ -642,7 +635,7 @@ function FormField({
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         disabled={disabled}
-        className="w-full px-3 py-2 text-sm rounded-lg border border-[#c8ced8] bg-white focus:outline-none focus:border-emerald-500 disabled:bg-slate-100 disabled:text-slate-400 transition-colors"
+        className="w-full px-3 py-2 text-sm rounded-lg border border-(--border-main) bg-white focus:outline-none focus:border-emerald-500 disabled:bg-slate-100 disabled:text-slate-400 transition-colors"
       />
     </div>
   );

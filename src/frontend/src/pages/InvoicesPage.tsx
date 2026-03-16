@@ -3,7 +3,6 @@
  * 매출/매입 탭 + CRUD + 확정(자동 전표 생성) + 기간 합계
  */
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
 import {
   MagnifyingGlassIcon,
   PlusIcon,
@@ -12,8 +11,8 @@ import {
   CheckIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
-  ArrowLeftIcon,
 } from '@heroicons/react/24/outline';
+import BackButton from '../components/BackButton';
 import {
   fetchInvoices,
   createInvoice,
@@ -59,7 +58,6 @@ const EMPTY_FORM: InvoiceFormData = {
 };
 
 export default function InvoicesPage() {
-  const navigate = useNavigate();
   const { user } = useAuthStore();
   const isManager = user?.role === 'admin' || user?.role === 'manager';
   const isAdmin = user?.role === 'admin';
@@ -253,12 +251,7 @@ export default function InvoicesPage() {
       {/* 헤더 */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <button
-            onClick={() => navigate('/finance')}
-            className="p-2 rounded-lg hover:bg-gray-100 transition"
-          >
-            <ArrowLeftIcon className="w-5 h-5 text-gray-600" />
-          </button>
+          <BackButton to="/finance" />
           <div>
             <h1 className="text-2xl font-bold text-gray-900">세금계산서</h1>
             <p className="text-sm text-gray-500 mt-0.5">매출/매입 세금계산서 발행 및 관리</p>

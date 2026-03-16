@@ -69,17 +69,17 @@ export default function SalesDashboardPage() {
 
       {/* 요약 카드 */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <div className="bg-white rounded-xl border border-[#c8ced8] p-4">
+        <div className="bg-white rounded-xl border border-(--border-main) p-4">
           <div className="text-xs text-slate-500 mb-1">전체 견적서</div>
           <div className="text-2xl font-bold text-slate-800">{stats.totalQuotations}</div>
           <div className="text-xs text-amber-500 mt-1">대기 {stats.pendingQuotations}건</div>
         </div>
-        <div className="bg-white rounded-xl border border-[#c8ced8] p-4">
+        <div className="bg-white rounded-xl border border-(--border-main) p-4">
           <div className="text-xs text-slate-500 mb-1">전체 수주</div>
           <div className="text-2xl font-bold text-slate-800">{stats.totalOrders}</div>
           <div className="text-xs text-blue-500 mt-1">진행중 {stats.activeOrders}건</div>
         </div>
-        <div className="bg-white rounded-xl border border-[#c8ced8] p-4 col-span-2">
+        <div className="bg-white rounded-xl border border-(--border-main) p-4 col-span-2">
           <div className="text-xs text-slate-500 mb-1">진행중 수주 금액</div>
           <div className="text-2xl font-bold text-emerald-600">
             {stats.totalOrderAmount.toLocaleString()}원
@@ -90,7 +90,7 @@ export default function SalesDashboardPage() {
       {/* 최근 목록 */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* 최근 견적서 */}
-        <div className="bg-white rounded-xl border border-[#c8ced8] p-4">
+        <div className="bg-white rounded-xl border border-(--border-main) p-4">
           <h3 className="font-semibold text-slate-700 mb-3">최근 견적서</h3>
           {quotations.length === 0 ? (
             <p className="text-sm text-slate-400 py-4 text-center">견적서가 없습니다</p>
@@ -113,7 +113,7 @@ export default function SalesDashboardPage() {
         </div>
 
         {/* 최근 수주 */}
-        <div className="bg-white rounded-xl border border-[#c8ced8] p-4">
+        <div className="bg-white rounded-xl border border-(--border-main) p-4">
           <h3 className="font-semibold text-slate-700 mb-3">최근 수주</h3>
           {orders.length === 0 ? (
             <p className="text-sm text-slate-400 py-4 text-center">수주 내역이 없습니다</p>

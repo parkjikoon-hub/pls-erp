@@ -182,9 +182,9 @@ export default function ExcelImportModal({ module, moduleName, onClose, onComple
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-      <div className="bg-[#e8ecf2] rounded-2xl shadow-xl w-full max-w-3xl max-h-[85vh] flex flex-col border border-[#c8ced8]">
+      <div className="bg-(--bg-card) rounded-2xl shadow-xl w-full max-w-3xl max-h-[85vh] flex flex-col border border-(--border-main)">
         {/* 헤더 */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-[#c8ced8] flex-shrink-0">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-(--border-main) flex-shrink-0">
           <div>
             <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2">
               <DocumentArrowUpIcon className="w-5 h-5 text-emerald-500" />
@@ -192,13 +192,13 @@ export default function ExcelImportModal({ module, moduleName, onClose, onComple
             </h2>
             <p className="text-xs text-slate-500 mt-0.5">이카운트 등 외부 엑셀 데이터를 PLS ERP로 가져옵니다</p>
           </div>
-          <button onClick={onClose} className="p-1 hover:bg-[#dce1e9] rounded-lg transition-colors">
+          <button onClick={onClose} className="p-1 hover:bg-(--bg-main) rounded-lg transition-colors">
             <XMarkIcon className="w-5 h-5 text-slate-500" />
           </button>
         </div>
 
         {/* 단계 표시 */}
-        <div className="flex items-center gap-2 px-6 py-3 border-b border-[#c8ced8] flex-shrink-0">
+        <div className="flex items-center gap-2 px-6 py-3 border-b border-(--border-main) flex-shrink-0">
           {[
             { key: 'upload', label: '1. 파일 선택' },
             { key: 'mapping', label: '2. 컬럼 매핑' },
@@ -238,7 +238,7 @@ export default function ExcelImportModal({ module, moduleName, onClose, onComple
               />
               <div
                 onClick={() => fileRef.current?.click()}
-                className="w-full max-w-sm border-2 border-dashed border-[#c8ced8] rounded-xl p-8 flex flex-col items-center gap-3 cursor-pointer hover:border-emerald-400 hover:bg-emerald-50/30 transition-colors"
+                className="w-full max-w-sm border-2 border-dashed border-(--border-main) rounded-xl p-8 flex flex-col items-center gap-3 cursor-pointer hover:border-emerald-400 hover:bg-emerald-50/30 transition-colors"
               >
                 <ArrowUpTrayIcon className="w-12 h-12 text-slate-400" />
                 <div className="text-center">
@@ -260,7 +260,7 @@ export default function ExcelImportModal({ module, moduleName, onClose, onComple
           {step === 'mapping' && analyzeResult && (
             <div className="space-y-4">
               {/* 파일 요약 */}
-              <div className="bg-white rounded-lg p-3 border border-[#c8ced8] text-sm">
+              <div className="bg-white rounded-lg p-3 border border-(--border-main) text-sm">
                 <span className="text-slate-500">파일:</span>{' '}
                 <span className="font-medium text-slate-700">{file?.name}</span>
                 <span className="text-slate-400 ml-3">시트: {analyzeResult.selected_sheet}</span>
@@ -268,8 +268,8 @@ export default function ExcelImportModal({ module, moduleName, onClose, onComple
               </div>
 
               {/* 매핑 테이블 */}
-              <div className="bg-white rounded-lg border border-[#c8ced8] overflow-hidden">
-                <div className="grid grid-cols-[1fr,auto,1fr] gap-0 items-center bg-[#dce1e9] px-4 py-2 text-xs font-semibold text-slate-600">
+              <div className="bg-white rounded-lg border border-(--border-main) overflow-hidden">
+                <div className="grid grid-cols-[1fr,auto,1fr] gap-0 items-center bg-(--bg-main) px-4 py-2 text-xs font-semibold text-slate-600">
                   <span>엑셀 컬럼명</span>
                   <span className="px-4">→</span>
                   <span>PLS ERP 필드</span>
@@ -277,14 +277,14 @@ export default function ExcelImportModal({ module, moduleName, onClose, onComple
                 {mappings.map((m, idx) => (
                   <div
                     key={idx}
-                    className="grid grid-cols-[1fr,auto,1fr] gap-0 items-center px-4 py-2 border-t border-[#c8ced8]"
+                    className="grid grid-cols-[1fr,auto,1fr] gap-0 items-center px-4 py-2 border-t border-(--border-main)"
                   >
                     <span className="text-sm text-slate-700 font-mono">{m.excel_column}</span>
                     <span className="px-4 text-slate-400">→</span>
                     <select
                       value={m.target_field || ''}
                       onChange={(e) => updateMapping(idx, e.target.value || null)}
-                      className={`text-sm px-2 py-1.5 rounded border border-[#c8ced8] bg-white focus:outline-none focus:border-emerald-500 ${
+                      className={`text-sm px-2 py-1.5 rounded border border-(--border-main) bg-white focus:outline-none focus:border-emerald-500 ${
                         m.target_field ? 'text-slate-700' : 'text-slate-400'
                       }`}
                     >
@@ -303,10 +303,10 @@ export default function ExcelImportModal({ module, moduleName, onClose, onComple
               {analyzeResult.preview_rows.length > 0 && (
                 <div>
                   <h3 className="text-sm font-semibold text-slate-600 mb-2">데이터 미리보기 (처음 5행)</h3>
-                  <div className="overflow-x-auto bg-white rounded-lg border border-[#c8ced8]">
+                  <div className="overflow-x-auto bg-white rounded-lg border border-(--border-main)">
                     <table className="text-xs w-full">
                       <thead>
-                        <tr className="bg-[#dce1e9]">
+                        <tr className="bg-(--bg-main)">
                           {analyzeResult.headers.map((h, i) => (
                             <th key={i} className="px-3 py-2 text-left font-medium text-slate-600 whitespace-nowrap">
                               {h}
@@ -316,7 +316,7 @@ export default function ExcelImportModal({ module, moduleName, onClose, onComple
                       </thead>
                       <tbody>
                         {analyzeResult.preview_rows.map((row, ri) => (
-                          <tr key={ri} className="border-t border-[#c8ced8]">
+                          <tr key={ri} className="border-t border-(--border-main)">
                             {row.map((cell, ci) => (
                               <td key={ci} className="px-3 py-1.5 text-slate-600 whitespace-nowrap max-w-[150px] truncate">
                                 {cell || '-'}
@@ -332,7 +332,7 @@ export default function ExcelImportModal({ module, moduleName, onClose, onComple
 
               {/* 검증 미리보기 결과 (있을 경우) */}
               {previewResult && (
-                <div className="bg-white rounded-lg p-3 border border-[#c8ced8] text-sm">
+                <div className="bg-white rounded-lg p-3 border border-(--border-main) text-sm">
                   <span className="text-emerald-600 font-medium">등록 가능: {previewResult.valid_count}건</span>
                   {previewResult.error_count > 0 && (
                     <span className="text-red-500 font-medium ml-4">오류: {previewResult.error_count}건</span>
@@ -377,9 +377,9 @@ export default function ExcelImportModal({ module, moduleName, onClose, onComple
               {executeResult.errors.length > 0 && (
                 <div>
                   <h3 className="text-sm font-semibold text-slate-600 mb-2">오류/건너뜀 상세</h3>
-                  <div className="bg-white rounded-lg border border-[#c8ced8] max-h-[200px] overflow-y-auto">
+                  <div className="bg-white rounded-lg border border-(--border-main) max-h-[200px] overflow-y-auto">
                     {executeResult.errors.map((err, i) => (
-                      <div key={i} className="px-4 py-2 border-b border-[#c8ced8] last:border-0 text-xs">
+                      <div key={i} className="px-4 py-2 border-b border-(--border-main) last:border-0 text-xs">
                         <span className="text-slate-500">
                           {err.data && typeof err.data === 'object' && 'code' in err.data
                             ? `[${err.data.code}] `
@@ -399,12 +399,12 @@ export default function ExcelImportModal({ module, moduleName, onClose, onComple
         </div>
 
         {/* 푸터 */}
-        <div className="flex items-center justify-between px-6 py-4 border-t border-[#c8ced8] flex-shrink-0">
+        <div className="flex items-center justify-between px-6 py-4 border-t border-(--border-main) flex-shrink-0">
           <div>
             {step === 'mapping' && (
               <button
                 onClick={() => { setStep('upload'); setFile(null); setAnalyzeResult(null); setError(''); }}
-                className="flex items-center gap-1 px-4 py-2 text-sm text-slate-600 hover:bg-[#dce1e9] rounded-lg transition-colors"
+                className="flex items-center gap-1 px-4 py-2 text-sm text-slate-600 hover:bg-(--bg-main) rounded-lg transition-colors"
               >
                 <ArrowLeftIcon className="w-4 h-4" />
                 다시 선택
@@ -415,7 +415,7 @@ export default function ExcelImportModal({ module, moduleName, onClose, onComple
             {step !== 'result' && (
               <button
                 onClick={onClose}
-                className="px-4 py-2 text-sm text-slate-600 hover:bg-[#dce1e9] rounded-lg transition-colors"
+                className="px-4 py-2 text-sm text-slate-600 hover:bg-(--bg-main) rounded-lg transition-colors"
               >
                 취소
               </button>

@@ -3,18 +3,17 @@
  * 시안 C 기반 디자인
  */
 import { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
 import {
   MagnifyingGlassIcon,
   PlusIcon,
   PencilSquareIcon,
   XMarkIcon,
-  ArrowLeftIcon,
   UserGroupIcon,
   KeyIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
 } from '@heroicons/react/24/outline';
+import BackButton from '../components/BackButton';
 import {
   fetchDepartments, createDepartment, updateDepartment,
   fetchPositions, createPosition, updatePosition,
@@ -43,7 +42,6 @@ const TABS = [
 type TabKey = typeof TABS[number]['key'];
 
 export default function UsersPage() {
-  const navigate = useNavigate();
   const { user } = useAuthStore();
   const isAdmin = user?.role === 'admin';
   const [activeTab, setActiveTab] = useState<TabKey>('users');
@@ -52,9 +50,7 @@ export default function UsersPage() {
     <div>
       {/* 상단 */}
       <div className="flex items-center gap-3 mb-6">
-        <button onClick={() => navigate('/system')} className="p-1.5 rounded-lg hover:bg-[#dce1e9] transition-colors">
-          <ArrowLeftIcon className="w-5 h-5 text-slate-500" />
-        </button>
+        <BackButton to="/system" />
         <div>
           <h1 className="text-xl font-bold text-slate-800 flex items-center gap-2">
             <UserGroupIcon className="w-6 h-6 text-purple-500" />
@@ -65,7 +61,7 @@ export default function UsersPage() {
       </div>
 
       {/* 탭 */}
-      <div className="flex gap-1 mb-4 bg-[#e8ecf2] rounded-xl p-1 border border-[#c8ced8] w-fit">
+      <div className="flex gap-1 mb-4 bg-(--bg-card) rounded-xl p-1 border border-(--border-main) w-fit">
         {TABS.map((tab) => (
           <button
             key={tab.key}
@@ -205,23 +201,23 @@ function UsersTab({ isAdmin }: { isAdmin: boolean }) {
   return (
     <>
       {/* 필터 바 */}
-      <div className="bg-[#e8ecf2] rounded-xl p-4 border border-[#c8ced8] mb-4">
+      <div className="bg-(--bg-card) rounded-xl p-4 border border-(--border-main) mb-4">
         <div className="flex flex-wrap items-center gap-3">
           <div className="relative flex-1 min-w-[200px]">
             <MagnifyingGlassIcon className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
             <input type="text" placeholder="이름, 이메일, 사번 검색..." value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
-              className="w-full pl-9 pr-3 py-2 text-sm rounded-lg border border-[#c8ced8] bg-white focus:outline-none focus:border-emerald-500 transition-colors" />
+              className="w-full pl-9 pr-3 py-2 text-sm rounded-lg border border-(--border-main) bg-white focus:outline-none focus:border-emerald-500 transition-colors" />
           </div>
           <select value={roleFilter} onChange={(e) => { setRoleFilter(e.target.value); setPage(1); }}
-            className="px-3 py-2 text-sm rounded-lg border border-[#c8ced8] bg-white focus:outline-none focus:border-emerald-500">
+            className="px-3 py-2 text-sm rounded-lg border border-(--border-main) bg-white focus:outline-none focus:border-emerald-500">
             <option value="">전체 역할</option>
             <option value="admin">관리자</option>
             <option value="manager">매니저</option>
             <option value="user">일반</option>
           </select>
           <select value={activeFilter} onChange={(e) => { setActiveFilter(e.target.value); setPage(1); }}
-            className="px-3 py-2 text-sm rounded-lg border border-[#c8ced8] bg-white focus:outline-none focus:border-emerald-500">
+            className="px-3 py-2 text-sm rounded-lg border border-(--border-main) bg-white focus:outline-none focus:border-emerald-500">
             <option value="">전체 상태</option>
             <option value="true">활성</option>
             <option value="false">비활성</option>
@@ -236,11 +232,11 @@ function UsersTab({ isAdmin }: { isAdmin: boolean }) {
       </div>
 
       {/* 테이블 */}
-      <div className="bg-[#e8ecf2] rounded-xl border border-[#c8ced8] overflow-hidden">
+      <div className="bg-(--bg-card) rounded-xl border border-(--border-main) overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="bg-[#dce1e9] text-slate-600">
+              <tr className="bg-(--bg-main) text-slate-600">
                 <th className="text-left px-4 py-3 font-semibold">사번</th>
                 <th className="text-left px-4 py-3 font-semibold">이름</th>
                 <th className="text-left px-4 py-3 font-semibold">이메일</th>
@@ -259,7 +255,7 @@ function UsersTab({ isAdmin }: { isAdmin: boolean }) {
                   {search ? '검색 결과가 없습니다' : '등록된 사용자가 없습니다'}
                 </td></tr>
               ) : data.items.map((u) => (
-                <tr key={u.id} className="border-t border-[#c8ced8] hover:bg-[#dce1e9]/50 transition-colors">
+                <tr key={u.id} className="border-t border-(--border-main) hover:bg-(--bg-main)/50 transition-colors">
                   <td className="px-4 py-3 font-mono text-xs text-slate-600">{u.employee_no}</td>
                   <td className="px-4 py-3 font-medium text-slate-800">{u.name}</td>
                   <td className="px-4 py-3 text-slate-600">{u.email}</td>
@@ -299,13 +295,13 @@ function UsersTab({ isAdmin }: { isAdmin: boolean }) {
 
         {/* 페이지네이션 */}
         {data && data.total_pages > 1 && (
-          <div className="flex items-center justify-between px-4 py-3 border-t border-[#c8ced8]">
+          <div className="flex items-center justify-between px-4 py-3 border-t border-(--border-main)">
             <span className="text-xs text-slate-500">
               전체 {data.total}건 중 {(data.page - 1) * data.size + 1}-{Math.min(data.page * data.size, data.total)}건
             </span>
             <div className="flex items-center gap-1">
               <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page <= 1}
-                className="p-1.5 rounded-lg hover:bg-[#dce1e9] disabled:opacity-30 transition-colors">
+                className="p-1.5 rounded-lg hover:bg-(--bg-main) disabled:opacity-30 transition-colors">
                 <ChevronLeftIcon className="w-4 h-4" />
               </button>
               {Array.from({ length: Math.min(5, data.total_pages) }, (_, i) => {
@@ -315,13 +311,13 @@ function UsersTab({ isAdmin }: { isAdmin: boolean }) {
                 if (pageNum > data.total_pages) return null;
                 return (
                   <button key={pageNum} onClick={() => setPage(pageNum)}
-                    className={`w-8 h-8 rounded-lg text-xs font-medium transition-colors ${pageNum === page ? 'bg-emerald-500 text-white' : 'hover:bg-[#dce1e9] text-slate-600'}`}>
+                    className={`w-8 h-8 rounded-lg text-xs font-medium transition-colors ${pageNum === page ? 'bg-emerald-500 text-white' : 'hover:bg-(--bg-main) text-slate-600'}`}>
                     {pageNum}
                   </button>
                 );
               })}
               <button onClick={() => setPage(p => Math.min(data.total_pages, p + 1))} disabled={page >= data.total_pages}
-                className="p-1.5 rounded-lg hover:bg-[#dce1e9] disabled:opacity-30 transition-colors">
+                className="p-1.5 rounded-lg hover:bg-(--bg-main) disabled:opacity-30 transition-colors">
                 <ChevronRightIcon className="w-4 h-4" />
               </button>
             </div>
@@ -332,10 +328,10 @@ function UsersTab({ isAdmin }: { isAdmin: boolean }) {
       {/* 사용자 등록/수정 모달 */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-          <div className="bg-[#e8ecf2] rounded-2xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto border border-[#c8ced8]">
-            <div className="flex items-center justify-between px-6 py-4 border-b border-[#c8ced8]">
+          <div className="bg-(--bg-card) rounded-2xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto border border-(--border-main)">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-(--border-main)">
               <h2 className="text-lg font-bold text-slate-800">{editingUser ? '사용자 수정' : '사용자 등록'}</h2>
-              <button onClick={() => setShowModal(false)} className="p-1 hover:bg-[#dce1e9] rounded-lg transition-colors">
+              <button onClick={() => setShowModal(false)} className="p-1 hover:bg-(--bg-main) rounded-lg transition-colors">
                 <XMarkIcon className="w-5 h-5 text-slate-500" />
               </button>
             </div>
@@ -351,7 +347,7 @@ function UsersTab({ isAdmin }: { isAdmin: boolean }) {
                 <div>
                   <label className="block text-xs font-medium text-slate-600 mb-1">부서</label>
                   <select value={form.department_id || ''} onChange={e => setForm(f => ({ ...f, department_id: e.target.value || null }))}
-                    className="w-full px-3 py-2 text-sm rounded-lg border border-[#c8ced8] bg-white focus:outline-none focus:border-emerald-500">
+                    className="w-full px-3 py-2 text-sm rounded-lg border border-(--border-main) bg-white focus:outline-none focus:border-emerald-500">
                     <option value="">미지정</option>
                     {departments.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
                   </select>
@@ -359,7 +355,7 @@ function UsersTab({ isAdmin }: { isAdmin: boolean }) {
                 <div>
                   <label className="block text-xs font-medium text-slate-600 mb-1">직급</label>
                   <select value={form.position_id || ''} onChange={e => setForm(f => ({ ...f, position_id: e.target.value || null }))}
-                    className="w-full px-3 py-2 text-sm rounded-lg border border-[#c8ced8] bg-white focus:outline-none focus:border-emerald-500">
+                    className="w-full px-3 py-2 text-sm rounded-lg border border-(--border-main) bg-white focus:outline-none focus:border-emerald-500">
                     <option value="">미지정</option>
                     {positions.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
                   </select>
@@ -368,15 +364,15 @@ function UsersTab({ isAdmin }: { isAdmin: boolean }) {
               <div>
                 <label className="block text-xs font-medium text-slate-600 mb-1">역할</label>
                 <select value={form.role} onChange={e => setForm(f => ({ ...f, role: e.target.value }))}
-                  className="w-full px-3 py-2 text-sm rounded-lg border border-[#c8ced8] bg-white focus:outline-none focus:border-emerald-500">
+                  className="w-full px-3 py-2 text-sm rounded-lg border border-(--border-main) bg-white focus:outline-none focus:border-emerald-500">
                   <option value="user">일반</option>
                   <option value="manager">매니저</option>
                   <option value="admin">관리자</option>
                 </select>
               </div>
             </div>
-            <div className="flex items-center justify-end gap-2 px-6 py-4 border-t border-[#c8ced8]">
-              <button onClick={() => setShowModal(false)} className="px-4 py-2 text-sm text-slate-600 hover:bg-[#dce1e9] rounded-lg transition-colors">취소</button>
+            <div className="flex items-center justify-end gap-2 px-6 py-4 border-t border-(--border-main)">
+              <button onClick={() => setShowModal(false)} className="px-4 py-2 text-sm text-slate-600 hover:bg-(--bg-main) rounded-lg transition-colors">취소</button>
               <button onClick={handleSave} disabled={saving}
                 className="px-6 py-2 text-sm font-medium text-white bg-gradient-to-r from-emerald-500 to-emerald-600 rounded-lg hover:from-emerald-600 hover:to-emerald-700 disabled:opacity-50 transition-colors">
                 {saving ? '저장 중...' : editingUser ? '수정' : '등록'}
@@ -389,12 +385,12 @@ function UsersTab({ isAdmin }: { isAdmin: boolean }) {
       {/* 비밀번호 초기화 모달 */}
       {resetTarget && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-          <div className="bg-[#e8ecf2] rounded-2xl shadow-xl w-full max-w-sm p-6 border border-[#c8ced8]">
+          <div className="bg-(--bg-card) rounded-2xl shadow-xl w-full max-w-sm p-6 border border-(--border-main)">
             <h3 className="text-lg font-bold text-slate-800 mb-2">비밀번호 초기화</h3>
             <p className="text-sm text-slate-600 mb-4"><strong>{resetTarget.name}</strong> ({resetTarget.email})</p>
             <FormField label="새 비밀번호 *" value={newPassword} onChange={setNewPassword} placeholder="4자 이상" />
             <div className="flex justify-end gap-2 mt-4">
-              <button onClick={() => setResetTarget(null)} className="px-4 py-2 text-sm text-slate-600 hover:bg-[#dce1e9] rounded-lg transition-colors">취소</button>
+              <button onClick={() => setResetTarget(null)} className="px-4 py-2 text-sm text-slate-600 hover:bg-(--bg-main) rounded-lg transition-colors">취소</button>
               <button onClick={handleResetPassword} disabled={!newPassword || newPassword.length < 4}
                 className="px-4 py-2 text-sm font-medium text-white bg-amber-500 rounded-lg hover:bg-amber-600 disabled:opacity-50 transition-colors">초기화</button>
             </div>
@@ -458,10 +454,10 @@ function DepartmentsTab({ isAdmin }: { isAdmin: boolean }) {
           </button>
         )}
       </div>
-      <div className="bg-[#e8ecf2] rounded-xl border border-[#c8ced8] overflow-hidden">
+      <div className="bg-(--bg-card) rounded-xl border border-(--border-main) overflow-hidden">
         <table className="w-full text-sm">
           <thead>
-            <tr className="bg-[#dce1e9] text-slate-600">
+            <tr className="bg-(--bg-main) text-slate-600">
               <th className="text-left px-4 py-3 font-semibold">코드</th>
               <th className="text-left px-4 py-3 font-semibold">부서명</th>
               <th className="text-center px-4 py-3 font-semibold">정렬순서</th>
@@ -475,7 +471,7 @@ function DepartmentsTab({ isAdmin }: { isAdmin: boolean }) {
             ) : departments.length === 0 ? (
               <tr><td colSpan={isAdmin ? 5 : 4} className="text-center py-12 text-slate-400">등록된 부서가 없습니다</td></tr>
             ) : departments.map(d => (
-              <tr key={d.id} className="border-t border-[#c8ced8] hover:bg-[#dce1e9]/50 transition-colors">
+              <tr key={d.id} className="border-t border-(--border-main) hover:bg-(--bg-main)/50 transition-colors">
                 <td className="px-4 py-3 font-mono text-xs text-slate-600">{d.code}</td>
                 <td className="px-4 py-3 font-medium text-slate-800">{d.name}</td>
                 <td className="px-4 py-3 text-center text-slate-600">{d.sort_order}</td>
@@ -501,7 +497,7 @@ function DepartmentsTab({ isAdmin }: { isAdmin: boolean }) {
 
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-          <div className="bg-[#e8ecf2] rounded-2xl shadow-xl w-full max-w-sm p-6 border border-[#c8ced8]">
+          <div className="bg-(--bg-card) rounded-2xl shadow-xl w-full max-w-sm p-6 border border-(--border-main)">
             <h3 className="text-lg font-bold text-slate-800 mb-4">{editingDept ? '부서 수정' : '부서 추가'}</h3>
             {error && <div className="p-3 rounded-lg bg-red-50 border border-red-200 text-red-600 text-sm mb-3">{error}</div>}
             <div className="space-y-3">
@@ -510,11 +506,11 @@ function DepartmentsTab({ isAdmin }: { isAdmin: boolean }) {
               <div>
                 <label className="block text-xs font-medium text-slate-600 mb-1">정렬 순서</label>
                 <input type="number" value={form.sort_order || 0} onChange={e => setForm(f => ({ ...f, sort_order: Number(e.target.value) }))} min={0}
-                  className="w-full px-3 py-2 text-sm rounded-lg border border-[#c8ced8] bg-white focus:outline-none focus:border-emerald-500" />
+                  className="w-full px-3 py-2 text-sm rounded-lg border border-(--border-main) bg-white focus:outline-none focus:border-emerald-500" />
               </div>
             </div>
             <div className="flex justify-end gap-2 mt-4">
-              <button onClick={() => setShowModal(false)} className="px-4 py-2 text-sm text-slate-600 hover:bg-[#dce1e9] rounded-lg transition-colors">취소</button>
+              <button onClick={() => setShowModal(false)} className="px-4 py-2 text-sm text-slate-600 hover:bg-(--bg-main) rounded-lg transition-colors">취소</button>
               <button onClick={handleSave} disabled={saving}
                 className="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-emerald-500 to-emerald-600 rounded-lg hover:from-emerald-600 hover:to-emerald-700 disabled:opacity-50 transition-colors">
                 {saving ? '저장 중...' : editingDept ? '수정' : '추가'}
@@ -580,10 +576,10 @@ function PositionsTab({ isAdmin }: { isAdmin: boolean }) {
           </button>
         )}
       </div>
-      <div className="bg-[#e8ecf2] rounded-xl border border-[#c8ced8] overflow-hidden">
+      <div className="bg-(--bg-card) rounded-xl border border-(--border-main) overflow-hidden">
         <table className="w-full text-sm">
           <thead>
-            <tr className="bg-[#dce1e9] text-slate-600">
+            <tr className="bg-(--bg-main) text-slate-600">
               <th className="text-left px-4 py-3 font-semibold">코드</th>
               <th className="text-left px-4 py-3 font-semibold">직급명</th>
               <th className="text-center px-4 py-3 font-semibold">레벨</th>
@@ -597,7 +593,7 @@ function PositionsTab({ isAdmin }: { isAdmin: boolean }) {
             ) : positions.length === 0 ? (
               <tr><td colSpan={isAdmin ? 5 : 4} className="text-center py-12 text-slate-400">등록된 직급이 없습니다</td></tr>
             ) : positions.map(p => (
-              <tr key={p.id} className="border-t border-[#c8ced8] hover:bg-[#dce1e9]/50 transition-colors">
+              <tr key={p.id} className="border-t border-(--border-main) hover:bg-(--bg-main)/50 transition-colors">
                 <td className="px-4 py-3 font-mono text-xs text-slate-600">{p.code}</td>
                 <td className="px-4 py-3 font-medium text-slate-800">{p.name}</td>
                 <td className="px-4 py-3 text-center text-slate-600">{p.level}</td>
@@ -623,7 +619,7 @@ function PositionsTab({ isAdmin }: { isAdmin: boolean }) {
 
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-          <div className="bg-[#e8ecf2] rounded-2xl shadow-xl w-full max-w-sm p-6 border border-[#c8ced8]">
+          <div className="bg-(--bg-card) rounded-2xl shadow-xl w-full max-w-sm p-6 border border-(--border-main)">
             <h3 className="text-lg font-bold text-slate-800 mb-4">{editingPos ? '직급 수정' : '직급 추가'}</h3>
             {error && <div className="p-3 rounded-lg bg-red-50 border border-red-200 text-red-600 text-sm mb-3">{error}</div>}
             <div className="space-y-3">
@@ -632,11 +628,11 @@ function PositionsTab({ isAdmin }: { isAdmin: boolean }) {
               <div>
                 <label className="block text-xs font-medium text-slate-600 mb-1">레벨 (높을수록 상위)</label>
                 <input type="number" value={form.level} onChange={e => setForm(f => ({ ...f, level: Number(e.target.value) }))} min={1} max={20}
-                  className="w-full px-3 py-2 text-sm rounded-lg border border-[#c8ced8] bg-white focus:outline-none focus:border-emerald-500" />
+                  className="w-full px-3 py-2 text-sm rounded-lg border border-(--border-main) bg-white focus:outline-none focus:border-emerald-500" />
               </div>
             </div>
             <div className="flex justify-end gap-2 mt-4">
-              <button onClick={() => setShowModal(false)} className="px-4 py-2 text-sm text-slate-600 hover:bg-[#dce1e9] rounded-lg transition-colors">취소</button>
+              <button onClick={() => setShowModal(false)} className="px-4 py-2 text-sm text-slate-600 hover:bg-(--bg-main) rounded-lg transition-colors">취소</button>
               <button onClick={handleSave} disabled={saving}
                 className="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-emerald-500 to-emerald-600 rounded-lg hover:from-emerald-600 hover:to-emerald-700 disabled:opacity-50 transition-colors">
                 {saving ? '저장 중...' : editingPos ? '수정' : '추가'}
@@ -658,7 +654,7 @@ function FormField({ label, value, onChange, placeholder, disabled }: {
     <div>
       <label className="block text-xs font-medium text-slate-600 mb-1">{label}</label>
       <input type="text" value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder} disabled={disabled}
-        className="w-full px-3 py-2 text-sm rounded-lg border border-[#c8ced8] bg-white focus:outline-none focus:border-emerald-500 disabled:bg-slate-100 disabled:text-slate-400 transition-colors" />
+        className="w-full px-3 py-2 text-sm rounded-lg border border-(--border-main) bg-white focus:outline-none focus:border-emerald-500 disabled:bg-slate-100 disabled:text-slate-400 transition-colors" />
     </div>
   );
 }

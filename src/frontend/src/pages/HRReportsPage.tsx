@@ -2,8 +2,7 @@
  * M3 인사/급여 — 급여명세서 + 인사 보고서 페이지
  */
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { ArrowLeftIcon } from '@heroicons/react/24/outline';
+import BackButton from '../components/BackButton';
 import { searchEmployees, type EmployeeSearchResult } from '../api/hr/employees';
 import { fetchPayslip, fetchHRSummary, type Payslip, type HRSummary } from '../api/hr/reports';
 import { XMarkIcon } from '@heroicons/react/24/outline';
@@ -17,7 +16,6 @@ const ATT_LABELS: Record<string, string> = {
 };
 
 export default function HRReportsPage() {
-  const navigate = useNavigate();
   const { user } = useAuthStore();
   const isManager = user?.role === 'admin' || user?.role === 'manager';
   const now = new Date();
@@ -71,9 +69,7 @@ export default function HRReportsPage() {
   return (
     <div>
       <div className="flex items-center gap-3 mb-4">
-        <button onClick={() => navigate('/hr')} className="p-1.5 rounded-lg hover:bg-[#c8ced8]">
-          <ArrowLeftIcon className="w-5 h-5 text-slate-600" />
-        </button>
+        <BackButton to="/hr" />
         <div>
           <h1 className="text-xl font-bold text-slate-800">급여명세서 / 보고서</h1>
           <p className="text-sm text-slate-500">개인 급여명세서 조회 및 인사 통계 보고서</p>
@@ -90,7 +86,7 @@ export default function HRReportsPage() {
             key={t.key}
             onClick={() => setTab(t.key)}
             className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
-              tab === t.key ? 'bg-violet-500 text-white' : 'bg-[#e8ecf2] text-slate-600 hover:bg-[#dce1e9]'
+              tab === t.key ? 'bg-violet-500 text-white' : 'bg-(--bg-card) text-slate-600 hover:bg-(--bg-main)'
             }`}
           >
             {t.label}
@@ -101,7 +97,7 @@ export default function HRReportsPage() {
       {/* 급여명세서 탭 */}
       {tab === 'payslip' && (
         <div>
-          <div className="bg-[#e8ecf2] rounded-xl p-4 border border-[#c8ced8] mb-4">
+          <div className="bg-(--bg-card) rounded-xl p-4 border border-(--border-main) mb-4">
             <div className="flex flex-wrap items-center gap-3">
               {/* 직원 선택 */}
               {selectedEmp ? (
@@ -120,15 +116,15 @@ export default function HRReportsPage() {
                     value={empSearch}
                     onChange={(e) => setEmpSearch(e.target.value)}
                     placeholder="직원 이름 또는 사번 검색..."
-                    className="w-full px-3 py-2 text-sm rounded-lg border border-[#c8ced8] bg-white focus:outline-none focus:border-violet-500"
+                    className="w-full px-3 py-2 text-sm rounded-lg border border-(--border-main) bg-white focus:outline-none focus:border-violet-500"
                   />
                   {empResults.length > 0 && (
-                    <div className="absolute z-10 mt-1 w-full bg-white border border-[#c8ced8] rounded-lg shadow-lg max-h-40 overflow-y-auto">
+                    <div className="absolute z-10 mt-1 w-full bg-white border border-(--border-main) rounded-lg shadow-lg max-h-40 overflow-y-auto">
                       {empResults.map((e) => (
                         <button
                           key={e.id}
                           onClick={() => { setSelectedEmp(e); setEmpResults([]); }}
-                          className="w-full text-left px-3 py-2 text-sm hover:bg-violet-50 border-b border-[#c8ced8] last:border-0"
+                          className="w-full text-left px-3 py-2 text-sm hover:bg-violet-50 border-b border-(--border-main) last:border-0"
                         >
                           <span className="font-mono text-xs text-slate-500 mr-2">{e.employee_no}</span>
                           <span className="font-medium">{e.name}</span>
@@ -139,11 +135,11 @@ export default function HRReportsPage() {
                 </div>
               )}
               <select value={year} onChange={(e) => setYear(Number(e.target.value))}
-                className="px-3 py-2 text-sm rounded-lg border border-[#c8ced8] bg-white">
+                className="px-3 py-2 text-sm rounded-lg border border-(--border-main) bg-white">
                 {[2024, 2025, 2026, 2027].map((y) => <option key={y} value={y}>{y}년</option>)}
               </select>
               <select value={month} onChange={(e) => setMonth(Number(e.target.value))}
-                className="px-3 py-2 text-sm rounded-lg border border-[#c8ced8] bg-white">
+                className="px-3 py-2 text-sm rounded-lg border border-(--border-main) bg-white">
                 {Array.from({ length: 12 }, (_, i) => <option key={i + 1} value={i + 1}>{i + 1}월</option>)}
               </select>
             </div>
@@ -152,14 +148,14 @@ export default function HRReportsPage() {
           {payslipLoading ? (
             <div className="text-center py-12 text-slate-400">불러오는 중...</div>
           ) : payslip ? (
-            <div className="bg-[#e8ecf2] rounded-xl border border-[#c8ced8] p-6">
+            <div className="bg-(--bg-card) rounded-xl border border-(--border-main) p-6">
               <h2 className="text-lg font-bold text-slate-800 mb-4">
                 {payslip.year}년 {payslip.month}월 급여명세서
               </h2>
               <div className="grid grid-cols-2 gap-6">
                 {/* 지급 항목 */}
                 <div>
-                  <h3 className="font-semibold text-slate-700 mb-2 pb-1 border-b border-[#c8ced8]">지급 항목</h3>
+                  <h3 className="font-semibold text-slate-700 mb-2 pb-1 border-b border-(--border-main)">지급 항목</h3>
                   <div className="space-y-1.5 text-sm">
                     <div className="flex justify-between"><span>기본급</span><span className="font-mono">{formatMoney(payslip.earnings.base_salary)}</span></div>
                     {payslip.earnings.overtime_pay > 0 && <div className="flex justify-between"><span>초과근무수당</span><span className="font-mono">{formatMoney(payslip.earnings.overtime_pay)}</span></div>}
@@ -168,14 +164,14 @@ export default function HRReportsPage() {
                     {payslip.earnings.car_allowance > 0 && <div className="flex justify-between text-blue-600"><span>자가운전보조금</span><span className="font-mono">{formatMoney(payslip.earnings.car_allowance)}</span></div>}
                     {payslip.earnings.research_allowance > 0 && <div className="flex justify-between text-blue-600"><span>연구활동비</span><span className="font-mono">{formatMoney(payslip.earnings.research_allowance)}</span></div>}
                     {payslip.earnings.childcare_allowance > 0 && <div className="flex justify-between text-blue-600"><span>육아수당</span><span className="font-mono">{formatMoney(payslip.earnings.childcare_allowance)}</span></div>}
-                    <div className="flex justify-between font-bold pt-2 border-t border-[#c8ced8]">
+                    <div className="flex justify-between font-bold pt-2 border-t border-(--border-main)">
                       <span>총 지급액</span><span className="font-mono">{formatMoney(payslip.earnings.gross_salary)}</span>
                     </div>
                   </div>
                 </div>
                 {/* 공제 항목 */}
                 <div>
-                  <h3 className="font-semibold text-slate-700 mb-2 pb-1 border-b border-[#c8ced8]">공제 항목</h3>
+                  <h3 className="font-semibold text-slate-700 mb-2 pb-1 border-b border-(--border-main)">공제 항목</h3>
                   <div className="space-y-1.5 text-sm">
                     <div className="flex justify-between"><span>소득세</span><span className="font-mono text-red-500">{formatMoney(payslip.deductions.income_tax)}</span></div>
                     <div className="flex justify-between"><span>지방소득세</span><span className="font-mono text-red-500">{formatMoney(payslip.deductions.local_tax)}</span></div>
@@ -183,7 +179,7 @@ export default function HRReportsPage() {
                     <div className="flex justify-between"><span>건강보험</span><span className="font-mono text-red-500">{formatMoney(payslip.deductions.health_insurance)}</span></div>
                     <div className="flex justify-between"><span>장기요양보험</span><span className="font-mono text-red-500">{formatMoney(payslip.deductions.long_term_care)}</span></div>
                     <div className="flex justify-between"><span>고용보험</span><span className="font-mono text-red-500">{formatMoney(payslip.deductions.employment_insurance)}</span></div>
-                    <div className="flex justify-between font-bold pt-2 border-t border-[#c8ced8] text-red-600">
+                    <div className="flex justify-between font-bold pt-2 border-t border-(--border-main) text-red-600">
                       <span>총 공제액</span><span className="font-mono">{formatMoney(payslip.deductions.total_deduction)}</span>
                     </div>
                   </div>
@@ -208,9 +204,9 @@ export default function HRReportsPage() {
       {/* 인사 통계 탭 */}
       {tab === 'summary' && (
         <div>
-          <div className="bg-[#e8ecf2] rounded-xl p-4 border border-[#c8ced8] mb-4">
+          <div className="bg-(--bg-card) rounded-xl p-4 border border-(--border-main) mb-4">
             <select value={year} onChange={(e) => setYear(Number(e.target.value))}
-              className="px-3 py-2 text-sm rounded-lg border border-[#c8ced8] bg-white">
+              className="px-3 py-2 text-sm rounded-lg border border-(--border-main) bg-white">
               {[2024, 2025, 2026, 2027].map((y) => <option key={y} value={y}>{y}년</option>)}
             </select>
           </div>
@@ -220,12 +216,12 @@ export default function HRReportsPage() {
           ) : summary ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* 인원 현황 */}
-              <div className="bg-[#e8ecf2] rounded-xl p-5 border border-[#c8ced8]">
+              <div className="bg-(--bg-card) rounded-xl p-5 border border-(--border-main)">
                 <h3 className="font-bold text-slate-700 mb-3">인원 현황</h3>
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between"><span>활성 인원</span><span className="font-bold text-emerald-600">{summary.headcount.active}명</span></div>
                   <div className="flex justify-between"><span>비활성 인원</span><span className="text-slate-400">{summary.headcount.inactive}명</span></div>
-                  <div className="border-t border-[#c8ced8] pt-2 mt-2">
+                  <div className="border-t border-(--border-main) pt-2 mt-2">
                     {Object.entries(summary.headcount.by_type).map(([k, v]) => (
                       <div key={k} className="flex justify-between">
                         <span>{TYPE_LABELS[k] || k}</span><span>{v}명</span>
@@ -236,7 +232,7 @@ export default function HRReportsPage() {
               </div>
 
               {/* 급여 연간 합계 */}
-              <div className="bg-[#e8ecf2] rounded-xl p-5 border border-[#c8ced8]">
+              <div className="bg-(--bg-card) rounded-xl p-5 border border-(--border-main)">
                 <h3 className="font-bold text-slate-700 mb-3">{year}년 급여 합계</h3>
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between"><span>계산 완료 월수</span><span>{summary.payroll_annual.months_calculated}개월</span></div>
@@ -247,14 +243,14 @@ export default function HRReportsPage() {
               </div>
 
               {/* 근태 통계 */}
-              <div className="bg-[#e8ecf2] rounded-xl p-5 border border-[#c8ced8] md:col-span-2">
+              <div className="bg-(--bg-card) rounded-xl p-5 border border-(--border-main) md:col-span-2">
                 <h3 className="font-bold text-slate-700 mb-3">{year}년 근태 통계</h3>
                 {Object.keys(summary.attendance_annual).length === 0 ? (
                   <p className="text-sm text-slate-400">근태 기록이 없습니다</p>
                 ) : (
                   <div className="flex flex-wrap gap-4">
                     {Object.entries(summary.attendance_annual).map(([k, v]) => (
-                      <div key={k} className="bg-white px-4 py-3 rounded-lg border border-[#c8ced8] text-center min-w-[100px]">
+                      <div key={k} className="bg-white px-4 py-3 rounded-lg border border-(--border-main) text-center min-w-[100px]">
                         <p className="text-xs text-slate-500">{ATT_LABELS[k] || k}</p>
                         <p className="text-xl font-bold text-slate-700">{v}건</p>
                       </div>

@@ -3,7 +3,6 @@
  * 목록/검색/필터/등록/수정/비활성화
  */
 import { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
 import {
   MagnifyingGlassIcon,
   PlusIcon,
@@ -12,8 +11,8 @@ import {
   XMarkIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
-  ArrowLeftIcon,
 } from '@heroicons/react/24/outline';
+import BackButton from '../components/BackButton';
 import {
   fetchEmployees,
   createEmployee,
@@ -50,7 +49,6 @@ const EMPTY_FORM: EmployeeFormData = {
 };
 
 export default function EmployeesPage() {
-  const navigate = useNavigate();
   const { user } = useAuthStore();
   const isManager = user?.role === 'admin' || user?.role === 'manager';
 
@@ -195,12 +193,7 @@ export default function EmployeesPage() {
     <div>
       {/* 페이지 헤더 */}
       <div className="flex items-center gap-3 mb-4">
-        <button
-          onClick={() => navigate('/hr')}
-          className="p-1.5 rounded-lg hover:bg-[#c8ced8] transition-colors"
-        >
-          <ArrowLeftIcon className="w-5 h-5 text-slate-600" />
-        </button>
+        <BackButton to="/hr" />
         <div>
           <h1 className="text-xl font-bold text-slate-800">사원 관리</h1>
           <p className="text-sm text-slate-500">
@@ -210,7 +203,7 @@ export default function EmployeesPage() {
       </div>
 
       {/* 필터 바 */}
-      <div className="bg-[#e8ecf2] rounded-xl p-4 border border-[#c8ced8] mb-4">
+      <div className="bg-(--bg-card) rounded-xl p-4 border border-(--border-main) mb-4">
         <div className="flex flex-wrap items-center gap-3">
           <div className="relative flex-1 min-w-[200px]">
             <MagnifyingGlassIcon className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
@@ -219,7 +212,7 @@ export default function EmployeesPage() {
               placeholder="이름 또는 사번으로 검색..."
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
-              className="w-full pl-9 pr-3 py-2 text-sm rounded-lg border border-[#c8ced8] bg-white focus:outline-none focus:border-violet-500 transition-colors"
+              className="w-full pl-9 pr-3 py-2 text-sm rounded-lg border border-(--border-main) bg-white focus:outline-none focus:border-violet-500 transition-colors"
             />
           </div>
           <select
@@ -228,7 +221,7 @@ export default function EmployeesPage() {
               setTypeFilter(e.target.value);
               setPage(1);
             }}
-            className="px-3 py-2 text-sm rounded-lg border border-[#c8ced8] bg-white focus:outline-none focus:border-violet-500"
+            className="px-3 py-2 text-sm rounded-lg border border-(--border-main) bg-white focus:outline-none focus:border-violet-500"
           >
             <option value="">전체 고용유형</option>
             <option value="regular">정규직</option>
@@ -248,11 +241,11 @@ export default function EmployeesPage() {
       </div>
 
       {/* 테이블 */}
-      <div className="bg-[#e8ecf2] rounded-xl border border-[#c8ced8] overflow-hidden">
+      <div className="bg-(--bg-card) rounded-xl border border-(--border-main) overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="bg-[#dce1e9] text-slate-600">
+              <tr className="bg-(--bg-main) text-slate-600">
                 <th className="text-left px-4 py-3 font-semibold w-20">사번</th>
                 <th className="text-left px-4 py-3 font-semibold">이름</th>
                 <th className="text-left px-4 py-3 font-semibold">부서</th>
@@ -283,7 +276,7 @@ export default function EmployeesPage() {
                 data.items.map((emp) => (
                   <tr
                     key={emp.id}
-                    className={`border-t border-[#c8ced8] hover:bg-[#dce1e9]/50 transition-colors ${
+                    className={`border-t border-(--border-main) hover:bg-(--bg-main)/50 transition-colors ${
                       !emp.is_active ? 'opacity-50' : ''
                     }`}
                   >
@@ -313,7 +306,7 @@ export default function EmployeesPage() {
                         <div className="flex items-center justify-center gap-1">
                           <button
                             onClick={() => openEditModal(emp)}
-                            className="p-1 rounded hover:bg-[#c8ced8] transition-colors"
+                            className="p-1 rounded hover:bg-(--border-main) transition-colors"
                             title="수정"
                           >
                             <PencilSquareIcon className="w-4 h-4 text-slate-500" />
@@ -339,7 +332,7 @@ export default function EmployeesPage() {
 
         {/* 페이지네이션 */}
         {data && data.total_pages > 1 && (
-          <div className="flex items-center justify-between px-4 py-3 border-t border-[#c8ced8]">
+          <div className="flex items-center justify-between px-4 py-3 border-t border-(--border-main)">
             <span className="text-xs text-slate-500">
               전체 {data.total}건 중 {(data.page - 1) * data.size + 1}-
               {Math.min(data.page * data.size, data.total)}건
@@ -348,7 +341,7 @@ export default function EmployeesPage() {
               <button
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
                 disabled={page <= 1}
-                className="p-1 rounded hover:bg-[#c8ced8] disabled:opacity-30"
+                className="p-1 rounded hover:bg-(--border-main) disabled:opacity-30"
               >
                 <ChevronLeftIcon className="w-4 h-4" />
               </button>
@@ -367,7 +360,7 @@ export default function EmployeesPage() {
                       className={`w-8 h-8 text-xs rounded-lg transition-colors ${
                         pageNum === page
                           ? 'bg-violet-500 text-white font-bold'
-                          : 'hover:bg-[#c8ced8]'
+                          : 'hover:bg-(--border-main)'
                       }`}
                     >
                       {pageNum}
@@ -378,7 +371,7 @@ export default function EmployeesPage() {
               <button
                 onClick={() => setPage((p) => Math.min(data.total_pages, p + 1))}
                 disabled={page >= data.total_pages}
-                className="p-1 rounded hover:bg-[#c8ced8] disabled:opacity-30"
+                className="p-1 rounded hover:bg-(--border-main) disabled:opacity-30"
               >
                 <ChevronRightIcon className="w-4 h-4" />
               </button>
@@ -390,15 +383,15 @@ export default function EmployeesPage() {
       {/* ── 등록/수정 모달 ── */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-          <div className="bg-[#e8ecf2] rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto border border-[#c8ced8]">
+          <div className="bg-(--bg-card) rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto border border-(--border-main)">
             {/* 헤더 */}
-            <div className="flex items-center justify-between px-6 py-4 border-b border-[#c8ced8]">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-(--border-main)">
               <h2 className="text-lg font-bold text-slate-800">
                 {editingId ? '사원 정보 수정' : '사원 등록'}
               </h2>
               <button
                 onClick={() => setShowModal(false)}
-                className="p-1 rounded-lg hover:bg-[#c8ced8]"
+                className="p-1 rounded-lg hover:bg-(--border-main)"
               >
                 <XMarkIcon className="w-5 h-5 text-slate-500" />
               </button>
@@ -413,7 +406,7 @@ export default function EmployeesPage() {
               )}
 
               {/* 기본 정보 */}
-              <fieldset className="border border-[#c8ced8] rounded-xl p-4">
+              <fieldset className="border border-(--border-main) rounded-xl p-4">
                 <legend className="text-sm font-semibold text-slate-600 px-2">기본 정보</legend>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
@@ -424,7 +417,7 @@ export default function EmployeesPage() {
                       onChange={(e) => setForm((f) => ({ ...f, employee_no: e.target.value }))}
                       disabled={!!editingId}
                       placeholder="예: EMP-001"
-                      className="w-full px-3 py-2 text-sm rounded-lg border border-[#c8ced8] bg-white focus:outline-none focus:border-violet-500 disabled:bg-slate-100 disabled:text-slate-400"
+                      className="w-full px-3 py-2 text-sm rounded-lg border border-(--border-main) bg-white focus:outline-none focus:border-violet-500 disabled:bg-slate-100 disabled:text-slate-400"
                     />
                   </div>
                   <div>
@@ -434,7 +427,7 @@ export default function EmployeesPage() {
                       value={form.name}
                       onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
                       placeholder="홍길동"
-                      className="w-full px-3 py-2 text-sm rounded-lg border border-[#c8ced8] bg-white focus:outline-none focus:border-violet-500"
+                      className="w-full px-3 py-2 text-sm rounded-lg border border-(--border-main) bg-white focus:outline-none focus:border-violet-500"
                     />
                   </div>
                   <div>
@@ -442,7 +435,7 @@ export default function EmployeesPage() {
                     <select
                       value={form.employee_type}
                       onChange={(e) => setForm((f) => ({ ...f, employee_type: e.target.value }))}
-                      className="w-full px-3 py-2 text-sm rounded-lg border border-[#c8ced8] bg-white focus:outline-none focus:border-violet-500"
+                      className="w-full px-3 py-2 text-sm rounded-lg border border-(--border-main) bg-white focus:outline-none focus:border-violet-500"
                     >
                       <option value="regular">정규직</option>
                       <option value="contract">계약직</option>
@@ -455,7 +448,7 @@ export default function EmployeesPage() {
                       type="date"
                       value={form.hire_date}
                       onChange={(e) => setForm((f) => ({ ...f, hire_date: e.target.value }))}
-                      className="w-full px-3 py-2 text-sm rounded-lg border border-[#c8ced8] bg-white focus:outline-none focus:border-violet-500"
+                      className="w-full px-3 py-2 text-sm rounded-lg border border-(--border-main) bg-white focus:outline-none focus:border-violet-500"
                     />
                   </div>
                   {editingId && (
@@ -465,7 +458,7 @@ export default function EmployeesPage() {
                         type="date"
                         value={form.resign_date || ''}
                         onChange={(e) => setForm((f) => ({ ...f, resign_date: e.target.value || undefined }))}
-                        className="w-full px-3 py-2 text-sm rounded-lg border border-[#c8ced8] bg-white focus:outline-none focus:border-violet-500"
+                        className="w-full px-3 py-2 text-sm rounded-lg border border-(--border-main) bg-white focus:outline-none focus:border-violet-500"
                       />
                     </div>
                   )}
@@ -473,7 +466,7 @@ export default function EmployeesPage() {
               </fieldset>
 
               {/* 급여 정보 */}
-              <fieldset className="border border-[#c8ced8] rounded-xl p-4">
+              <fieldset className="border border-(--border-main) rounded-xl p-4">
                 <legend className="text-sm font-semibold text-slate-600 px-2">급여 / 수당 정보</legend>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
@@ -482,7 +475,7 @@ export default function EmployeesPage() {
                       type="number"
                       value={form.base_salary}
                       onChange={(e) => setForm((f) => ({ ...f, base_salary: Number(e.target.value) }))}
-                      className="w-full px-3 py-2 text-sm rounded-lg border border-[#c8ced8] bg-white focus:outline-none focus:border-violet-500"
+                      className="w-full px-3 py-2 text-sm rounded-lg border border-(--border-main) bg-white focus:outline-none focus:border-violet-500"
                     />
                   </div>
                   <div>
@@ -491,7 +484,7 @@ export default function EmployeesPage() {
                       type="number"
                       value={form.annual_leave_days}
                       onChange={(e) => setForm((f) => ({ ...f, annual_leave_days: Number(e.target.value) }))}
-                      className="w-full px-3 py-2 text-sm rounded-lg border border-[#c8ced8] bg-white focus:outline-none focus:border-violet-500"
+                      className="w-full px-3 py-2 text-sm rounded-lg border border-(--border-main) bg-white focus:outline-none focus:border-violet-500"
                     />
                   </div>
                   <div className="col-span-2 flex flex-wrap gap-4 mt-1">
@@ -527,7 +520,7 @@ export default function EmployeesPage() {
               </fieldset>
 
               {/* 연락처 / 계좌 정보 */}
-              <fieldset className="border border-[#c8ced8] rounded-xl p-4">
+              <fieldset className="border border-(--border-main) rounded-xl p-4">
                 <legend className="text-sm font-semibold text-slate-600 px-2">연락처 / 계좌</legend>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
@@ -537,7 +530,7 @@ export default function EmployeesPage() {
                       value={form.phone || ''}
                       onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))}
                       placeholder="010-1234-5678"
-                      className="w-full px-3 py-2 text-sm rounded-lg border border-[#c8ced8] bg-white focus:outline-none focus:border-violet-500"
+                      className="w-full px-3 py-2 text-sm rounded-lg border border-(--border-main) bg-white focus:outline-none focus:border-violet-500"
                     />
                   </div>
                   <div>
@@ -547,7 +540,7 @@ export default function EmployeesPage() {
                       value={form.email || ''}
                       onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
                       placeholder="example@email.com"
-                      className="w-full px-3 py-2 text-sm rounded-lg border border-[#c8ced8] bg-white focus:outline-none focus:border-violet-500"
+                      className="w-full px-3 py-2 text-sm rounded-lg border border-(--border-main) bg-white focus:outline-none focus:border-violet-500"
                     />
                   </div>
                   <div>
@@ -557,7 +550,7 @@ export default function EmployeesPage() {
                       value={form.bank_name || ''}
                       onChange={(e) => setForm((f) => ({ ...f, bank_name: e.target.value }))}
                       placeholder="국민은행"
-                      className="w-full px-3 py-2 text-sm rounded-lg border border-[#c8ced8] bg-white focus:outline-none focus:border-violet-500"
+                      className="w-full px-3 py-2 text-sm rounded-lg border border-(--border-main) bg-white focus:outline-none focus:border-violet-500"
                     />
                   </div>
                   <div>
@@ -567,7 +560,7 @@ export default function EmployeesPage() {
                       value={form.bank_account || ''}
                       onChange={(e) => setForm((f) => ({ ...f, bank_account: e.target.value }))}
                       placeholder="000-0000-0000-00"
-                      className="w-full px-3 py-2 text-sm rounded-lg border border-[#c8ced8] bg-white focus:outline-none focus:border-violet-500"
+                      className="w-full px-3 py-2 text-sm rounded-lg border border-(--border-main) bg-white focus:outline-none focus:border-violet-500"
                     />
                   </div>
                   <div className="col-span-2">
@@ -576,7 +569,7 @@ export default function EmployeesPage() {
                       value={form.memo || ''}
                       onChange={(e) => setForm((f) => ({ ...f, memo: e.target.value }))}
                       rows={2}
-                      className="w-full px-3 py-2 text-sm rounded-lg border border-[#c8ced8] bg-white focus:outline-none focus:border-violet-500 resize-none"
+                      className="w-full px-3 py-2 text-sm rounded-lg border border-(--border-main) bg-white focus:outline-none focus:border-violet-500 resize-none"
                     />
                   </div>
                 </div>
@@ -584,10 +577,10 @@ export default function EmployeesPage() {
             </div>
 
             {/* 푸터 */}
-            <div className="flex items-center justify-end gap-2 px-6 py-4 border-t border-[#c8ced8]">
+            <div className="flex items-center justify-end gap-2 px-6 py-4 border-t border-(--border-main)">
               <button
                 onClick={() => setShowModal(false)}
-                className="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-[#c8ced8] rounded-lg hover:bg-[#dce1e9] transition-colors"
+                className="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-(--border-main) rounded-lg hover:bg-(--bg-main) transition-colors"
               >
                 취소
               </button>
@@ -606,7 +599,7 @@ export default function EmployeesPage() {
       {/* ── 비활성화 확인 모달 ── */}
       {deleteTarget && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-          <div className="bg-[#e8ecf2] rounded-2xl shadow-xl w-full max-w-sm p-6 border border-[#c8ced8]">
+          <div className="bg-(--bg-card) rounded-2xl shadow-xl w-full max-w-sm p-6 border border-(--border-main)">
             <h3 className="text-lg font-bold text-slate-800 mb-2">사원 비활성화</h3>
             <p className="text-sm text-slate-600 mb-1">
               <strong>{deleteTarget.employee_no} {deleteTarget.name}</strong>
@@ -621,7 +614,7 @@ export default function EmployeesPage() {
             <div className="flex justify-end gap-2">
               <button
                 onClick={() => setDeleteTarget(null)}
-                className="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-[#c8ced8] rounded-lg hover:bg-[#dce1e9]"
+                className="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-(--border-main) rounded-lg hover:bg-(--bg-main)"
               >
                 취소
               </button>

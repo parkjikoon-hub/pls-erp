@@ -4,6 +4,7 @@
 import { useState, useEffect } from 'react';
 import { listNotices, getNotice, createNotice, updateNotice, deleteNotice, type NoticeListItem, type NoticeDetail } from '../api/groupware/notices';
 import { useAuthStore } from '../stores/authStore';
+import BackButton from '../components/BackButton';
 
 export default function NoticesPage() {
   const { user } = useAuthStore();
@@ -80,7 +81,10 @@ export default function NoticesPage() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-slate-800">공지사항</h1>
+        <div className="flex items-center gap-3">
+          <BackButton to="/groupware" />
+          <h1 className="text-2xl font-bold text-slate-800">공지사항</h1>
+        </div>
         {isManager && (
           <button onClick={() => openEdit()}
             className="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition text-sm font-medium"
@@ -91,10 +95,10 @@ export default function NoticesPage() {
       </div>
 
       {/* 목록 */}
-      <div className="bg-white rounded-xl border border-[#c8ced8] overflow-hidden">
+      <div className="bg-white rounded-xl border border-(--border-main) overflow-hidden">
         <table className="w-full text-sm">
           <thead>
-            <tr className="bg-[#e8ecf2] text-slate-600 text-xs uppercase">
+            <tr className="bg-(--bg-card) text-slate-600 text-xs uppercase">
               <th className="text-left py-3 px-4 font-semibold w-12"></th>
               <th className="text-left py-3 px-4 font-semibold">제목</th>
               <th className="text-left py-3 px-4 font-semibold">작성자</th>
@@ -108,7 +112,7 @@ export default function NoticesPage() {
             ) : (
               notices.map(n => (
                 <tr key={n.id} onClick={() => openDetail(n.id)}
-                  className="border-t border-[#c8ced8] hover:bg-slate-50 cursor-pointer transition"
+                  className="border-t border-(--border-main) hover:bg-slate-50 cursor-pointer transition"
                 >
                   <td className="py-3 px-4">
                     {n.is_pinned && <span className="text-xs bg-red-100 text-red-600 px-1.5 py-0.5 rounded font-medium">고정</span>}
@@ -131,10 +135,10 @@ export default function NoticesPage() {
       {total > 20 && (
         <div className="flex justify-center gap-2">
           <button disabled={page <= 1} onClick={() => setPage(p => p - 1)}
-            className="px-3 py-1 border border-[#c8ced8] rounded text-sm disabled:opacity-30">이전</button>
+            className="px-3 py-1 border border-(--border-main) rounded text-sm disabled:opacity-30">이전</button>
           <span className="text-sm text-slate-500 py-1">{page} / {Math.ceil(total / 20)}</span>
           <button disabled={page >= Math.ceil(total / 20)} onClick={() => setPage(p => p + 1)}
-            className="px-3 py-1 border border-[#c8ced8] rounded text-sm disabled:opacity-30">다음</button>
+            className="px-3 py-1 border border-(--border-main) rounded text-sm disabled:opacity-30">다음</button>
         </div>
       )}
 
@@ -158,11 +162,11 @@ export default function NoticesPage() {
                 </div>
                 <button onClick={() => setDetail(null)} className="text-slate-400 hover:text-slate-600 text-xl">×</button>
               </div>
-              <div className="border-t border-[#c8ced8] pt-4 text-sm text-slate-700 whitespace-pre-wrap">
+              <div className="border-t border-(--border-main) pt-4 text-sm text-slate-700 whitespace-pre-wrap">
                 {detail.content}
               </div>
               {isManager && (
-                <div className="flex gap-2 justify-end border-t border-[#c8ced8] pt-3">
+                <div className="flex gap-2 justify-end border-t border-(--border-main) pt-3">
                   <button onClick={() => openEdit(detail)} className="px-3 py-1.5 text-sm text-blue-600 hover:bg-blue-50 rounded-lg">수정</button>
                   <button onClick={() => handleDelete(detail.id)} className="px-3 py-1.5 text-sm text-red-600 hover:bg-red-50 rounded-lg">삭제</button>
                 </div>
@@ -181,9 +185,9 @@ export default function NoticesPage() {
             <div className="p-6 space-y-4">
               <h2 className="text-lg font-bold text-slate-800">{editId ? '공지 수정' : '공지 작성'}</h2>
               <input value={formTitle} onChange={e => setFormTitle(e.target.value)}
-                className="w-full border border-[#c8ced8] rounded-lg px-3 py-2 text-sm" placeholder="제목" />
+                className="w-full border border-(--border-main) rounded-lg px-3 py-2 text-sm" placeholder="제목" />
               <textarea value={formContent} onChange={e => setFormContent(e.target.value)}
-                rows={8} className="w-full border border-[#c8ced8] rounded-lg px-3 py-2 text-sm resize-none" placeholder="내용" />
+                rows={8} className="w-full border border-(--border-main) rounded-lg px-3 py-2 text-sm resize-none" placeholder="내용" />
               <div className="flex gap-4">
                 <label className="flex items-center gap-1.5 text-sm text-slate-600">
                   <input type="checkbox" checked={formPinned} onChange={e => setFormPinned(e.target.checked)} className="rounded" />
@@ -195,7 +199,7 @@ export default function NoticesPage() {
                 </label>
               </div>
               <div className="flex gap-3 justify-end">
-                <button onClick={() => setShowForm(false)} className="px-4 py-2 border border-[#c8ced8] text-slate-600 rounded-lg text-sm">취소</button>
+                <button onClick={() => setShowForm(false)} className="px-4 py-2 border border-(--border-main) text-slate-600 rounded-lg text-sm">취소</button>
                 <button onClick={handleSave} className="px-6 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 text-sm font-medium">저장</button>
               </div>
             </div>

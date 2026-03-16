@@ -3,17 +3,15 @@
  * 담당자가 CSV 파일을 다운로드하여 홈택스에 수동 업로드합니다.
  */
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import {
-  ArrowLeftIcon,
   ArrowDownTrayIcon,
   DocumentArrowDownIcon,
 } from '@heroicons/react/24/outline';
+import BackButton from '../components/BackButton';
 import { useAuthStore } from '../stores/authStore';
 import api from '../api/client';
 
 export default function TaxFilingPage() {
-  const navigate = useNavigate();
   const { user } = useAuthStore();
   const now = new Date();
 
@@ -56,9 +54,7 @@ export default function TaxFilingPage() {
   return (
     <div>
       <div className="flex items-center gap-3 mb-4">
-        <button onClick={() => navigate('/hr')} className="p-1.5 rounded-lg hover:bg-[#c8ced8]">
-          <ArrowLeftIcon className="w-5 h-5 text-slate-600" />
-        </button>
+        <BackButton to="/hr" />
         <div>
           <h1 className="text-xl font-bold text-slate-800">국세청 신고파일 생성</h1>
           <p className="text-sm text-slate-500">
@@ -68,7 +64,7 @@ export default function TaxFilingPage() {
       </div>
 
       <div className="max-w-xl mx-auto">
-        <div className="bg-[#e8ecf2] rounded-2xl p-8 border border-[#c8ced8]">
+        <div className="bg-(--bg-card) rounded-2xl p-8 border border-(--border-main)">
           <div className="flex justify-center mb-6">
             <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-rose-400 to-rose-600 flex items-center justify-center">
               <DocumentArrowDownIcon className="w-8 h-8 text-white" />
@@ -89,7 +85,7 @@ export default function TaxFilingPage() {
             <select
               value={year}
               onChange={(e) => setYear(Number(e.target.value))}
-              className="px-4 py-2.5 text-sm rounded-lg border border-[#c8ced8] bg-white focus:outline-none focus:border-rose-500"
+              className="px-4 py-2.5 text-sm rounded-lg border border-(--border-main) bg-white focus:outline-none focus:border-rose-500"
             >
               {[2024, 2025, 2026, 2027].map((y) => (
                 <option key={y} value={y}>{y}년</option>
@@ -98,7 +94,7 @@ export default function TaxFilingPage() {
             <select
               value={month}
               onChange={(e) => setMonth(Number(e.target.value))}
-              className="px-4 py-2.5 text-sm rounded-lg border border-[#c8ced8] bg-white focus:outline-none focus:border-rose-500"
+              className="px-4 py-2.5 text-sm rounded-lg border border-(--border-main) bg-white focus:outline-none focus:border-rose-500"
             >
               {Array.from({ length: 12 }, (_, i) => (
                 <option key={i + 1} value={i + 1}>{i + 1}월</option>

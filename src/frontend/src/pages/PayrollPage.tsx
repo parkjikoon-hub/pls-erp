@@ -3,12 +3,11 @@
  * 급여 계산, 급여대장 조회, 승인
  */
 import { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
 import {
-  ArrowLeftIcon,
   CalculatorIcon,
   CheckCircleIcon,
 } from '@heroicons/react/24/outline';
+import BackButton from '../components/BackButton';
 import {
   fetchPayroll,
   calculatePayroll,
@@ -31,7 +30,6 @@ const STATUS_COLORS: Record<string, string> = {
 };
 
 export default function PayrollPage() {
-  const navigate = useNavigate();
   const { user } = useAuthStore();
   const isAdmin = user?.role === 'admin';
   const isManager = user?.role === 'admin' || user?.role === 'manager';
@@ -95,9 +93,7 @@ export default function PayrollPage() {
     <div>
       {/* 헤더 */}
       <div className="flex items-center gap-3 mb-4">
-        <button onClick={() => navigate('/hr')} className="p-1.5 rounded-lg hover:bg-[#c8ced8] transition-colors">
-          <ArrowLeftIcon className="w-5 h-5 text-slate-600" />
-        </button>
+        <BackButton to="/hr" />
         <div>
           <h1 className="text-xl font-bold text-slate-800">급여 관리</h1>
           <p className="text-sm text-slate-500">
@@ -107,12 +103,12 @@ export default function PayrollPage() {
       </div>
 
       {/* 기간 선택 + 액션 */}
-      <div className="bg-[#e8ecf2] rounded-xl p-4 border border-[#c8ced8] mb-4">
+      <div className="bg-(--bg-card) rounded-xl p-4 border border-(--border-main) mb-4">
         <div className="flex flex-wrap items-center gap-3">
           <select
             value={year}
             onChange={(e) => setYear(Number(e.target.value))}
-            className="px-3 py-2 text-sm rounded-lg border border-[#c8ced8] bg-white focus:outline-none focus:border-violet-500"
+            className="px-3 py-2 text-sm rounded-lg border border-(--border-main) bg-white focus:outline-none focus:border-violet-500"
           >
             {[2024, 2025, 2026, 2027].map((y) => (
               <option key={y} value={y}>{y}년</option>
@@ -121,7 +117,7 @@ export default function PayrollPage() {
           <select
             value={month}
             onChange={(e) => setMonth(Number(e.target.value))}
-            className="px-3 py-2 text-sm rounded-lg border border-[#c8ced8] bg-white focus:outline-none focus:border-violet-500"
+            className="px-3 py-2 text-sm rounded-lg border border-(--border-main) bg-white focus:outline-none focus:border-violet-500"
           >
             {Array.from({ length: 12 }, (_, i) => (
               <option key={i + 1} value={i + 1}>{i + 1}월</option>
@@ -162,19 +158,19 @@ export default function PayrollPage() {
       {/* 급여 요약 */}
       {data && (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
-          <div className="bg-[#e8ecf2] rounded-xl p-4 border border-[#c8ced8]">
+          <div className="bg-(--bg-card) rounded-xl p-4 border border-(--border-main)">
             <p className="text-xs text-slate-500 mb-1">대상 인원</p>
             <p className="text-xl font-bold text-slate-800">{data.total_employees}명</p>
           </div>
-          <div className="bg-[#e8ecf2] rounded-xl p-4 border border-[#c8ced8]">
+          <div className="bg-(--bg-card) rounded-xl p-4 border border-(--border-main)">
             <p className="text-xs text-slate-500 mb-1">총 지급액</p>
             <p className="text-xl font-bold text-blue-600">{formatMoney(data.total_gross)}</p>
           </div>
-          <div className="bg-[#e8ecf2] rounded-xl p-4 border border-[#c8ced8]">
+          <div className="bg-(--bg-card) rounded-xl p-4 border border-(--border-main)">
             <p className="text-xs text-slate-500 mb-1">총 공제액</p>
             <p className="text-xl font-bold text-red-500">{formatMoney(data.total_deduction)}</p>
           </div>
-          <div className="bg-[#e8ecf2] rounded-xl p-4 border border-[#c8ced8]">
+          <div className="bg-(--bg-card) rounded-xl p-4 border border-(--border-main)">
             <p className="text-xs text-slate-500 mb-1">총 실수령액</p>
             <p className="text-xl font-bold text-emerald-600">{formatMoney(data.total_net)}</p>
           </div>
@@ -182,11 +178,11 @@ export default function PayrollPage() {
       )}
 
       {/* 급여 상세 테이블 */}
-      <div className="bg-[#e8ecf2] rounded-xl border border-[#c8ced8] overflow-hidden">
+      <div className="bg-(--bg-card) rounded-xl border border-(--border-main) overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="bg-[#dce1e9] text-slate-600">
+              <tr className="bg-(--bg-main) text-slate-600">
                 <th className="text-left px-3 py-3 font-semibold w-16">사번</th>
                 <th className="text-left px-3 py-3 font-semibold">이름</th>
                 <th className="text-left px-3 py-3 font-semibold">부서</th>
@@ -216,7 +212,7 @@ export default function PayrollPage() {
                   const insurance = d.national_pension + d.health_insurance + d.long_term_care + d.employment_insurance;
                   const incomeTax = d.income_tax + d.local_tax;
                   return (
-                    <tr key={d.id} className="border-t border-[#c8ced8] hover:bg-[#dce1e9]/50 transition-colors">
+                    <tr key={d.id} className="border-t border-(--border-main) hover:bg-(--bg-main)/50 transition-colors">
                       <td className="px-3 py-2.5 font-mono text-xs">{d.employee_no}</td>
                       <td className="px-3 py-2.5 font-medium text-slate-700">{d.employee_name}</td>
                       <td className="px-3 py-2.5 text-xs text-slate-500">{d.department_name || '-'}</td>
@@ -234,7 +230,7 @@ export default function PayrollPage() {
             </tbody>
             {data?.details && data.details.length > 0 && (
               <tfoot>
-                <tr className="border-t-2 border-[#b0b8c4] bg-[#dce1e9] font-bold">
+                <tr className="border-t-2 border-(--border-light) bg-(--bg-main) font-bold">
                   <td colSpan={5} className="px-3 py-3 text-slate-700">합계 ({data.total_employees}명)</td>
                   <td className="px-3 py-3 text-right font-mono text-xs">{formatMoney(data.total_gross)}</td>
                   <td colSpan={2} />

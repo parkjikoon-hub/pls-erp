@@ -56,7 +56,7 @@ export default function GroupwarePage() {
           { label: '결재 대기', value: pendingCount, color: 'text-cyan-600', bg: 'bg-cyan-50' },
           { label: '전체 공지', value: noticeCount, color: 'text-amber-600', bg: 'bg-amber-50' },
         ].map((s, i) => (
-          <div key={i} className={`${s.bg} rounded-xl p-4 border border-[#c8ced8]`}>
+          <div key={i} className={`${s.bg} rounded-xl p-4 border border-(--border-main)`}>
             <p className="text-xs text-slate-500 font-medium">{s.label}</p>
             <p className={`text-2xl font-bold mt-1 ${s.color}`}>{s.value}</p>
           </div>
@@ -69,7 +69,7 @@ export default function GroupwarePage() {
           <div
             key={menu.path}
             onClick={() => navigate(menu.path)}
-            className="bg-white rounded-xl border border-[#c8ced8] p-5 hover:shadow-lg hover:-translate-y-0.5 transition-all cursor-pointer group"
+            className="bg-white rounded-xl border border-(--border-main) p-5 hover:shadow-lg hover:-translate-y-0.5 transition-all cursor-pointer group"
           >
             <div className="flex items-start gap-4">
               <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${menu.color} flex items-center justify-center text-2xl flex-shrink-0`}>
