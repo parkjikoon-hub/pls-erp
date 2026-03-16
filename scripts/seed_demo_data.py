@@ -1,5 +1,5 @@
 """
-PLS ERP — 더미 데이터 시뮬레이션 스크립트
+PLS ERP -더미 데이터 시뮬레이션 스크립트
 실제 업무 플로우를 재현하여 전체 시스템을 검증합니다.
 
 사용법:
@@ -38,14 +38,27 @@ def api(client, method, path, data=None, token=None, params=None):
     headers = {"Content-Type": "application/json"}
     if token:
         headers["Authorization"] = f"Bearer {token}"
-    resp = getattr(client, method)(
-        path, json=data, headers=headers, params=params, timeout=30.0,
-    )
+    kwargs = {"headers": headers, "timeout": 120.0}
+    if params:
+        kwargs["params"] = params
+    if method in ("post", "put", "patch") and data is not None:
+        kwargs["json"] = data
+    resp = getattr(client, method)(path, **kwargs)
     return resp
 
 
+def get_data(resp):
+    """API 응답에서 실제 데이터를 추출 (래핑된 응답 지원)
+    응답 형식: {"status":"success","data":{...}} 또는 직접 {...}
+    """
+    body = resp.json()
+    if isinstance(body, dict) and "data" in body:
+        return body["data"]
+    return body
+
+
 def run_seed(base_url):
-    """더미 데이터 생성 — 실제 업무 플로우 재현"""
+    """더미 데이터 생성 -실제 업무 플로우 재현"""
     client = httpx.Client(base_url=base_url)
     results = {}  # 생성된 데이터 ID 저장
 
@@ -67,7 +80,7 @@ def run_seed(base_url):
         return False
     token = resp.json()["access_token"]
     user_name = resp.json().get("user_name", "관리자")
-    log(1, f"로그인 성공 — {user_name}")
+    log(1, f"로그인 성공 -{user_name}")
 
     # ──────────────────────────────────────
     # 2. 거래처 5개 생성
@@ -94,11 +107,24 @@ def run_seed(base_url):
     for c in customers_data:
         resp = api(client, "post", "/api/v1/system/customers", c, token)
         if resp.status_code in (200, 201):
-            cid = resp.json()["id"]
+            cid = get_data(resp)["id"]
             results["customers"].append(cid)
             log(2, f"거래처 '{c['name']}' 생성 (ID: {cid[:8]}...)")
+        elif resp.status_code == 409:
+            log(2, f"거래처 '{c['name']}' 이미 존재 (건너뜀)")
         else:
             log(2, f"거래처 '{c['name']}' 생성 실패: {resp.status_code}", ok=False)
+
+    # 409로 건너뛴 거래처가 있으면 기존 목록에서 DEMO- 거래처 ID 조회
+    if len(results["customers"]) < len(customers_data):
+        resp = api(client, "get", "/api/v1/system/customers", token=token, params={"size": 100})
+        if resp.status_code == 200:
+            body = get_data(resp)
+            items = body.get("items", body) if isinstance(body, dict) else body
+            if isinstance(items, list):
+                demo_custs = [it for it in items if it.get("code", "").startswith(DEMO_PREFIX)]
+                results["customers"] = [it["id"] for it in demo_custs]
+                log(2, f"기존 DEMO 거래처 {len(results['customers'])}개 확인")
 
     # ──────────────────────────────────────
     # 3. 품목 카테고리 + 품목 생성
@@ -113,7 +139,7 @@ def run_seed(base_url):
     for cat in categories:
         resp = api(client, "post", "/api/v1/system/product-categories", cat, token)
         if resp.status_code in (200, 201):
-            results["categories"].append(resp.json()["id"])
+            results["categories"].append(get_data(resp)["id"])
             log(3, f"카테고리 '{cat['name']}' 생성")
 
     products_data = [
@@ -140,11 +166,27 @@ def run_seed(base_url):
             p["category_id"] = results["categories"][0]
         resp = api(client, "post", "/api/v1/system/products", p, token)
         if resp.status_code in (200, 201):
-            pid = resp.json()["id"]
+            pid = get_data(resp)["id"]
             results["products"].append({"id": pid, "name": p["name"], "price": p["standard_price"]})
             log(3, f"품목 '{p['name']}' 생성")
+        elif resp.status_code == 409:
+            log(3, f"품목 '{p['name']}' 이미 존재 (건너뜀)")
         else:
             log(3, f"품목 '{p['name']}' 실패: {resp.status_code}", ok=False)
+
+    # 409로 건너뛴 품목이 있으면 기존 목록에서 DEMO- 품목 ID 조회
+    if len(results["products"]) < len(products_data):
+        resp = api(client, "get", "/api/v1/system/products", token=token, params={"size": 100})
+        if resp.status_code == 200:
+            body = get_data(resp)
+            items = body.get("items", body) if isinstance(body, dict) else body
+            if isinstance(items, list):
+                demo_prods = [it for it in items if it.get("code", "").startswith(DEMO_PREFIX)]
+                results["products"] = [
+                    {"id": it["id"], "name": it["name"], "price": it.get("standard_price", 0)}
+                    for it in demo_prods
+                ]
+                log(3, f"기존 DEMO 품목 {len(results['products'])}개 확인")
 
     # ──────────────────────────────────────
     # 4. 견적서 3건 생성
@@ -158,7 +200,7 @@ def run_seed(base_url):
                 "quote_date": str(today),
                 "valid_until": str(today + timedelta(days=30)),
                 "customer_id": results["customers"][0],
-                "notes": f"{DEMO_PREFIX}견적서 — LED 모듈 납품 건",
+                "notes": f"{DEMO_PREFIX}견적서 -LED 모듈 납품 건",
                 "lines": [
                     {"product_id": results["products"][0]["id"],
                      "product_name": results["products"][0]["name"],
@@ -172,7 +214,7 @@ def run_seed(base_url):
                 "quote_date": str(today - timedelta(days=5)),
                 "valid_until": str(today + timedelta(days=25)),
                 "customer_id": results["customers"][2],
-                "notes": f"{DEMO_PREFIX}견적서 — 모터 어셈블리 대량 주문",
+                "notes": f"{DEMO_PREFIX}견적서 -모터 어셈블리 대량 주문",
                 "lines": [
                     {"product_id": results["products"][2]["id"],
                      "product_name": results["products"][2]["name"],
@@ -183,7 +225,7 @@ def run_seed(base_url):
                 "quote_date": str(today - timedelta(days=10)),
                 "valid_until": str(today + timedelta(days=20)),
                 "customer_id": results["customers"][3],
-                "notes": f"{DEMO_PREFIX}견적서 — 냉각팬 시스템 납품",
+                "notes": f"{DEMO_PREFIX}견적서 -냉각팬 시스템 납품",
                 "lines": [
                     {"product_id": results["products"][7]["id"],
                      "product_name": results["products"][7]["name"],
@@ -197,10 +239,10 @@ def run_seed(base_url):
         for i, q in enumerate(quotations):
             resp = api(client, "post", "/api/v1/sales/quotations", q, token)
             if resp.status_code in (200, 201):
-                qid = resp.json()["id"]
-                qno = resp.json().get("quote_no", "?")
+                qid = get_data(resp)["id"]
+                qno = get_data(resp).get("quote_no", "?")
                 results["quotations"].append(qid)
-                log(4, f"견적서 {qno} 생성 (총액: {resp.json().get('grand_total', 0):,.0f}원)")
+                log(4, f"견적서 {qno} 생성 (총액: {get_data(resp).get('grand_total', 0):,.0f}원)")
             else:
                 log(4, f"견적서 {i+1} 실패: {resp.status_code} {resp.text[:100]}", ok=False)
 
@@ -214,8 +256,8 @@ def run_seed(base_url):
         resp = api(client, "post", f"/api/v1/sales/orders/from-quotation/{qid}",
                    token=token, params={"order_date": today_str})
         if resp.status_code in (200, 201):
-            oid = resp.json()["id"]
-            ono = resp.json().get("order_no", "?")
+            oid = get_data(resp)["id"]
+            ono = get_data(resp).get("order_no", "?")
             results["orders"].append(oid)
             log(5, f"수주 {ono} 생성 (견적 → 수주 전환 완료)")
         else:
@@ -224,90 +266,132 @@ def run_seed(base_url):
     # ──────────────────────────────────────
     # 6. 수주 → 작업지시서 생성
     # ──────────────────────────────────────
-    print("\n[6/11] 수주 → 작업지시서 생성...")
+    print("\n[6/11] 수주 -> 작업지시서 생성...")
     results["work_orders"] = []
     for oid in results["orders"][:1]:
-        resp = api(client, "post", f"/api/v1/production/work-orders/from-order/{oid}", token=token)
-        if resp.status_code in (200, 201):
-            woid = resp.json()["id"]
-            wono = resp.json().get("wo_no", "?")
-            results["work_orders"].append(woid)
-            log(6, f"작업지시서 {wono} 생성")
-        else:
-            log(6, f"작업지시서 실패: {resp.status_code} {resp.text[:100]}", ok=False)
+        try:
+            resp = api(client, "post", f"/api/v1/production/work-orders/from-order/{oid}", token=token)
+            if resp.status_code in (200, 201):
+                d = get_data(resp)
+                woid = d.get("id") or d.get("wo_id", "")
+                wono = d.get("wo_no", "?")
+                if woid:
+                    results["work_orders"].append(woid)
+                log(6, f"작업지시서 {wono} 생성")
+            else:
+                log(6, f"작업지시서 실패: {resp.status_code} {resp.text[:200]}", ok=False)
+        except Exception as e:
+            log(6, f"작업지시서 오류: {e}", ok=False)
 
     # ──────────────────────────────────────
     # 7. 재고 입고
     # ──────────────────────────────────────
     print("\n[7/11] 재고 입고 처리...")
     # 먼저 창고 목록 조회
-    resp = api(client, "get", "/api/v1/production/inventory/warehouses", token=token)
-    warehouses = {}
-    if resp.status_code == 200:
-        for w in resp.json():
-            warehouses[w["zone_type"]] = w["id"]
+    try:
+        resp = api(client, "get", "/api/v1/production/inventory/warehouses", token=token)
+        warehouses = {}
+        if resp.status_code == 200:
+            wh_data = get_data(resp)
+            wh_list = wh_data if isinstance(wh_data, list) else wh_data.get("items", [])
+            for w in wh_list:
+                warehouses[w.get("zone_type", "")] = w["id"]
+    except Exception as e:
+        log(7, f"창고 조회 오류: {e}", ok=False)
+        warehouses = {}
 
+    materials = []
     if warehouses.get("raw") and results["products"]:
         materials = [p for p in results["products"] if "PCB" in p["name"] or "알루미늄" in p["name"]
                      or "배선" in p["name"] or "반도체" in p["name"]]
         for mat in materials:
-            resp = api(client, "post", "/api/v1/production/inventory/receive", {
-                "product_id": mat["id"],
-                "warehouse_id": warehouses["raw"],
-                "quantity": 500,
-                "unit_cost": mat["price"],
-                "reference_type": "purchase",
-                "reference_no": f"{DEMO_PREFIX}PO-001",
-                "memo": f"{DEMO_PREFIX}초기 원자재 입고"
-            }, token)
-            if resp.status_code in (200, 201):
-                log(7, f"입고: {mat['name']} 500개 → 원자재 창고")
-            else:
-                log(7, f"입고 실패: {mat['name']} — {resp.status_code}", ok=False)
+            try:
+                resp = api(client, "post", "/api/v1/production/inventory/receive", {
+                    "product_id": mat["id"],
+                    "warehouse_id": warehouses["raw"],
+                    "quantity": 500,
+                    "unit_cost": mat["price"],
+                    "reference_type": "purchase",
+                    "reference_no": f"{DEMO_PREFIX}PO-001",
+                    "memo": f"{DEMO_PREFIX}초기 원자재 입고"
+                }, token)
+                if resp.status_code in (200, 201):
+                    log(7, f"입고: {mat['name']} 500개 -> 원자재 창고")
+                else:
+                    log(7, f"입고 실패: {mat['name']} - {resp.status_code} {resp.text[:100]}", ok=False)
+            except Exception as e:
+                log(7, f"입고 오류: {mat['name']} - {e}", ok=False)
 
     if warehouses.get("finished") and results["products"]:
         finished = [p for p in results["products"] if "LED" in p["name"] or "센서" in p["name"]]
         for fp in finished:
-            resp = api(client, "post", "/api/v1/production/inventory/receive", {
-                "product_id": fp["id"],
-                "warehouse_id": warehouses["finished"],
-                "quantity": 200,
-                "unit_cost": fp["price"],
-                "reference_type": "production",
-                "reference_no": f"{DEMO_PREFIX}PROD-001",
-                "memo": f"{DEMO_PREFIX}완제품 입고"
-            }, token)
-            if resp.status_code in (200, 201):
-                log(7, f"입고: {fp['name']} 200개 → 완제품 창고")
+            try:
+                resp = api(client, "post", "/api/v1/production/inventory/receive", {
+                    "product_id": fp["id"],
+                    "warehouse_id": warehouses["finished"],
+                    "quantity": 200,
+                    "unit_cost": fp["price"],
+                    "reference_type": "production",
+                    "reference_no": f"{DEMO_PREFIX}PROD-001",
+                    "memo": f"{DEMO_PREFIX}완제품 입고"
+                }, token)
+                if resp.status_code in (200, 201):
+                    log(7, f"입고: {fp['name']} 200개 -> 완제품 창고")
+                else:
+                    log(7, f"입고 실패: {fp['name']} - {resp.status_code}", ok=False)
+            except Exception as e:
+                log(7, f"입고 오류: {fp['name']} - {e}", ok=False)
 
     # ──────────────────────────────────────
     # 8. 재고 이관 테스트
     # ──────────────────────────────────────
     print("\n[8/11] 재고 이관 테스트...")
-    if warehouses.get("raw") and warehouses.get("wip") and materials:
-        resp = api(client, "post", "/api/v1/production/inventory/transfer", {
-            "product_id": materials[0]["id"],
-            "from_warehouse_id": warehouses["raw"],
-            "to_warehouse_id": warehouses["wip"],
-            "quantity": 50,
-            "memo": f"{DEMO_PREFIX}생산 투입용 이관"
-        }, token)
-        if resp.status_code in (200, 201):
-            log(8, f"이관: {materials[0]['name']} 50개 (원자재 → 생산중)")
+    try:
+        if warehouses.get("raw") and warehouses.get("wip") and materials:
+            resp = api(client, "post", "/api/v1/production/inventory/transfer", {
+                "product_id": materials[0]["id"],
+                "from_warehouse_id": warehouses["raw"],
+                "to_warehouse_id": warehouses["wip"],
+                "quantity": 50,
+                "memo": f"{DEMO_PREFIX}생산 투입용 이관"
+            }, token)
+            if resp.status_code in (200, 201):
+                log(8, f"이관: {materials[0]['name']} 50개 (원자재 -> 생산중)")
+            else:
+                log(8, f"이관 실패: {resp.status_code} {resp.text[:100]}", ok=False)
         else:
-            log(8, f"이관 실패: {resp.status_code}", ok=False)
+            log(8, "재고 이관 건너뜀 (창고/자재 데이터 부족)")
+    except Exception as e:
+        log(8, f"재고 이관 오류: {e}", ok=False)
 
     # ──────────────────────────────────────
     # 9. 직원 등록
     # ──────────────────────────────────────
     print("\n[9/11] 직원 등록...")
     # 기존 부서/직급 조회
-    resp = api(client, "get", "/api/v1/system/departments", token=token)
-    depts = resp.json().get("items", []) if resp.status_code == 200 else []
-    resp = api(client, "get", "/api/v1/system/positions", token=token)
-    positions = resp.json().get("items", []) if resp.status_code == 200 else []
+    try:
+        resp = api(client, "get", "/api/v1/system/departments", token=token)
+        if resp.status_code == 200:
+            d_body = get_data(resp)
+            depts = d_body.get("items", d_body) if isinstance(d_body, dict) else d_body
+            if not isinstance(depts, list):
+                depts = []
+        else:
+            depts = []
+        resp = api(client, "get", "/api/v1/system/positions", token=token)
+        if resp.status_code == 200:
+            p_body = get_data(resp)
+            positions = p_body.get("items", p_body) if isinstance(p_body, dict) else p_body
+            if not isinstance(positions, list):
+                positions = []
+        else:
+            positions = []
+    except Exception as e:
+        log(9, f"부서/직급 조회 오류: {e}", ok=False)
+        depts = []
+        positions = []
 
-    dept_id = depts[1]["id"] if len(depts) > 1 else None
+    dept_id = depts[1]["id"] if len(depts) > 1 else (depts[0]["id"] if depts else None)
     pos_id = positions[-1]["id"] if positions else None
 
     employees = [
@@ -328,13 +412,18 @@ def run_seed(base_url):
             emp["department_id"] = dept_id
         if pos_id:
             emp["position_id"] = pos_id
-        resp = api(client, "post", "/api/v1/hr/employees", emp, token)
-        if resp.status_code in (200, 201):
-            eid = resp.json()["id"]
-            results["employees"].append(eid)
-            log(9, f"직원 '{emp['name']}' 등록 (사번: {emp['employee_no']})")
-        else:
-            log(9, f"직원 '{emp['name']}' 실패: {resp.status_code} {resp.text[:100]}", ok=False)
+        try:
+            resp = api(client, "post", "/api/v1/hr/employees", emp, token)
+            if resp.status_code in (200, 201):
+                eid = get_data(resp)["id"]
+                results["employees"].append(eid)
+                log(9, f"직원 '{emp['name']}' 등록 (사번: {emp['employee_no']})")
+            elif resp.status_code == 409:
+                log(9, f"직원 '{emp['name']}' 이미 존재 (건너뜀)")
+            else:
+                log(9, f"직원 '{emp['name']}' 실패: {resp.status_code} {resp.text[:100]}", ok=False)
+        except Exception as e:
+            log(9, f"직원 '{emp['name']}' 오류: {e}", ok=False)
 
     # ──────────────────────────────────────
     # 10. 계정과목 + 전표
@@ -354,13 +443,35 @@ def run_seed(base_url):
     ]
     results["accounts"] = []
     for acc in accounts_data:
-        resp = api(client, "post", "/api/v1/finance/accounts", acc, token)
-        if resp.status_code in (200, 201):
-            aid = resp.json()["id"]
-            results["accounts"].append({"id": aid, "name": acc["name"], "type": acc["account_type"]})
-            log(10, f"계정과목 '{acc['name']}' 생성")
-        else:
-            log(10, f"계정과목 '{acc['name']}' 실패: {resp.status_code}", ok=False)
+        try:
+            resp = api(client, "post", "/api/v1/finance/accounts", acc, token)
+            if resp.status_code in (200, 201):
+                aid = get_data(resp)["id"]
+                results["accounts"].append({"id": aid, "name": acc["name"], "type": acc["account_type"]})
+                log(10, f"계정과목 '{acc['name']}' 생성")
+            elif resp.status_code == 409:
+                log(10, f"계정과목 '{acc['name']}' 이미 존재 (건너뜀)")
+            else:
+                log(10, f"계정과목 '{acc['name']}' 실패: {resp.status_code}", ok=False)
+        except Exception as e:
+            log(10, f"계정과목 '{acc['name']}' 오류: {e}", ok=False)
+
+    # 409로 건너뛴 계정이 있으면 기존 목록에서 DEMO- 계정 ID 조회
+    if len(results["accounts"]) < len(accounts_data):
+        try:
+            resp = api(client, "get", "/api/v1/finance/accounts", token=token, params={"size": 100})
+            if resp.status_code == 200:
+                body = get_data(resp)
+                items = body.get("items", body) if isinstance(body, dict) else body
+                if isinstance(items, list):
+                    demo_accs = [it for it in items if it.get("code", "").startswith(DEMO_PREFIX)]
+                    results["accounts"] = [
+                        {"id": it["id"], "name": it["name"], "type": it.get("account_type", "")}
+                        for it in demo_accs
+                    ]
+                    log(10, f"기존 DEMO 계정과목 {len(results['accounts'])}개 확인")
+        except Exception as e:
+            log(10, f"계정과목 조회 오류: {e}", ok=False)
 
     # 전표 생성 (차변/대변 균형)
     if len(results["accounts"]) >= 4:
@@ -373,7 +484,7 @@ def run_seed(base_url):
             {
                 "entry_date": str(date.today() - timedelta(days=15)),
                 "entry_type": "sales",
-                "description": f"{DEMO_PREFIX}LED 모듈 매출 — 한빛전자",
+                "description": f"{DEMO_PREFIX}LED 모듈 매출 -한빛전자",
                 "lines": [
                     {"account_id": cash["id"], "debit_amount": 1650000, "credit_amount": 0,
                      "description": f"{DEMO_PREFIX}현금 수금"},
@@ -384,7 +495,7 @@ def run_seed(base_url):
             {
                 "entry_date": str(date.today() - timedelta(days=10)),
                 "entry_type": "purchase",
-                "description": f"{DEMO_PREFIX}PCB 기판 매입 — 삼성부품",
+                "description": f"{DEMO_PREFIX}PCB 기판 매입 -삼성부품",
                 "lines": [
                     {"account_id": expense["id"], "debit_amount": 1500000, "credit_amount": 0,
                      "description": f"{DEMO_PREFIX}PCB 기판 500EA 매입"},
@@ -395,7 +506,7 @@ def run_seed(base_url):
             {
                 "entry_date": str(date.today() - timedelta(days=3)),
                 "entry_type": "sales",
-                "description": f"{DEMO_PREFIX}모터 어셈블리 매출 — 대한기계",
+                "description": f"{DEMO_PREFIX}모터 어셈블리 매출 -대한기계",
                 "lines": [
                     {"account_id": deposit["id"], "debit_amount": 3960000, "credit_amount": 0,
                      "description": f"{DEMO_PREFIX}계좌이체 수금"},
@@ -408,8 +519,8 @@ def run_seed(base_url):
         for j in journals:
             resp = api(client, "post", "/api/v1/finance/journals", j, token)
             if resp.status_code in (200, 201):
-                jid = resp.json()["id"]
-                jno = resp.json().get("entry_no", "?")
+                jid = get_data(resp)["id"]
+                jno = get_data(resp).get("entry_no", "?")
                 results["journals"].append(jid)
                 log(10, f"전표 {jno} 생성 ({j['entry_type']})")
             else:
@@ -419,26 +530,38 @@ def run_seed(base_url):
     # 11. 대시보드 검증
     # ──────────────────────────────────────
     print("\n[11/11] 대시보드 데이터 검증...")
-    resp = api(client, "get", "/api/v1/dashboard/summary", token=token)
-    if resp.status_code == 200:
-        cards = resp.json().get("cards", {})
-        log(11, f"거래처 수: {cards.get('customer_count', 0)}")
-        log(11, f"품목 수: {cards.get('product_count', 0)}")
-        log(11, f"사용자 수: {cards.get('user_count', 0)}")
-        log(11, f"이번 달 매출: {cards.get('month_sales', 0):,.0f}원")
-        log(11, f"진행중 수주: {cards.get('active_orders', 0)}건")
-        log(11, f"재고 품목: {cards.get('inventory_items', 0)}종")
-    else:
-        log(11, f"대시보드 조회 실패: {resp.status_code}", ok=False)
+    try:
+        resp = api(client, "get", "/api/v1/dashboard/summary", token=token)
+        if resp.status_code == 200:
+            dash = get_data(resp)
+            cards = dash.get("cards", dash) if isinstance(dash, dict) else {}
+            log(11, f"거래처 수: {cards.get('customer_count', '?')}")
+            log(11, f"품목 수: {cards.get('product_count', '?')}")
+            log(11, f"사용자 수: {cards.get('user_count', '?')}")
+            ms = cards.get('month_sales', 0)
+            log(11, f"이번 달 매출: {ms:,.0f}원" if isinstance(ms, (int, float)) else f"이번 달 매출: {ms}")
+            log(11, f"진행중 수주: {cards.get('active_orders', '?')}건")
+            log(11, f"재고 품목: {cards.get('inventory_items', '?')}종")
+        else:
+            log(11, f"대시보드 조회 실패: {resp.status_code}", ok=False)
+    except Exception as e:
+        log(11, f"대시보드 조회 오류: {e}", ok=False)
 
     # 월별 매출 그래프
-    resp = api(client, "get", "/api/v1/dashboard/monthly-sales",
-               token=token, params={"year": date.today().year})
-    if resp.status_code == 200:
-        data = resp.json().get("data", [])
-        this_month = next((d for d in data if d["month"] == date.today().month), None)
-        if this_month:
-            log(11, f"이번 달 매출 그래프: {this_month['amount']:,.0f}원 / {this_month['order_count']}건")
+    try:
+        resp = api(client, "get", "/api/v1/dashboard/monthly-sales",
+                   token=token, params={"year": date.today().year})
+        if resp.status_code == 200:
+            ms_data = get_data(resp)
+            data_list = ms_data.get("data", ms_data) if isinstance(ms_data, dict) else ms_data
+            if isinstance(data_list, list):
+                this_month = next((d for d in data_list if d.get("month") == date.today().month), None)
+                if this_month:
+                    amt = this_month.get('amount', 0)
+                    cnt = this_month.get('order_count', 0)
+                    log(11, f"이번 달 매출 그래프: {amt:,.0f}원 / {cnt}건")
+    except Exception as e:
+        log(11, f"월별 매출 조회 오류: {e}", ok=False)
 
     # ── 결과 요약 ──
     print(f"\n{'='*60}")
