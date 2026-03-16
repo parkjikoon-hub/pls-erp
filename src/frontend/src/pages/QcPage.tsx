@@ -8,6 +8,7 @@ import {
   type QcInspection, type QcFormData,
 } from '../api/production/qc';
 import { listWorkOrders, type WorkOrder } from '../api/production/workOrders';
+import BackButton from '../components/BackButton';
 
 /* 결과별 색상 */
 const RESULT_STYLE: Record<string, { label: string; color: string; bg: string }> = {
@@ -98,6 +99,10 @@ export default function QcPage() {
 
   return (
     <div className="space-y-6">
+      {/* 뒤로가기 */}
+      <div className="mb-4">
+        <BackButton to="/production" label="생산/SCM" />
+      </div>
       {/* ── 헤더 ── */}
       <div className="flex items-center justify-between">
         <div>

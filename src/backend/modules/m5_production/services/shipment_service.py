@@ -49,6 +49,7 @@ async def list_shipments(
     db: AsyncSession, *,
     status_filter: str | None = None,
     customer_id: str | None = None,
+    order_id: str | None = None,
     search: str | None = None,
     page: int = 1, size: int = 20,
 ):
@@ -62,6 +63,8 @@ async def list_shipments(
         base = base.where(Shipment.status == status_filter)
     if customer_id:
         base = base.where(Shipment.customer_id == uuid.UUID(customer_id))
+    if order_id:
+        base = base.where(Shipment.order_id == uuid.UUID(order_id))
     if search:
         base = base.where(Shipment.shipment_no.ilike(f"%{search}%"))
 

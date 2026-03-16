@@ -21,6 +21,7 @@ router = APIRouter()
 async def list_work_orders(
     status: Optional[str] = Query(None, description="상태 필터"),
     order_type: Optional[str] = Query(None, description="유형 필터"),
+    order_id: Optional[str] = Query(None, description="수주 ID 필터"),
     search: Optional[str] = Query(None, description="검색어"),
     page: int = Query(1, ge=1),
     size: int = Query(20, ge=1, le=100),
@@ -30,6 +31,7 @@ async def list_work_orders(
     """작업지시서 목록을 조회합니다"""
     data = await work_order_service.list_work_orders(
         db, status_filter=status, order_type=order_type,
+        order_id=order_id,
         search=search, page=page, size=size,
     )
     return success_response(data=data)

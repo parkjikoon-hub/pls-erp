@@ -9,6 +9,7 @@ import {
   type Shipment,
 } from '../api/production/shipments';
 import api from '../api/client';
+import BackButton from '../components/BackButton';
 
 /* 상태 라벨/색상 */
 const STATUS_MAP: Record<string, { label: string; color: string; bg: string }> = {
@@ -120,6 +121,10 @@ export default function ShipmentsPage() {
 
   return (
     <div className="space-y-6">
+      {/* 뒤로가기 */}
+      <div className="mb-4">
+        <BackButton to="/production" label="생산/SCM" />
+      </div>
       {/* ── 헤더 ── */}
       <div className="flex items-center justify-between">
         <div>

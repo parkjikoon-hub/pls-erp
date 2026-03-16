@@ -9,6 +9,7 @@ import {
   type WorkOrder, type WorkOrderFormData, type FromOrderResult,
 } from '../api/production/workOrders';
 import api from '../api/client';
+import BackButton from '../components/BackButton';
 
 /* 상태 라벨/색상 */
 const STATUS_MAP: Record<string, { label: string; color: string; bg: string }> = {
@@ -191,6 +192,10 @@ export default function WorkOrdersPage() {
 
   return (
     <div>
+      {/* 뒤로가기 */}
+      <div className="mb-4">
+        <BackButton to="/production" label="생산/SCM" />
+      </div>
       {/* 헤더 */}
       <div className="flex items-center justify-between mb-4">
         <div>

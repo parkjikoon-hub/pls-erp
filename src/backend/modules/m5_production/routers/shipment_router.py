@@ -19,6 +19,7 @@ router = APIRouter()
 async def list_shipments(
     status: Optional[str] = Query(None, description="상태 필터"),
     customer_id: Optional[str] = Query(None, description="거래처 필터"),
+    order_id: Optional[str] = Query(None, description="수주 ID 필터"),
     search: Optional[str] = Query(None, description="검색어"),
     page: int = Query(1, ge=1),
     size: int = Query(20, ge=1, le=100),
@@ -28,6 +29,7 @@ async def list_shipments(
     """출하지시서 목록을 조회합니다"""
     data = await shipment_service.list_shipments(
         db, status_filter=status, customer_id=customer_id,
+        order_id=order_id,
         search=search, page=page, size=size,
     )
     return success_response(data=data)

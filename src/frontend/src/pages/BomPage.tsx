@@ -9,6 +9,7 @@ import {
   type Bom, type BomLine, type BomFormData, type BomTreeNode, type MaterialRequirement,
 } from '../api/production/bom';
 import api from '../api/client';
+import BackButton from '../components/BackButton';
 
 /* ── 빈 라인 ── */
 const emptyLine = (): BomLine => ({
@@ -207,6 +208,10 @@ export default function BomPage() {
 
   return (
     <div>
+      {/* 뒤로가기 */}
+      <div className="mb-4">
+        <BackButton to="/production" label="생산/SCM" />
+      </div>
       {/* 페이지 헤더 */}
       <div className="flex items-center justify-between mb-4">
         <div>

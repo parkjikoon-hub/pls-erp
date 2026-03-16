@@ -5,6 +5,7 @@
 import { useState, useEffect } from 'react';
 import { listQuotations, type Quotation } from '../api/sales/quotations';
 import { listOrders, type SalesOrder } from '../api/sales/orders';
+import BackButton from '../components/BackButton';
 
 /* ── 상태 라벨 ── */
 const QT_STATUS: Record<string, string> = {
@@ -56,6 +57,9 @@ export default function SalesDashboardPage() {
 
   return (
     <div>
+      <div className="mb-4">
+        <BackButton to="/sales" label="영업수주" />
+      </div>
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-slate-800">영업 현황</h1>
         <p className="text-sm text-slate-500 mt-1">

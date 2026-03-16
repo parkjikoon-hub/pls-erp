@@ -3,7 +3,6 @@ PLS ERP — FastAPI 메인 애플리케이션
 모든 모듈 라우터를 등록하고 미들웨어를 설정합니다.
 프론트엔드(React 빌드)도 같은 서버에서 제공합니다.
 """
-import os
 from pathlib import Path
 
 from fastapi import FastAPI
@@ -53,14 +52,10 @@ app.add_middleware(
 @app.get("/api/health", tags=["시스템"])
 async def health_check():
     """서버 상태 확인"""
-    _dist = Path(__file__).resolve().parent.parent / "frontend" / "dist"
     return {
         "status": "healthy",
         "app": settings.APP_NAME,
         "version": settings.APP_VERSION,
-        "frontend_path": str(_dist),
-        "frontend_exists": _dist.is_dir(),
-        "frontend_files": os.listdir(str(_dist)) if _dist.is_dir() else [],
     }
 
 

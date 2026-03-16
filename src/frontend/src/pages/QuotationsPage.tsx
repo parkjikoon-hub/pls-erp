@@ -14,6 +14,7 @@ import {
   type QuotationLine,
 } from '../api/sales/quotations';
 import api from '../api/client';
+import BackButton from '../components/BackButton';
 
 /* ── 상태 라벨/색상 매핑 ── */
 const STATUS_MAP: Record<string, { label: string; color: string }> = {
@@ -165,6 +166,10 @@ export default function QuotationsPage() {
 
   return (
     <div>
+      {/* 뒤로가기 */}
+      <div className="mb-4">
+        <BackButton to="/sales" label="영업수주" />
+      </div>
       {/* 페이지 헤더 */}
       <div className="flex items-center justify-between mb-4">
         <div>

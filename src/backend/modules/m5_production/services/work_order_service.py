@@ -72,6 +72,7 @@ async def list_work_orders(
     db: AsyncSession,
     status_filter: Optional[str] = None,
     order_type: Optional[str] = None,
+    order_id: Optional[str] = None,
     search: Optional[str] = None,
     page: int = 1,
     size: int = 20,
@@ -83,6 +84,8 @@ async def list_work_orders(
         query = query.where(WorkOrder.status == status_filter)
     if order_type:
         query = query.where(WorkOrder.order_type == order_type)
+    if order_id:
+        query = query.where(WorkOrder.order_id == order_id)
     if search:
         sf = f"%{search}%"
         query = query.where(or_(

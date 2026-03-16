@@ -9,6 +9,7 @@ import {
   type Warehouse, type InventoryItem, type ShortageItem,
 } from '../api/production/inventory';
 import api from '../api/client';
+import BackButton from '../components/BackButton';
 
 /* 구역 라벨 */
 const ZONE_LABELS: Record<string, string> = {
@@ -128,6 +129,10 @@ export default function InventoryPage() {
 
   return (
     <div>
+      {/* 뒤로가기 */}
+      <div className="mb-4">
+        <BackButton to="/production" label="생산/SCM" />
+      </div>
       {/* 헤더 */}
       <div className="flex items-center justify-between mb-4">
         <div>
