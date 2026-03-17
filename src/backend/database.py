@@ -37,6 +37,8 @@ engine = create_async_engine(
     echo=settings.DEBUG,  # 디버그 모드일 때 SQL 쿼리 출력
     pool_size=10,         # 동시 연결 수
     max_overflow=20,      # 추가 허용 연결 수
+    pool_timeout=30,      # DB 연결 대기 최대 30초
+    pool_recycle=300,     # 5분마다 오래된 연결 재생성 (Neon cold start 대응)
     connect_args=_connect_args,
 )
 

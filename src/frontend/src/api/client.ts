@@ -12,6 +12,7 @@ const API_BASE = import.meta.env.VITE_API_URL
 const api = axios.create({
   baseURL: API_BASE,
   headers: { 'Content-Type': 'application/json' },
+  timeout: 30000, // 30초 타임아웃 — 서버 무응답 시 "저장 중..." 무한 대기 방지
 });
 
 // 요청 인터셉터: 저장된 토큰을 자동으로 Authorization 헤더에 추가

@@ -115,7 +115,10 @@ async def create_request(db: AsyncSession, data, current_user, ip: str | None = 
         db.add(step)
 
     await db.commit()
-    await log_action(db, "approval_create", "approval_request", str(req.id), current_user.id, ip)
+    await log_action(
+        db=db, table_name="approval_requests", record_id=req.id,
+        action="CREATE", changed_by=current_user.id, ip_address=ip,
+    )
 
     # 재조회 (steps 포함)
     stmt = (
@@ -288,7 +291,10 @@ async def approve_step(db: AsyncSession, request_id: uuid.UUID, current_user, co
         req.status = "approved"  # 최종 승인
 
     await db.commit()
-    await log_action(db, "approval_approve", "approval_request", str(req.id), current_user.id, ip)
+    await log_action(
+        db=db, table_name="approval_requests", record_id=req.id,
+        action="APPROVE", changed_by=current_user.id, ip_address=ip,
+    )
 
     return await _build_response(db, req)
 
@@ -325,6 +331,9 @@ async def reject_step(db: AsyncSession, request_id: uuid.UUID, current_user, com
     req.status = "rejected"
 
     await db.commit()
-    await log_action(db, "approval_reject", "approval_request", str(req.id), current_user.id, ip)
+    await log_action(
+        db=db, table_name="approval_requests", record_id=req.id,
+        action="REJECT", changed_by=current_user.id, ip_address=ip,
+    )
 
     return await _build_response(db, req)

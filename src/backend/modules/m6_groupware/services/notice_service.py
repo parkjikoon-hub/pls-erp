@@ -75,7 +75,10 @@ async def create_notice(db: AsyncSession, data, current_user, ip: str | None = N
     )
     db.add(notice)
     await db.commit()
-    await log_action(db, "notice_create", "notice", str(notice.id), current_user.id, ip)
+    await log_action(
+        db=db, table_name="notices", record_id=notice.id,
+        action="CREATE", changed_by=current_user.id, ip_address=ip,
+    )
     return _build_response(notice, current_user.name, include_content=True)
 
 
@@ -95,7 +98,10 @@ async def update_notice(db: AsyncSession, notice_id: uuid.UUID, data, current_us
         notice.is_important = data.is_important
 
     await db.commit()
-    await log_action(db, "notice_update", "notice", str(notice.id), current_user.id, ip)
+    await log_action(
+        db=db, table_name="notices", record_id=notice.id,
+        action="UPDATE", changed_by=current_user.id, ip_address=ip,
+    )
 
     author = await db.get(User, notice.author_id)
     return _build_response(notice, author.name if author else None, include_content=True)
@@ -109,5 +115,8 @@ async def delete_notice(db: AsyncSession, notice_id: uuid.UUID, current_user, ip
 
     notice.is_deleted = True
     await db.commit()
-    await log_action(db, "notice_delete", "notice", str(notice.id), current_user.id, ip)
+    await log_action(
+        db=db, table_name="notices", record_id=notice.id,
+        action="DELETE", changed_by=current_user.id, ip_address=ip,
+    )
     return {"message": "삭제되었습니다"}

@@ -214,6 +214,19 @@
   - 원인 4: M4 relationship lazy loading 미설정 → lazy="noload" 추가
 - [ ] 재고(M5) 창고-품목 연동 보완 필요
 
+### UI 개선 & 버그 수정 (2026-03-17 완료)
+- [x] **품목관리 카드 UI 전면 개편** — 원자재/완제품/반제품 3카드 디자인
+  - 각 카드에 아이콘+색상+건수 표시, 클릭 시 유형별 필터링
+  - "새로 등록" 버튼 → 유형 자동 설정된 폼 열림
+- [x] **전체 관리 페이지 글자 크기 통일** — text-xs → text-sm (6개 페이지)
+  - ProductsPage, CustomersPage, EmployeesPage, InventoryPage, WorkOrdersPage, SalesOrdersPage
+- [x] **저장 버튼 "저장 중..." 무한 대기 수정**
+  - Axios 타임아웃 30초 추가 (`client.ts`)
+  - DB 풀 타임아웃 30초 + 재활용 5분 추가 (`database.py`)
+  - 타임아웃 에러 구분 메시지 추가 (Products, Customers, Employees)
+- [x] TypeScript 빌드 검증 통과
+- [ ] M4(재무), M6(그룹웨어), M7(알림) 페이지 글자 크기 점검 미완료
+
 ### AI 기능 (별도 Step, 나중에 추가)
 - [ ] M4-F01: 영수증 OCR (Gemini Vision → 자동 분개)
 - [ ] M4-F01: 계정과목 AI 추천 (적요→계정 매칭)

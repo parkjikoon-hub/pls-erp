@@ -165,8 +165,12 @@ export default function EmployeesPage() {
       setShowModal(false);
       loadData();
     } catch (err: unknown) {
-      const axiosErr = err as { response?: { data?: { detail?: string } } };
-      setError(axiosErr.response?.data?.detail || '저장 중 오류가 발생했습니다.');
+      const axiosErr = err as { response?: { data?: { detail?: string } }; code?: string };
+      if (axiosErr.code === 'ECONNABORTED') {
+        setError('서버 응답 시간이 초과되었습니다. 잠시 후 다시 시도해주세요.');
+      } else {
+        setError(axiosErr.response?.data?.detail || '저장 중 오류가 발생했습니다.');
+      }
     } finally {
       setSaving(false);
     }
@@ -280,24 +284,24 @@ export default function EmployeesPage() {
                       !emp.is_active ? 'opacity-50' : ''
                     }`}
                   >
-                    <td className="px-4 py-3 font-mono text-xs">{emp.employee_no}</td>
+                    <td className="px-4 py-3 text-slate-600">{emp.employee_no}</td>
                     <td className="px-4 py-3 font-medium text-slate-700">{emp.name}</td>
                     <td className="px-4 py-3 text-slate-600">{emp.department_name || '-'}</td>
                     <td className="px-4 py-3 text-slate-600">{emp.position_name || '-'}</td>
                     <td className="px-4 py-3 text-center">
                       <span
-                        className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${
+                        className={`inline-block px-2.5 py-1 rounded text-sm font-medium ${
                           TYPE_COLORS[emp.employee_type] || 'bg-slate-100 text-slate-600'
                         }`}
                       >
                         {TYPE_LABELS[emp.employee_type] || emp.employee_type}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-xs text-slate-500">{emp.hire_date}</td>
-                    <td className="px-4 py-3 text-right font-mono text-xs">
+                    <td className="px-4 py-3 text-slate-500">{emp.hire_date}</td>
+                    <td className="px-4 py-3 text-right text-slate-700">
                       {formatMoney(emp.base_salary)}
                     </td>
-                    <td className="px-4 py-3 text-center text-xs">
+                    <td className="px-4 py-3 text-center">
                       <span className="text-emerald-600 font-medium">{emp.remaining_leaves}</span>
                       <span className="text-slate-400">/{emp.annual_leave_days}</span>
                     </td>
@@ -333,7 +337,7 @@ export default function EmployeesPage() {
         {/* 페이지네이션 */}
         {data && data.total_pages > 1 && (
           <div className="flex items-center justify-between px-4 py-3 border-t border-(--border-main)">
-            <span className="text-xs text-slate-500">
+            <span className="text-sm text-slate-500">
               전체 {data.total}건 중 {(data.page - 1) * data.size + 1}-
               {Math.min(data.page * data.size, data.total)}건
             </span>
@@ -357,7 +361,7 @@ export default function EmployeesPage() {
                     <button
                       key={pageNum}
                       onClick={() => setPage(pageNum)}
-                      className={`w-8 h-8 text-xs rounded-lg transition-colors ${
+                      className={`w-8 h-8 text-sm rounded-lg transition-colors ${
                         pageNum === page
                           ? 'bg-violet-500 text-white font-bold'
                           : 'hover:bg-(--border-main)'
@@ -410,7 +414,7 @@ export default function EmployeesPage() {
                 <legend className="text-sm font-semibold text-slate-600 px-2">기본 정보</legend>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs font-medium text-slate-600 mb-1">사번 *</label>
+                    <label className="block text-sm font-medium text-slate-600 mb-1">사번 *</label>
                     <input
                       type="text"
                       value={form.employee_no}
@@ -421,7 +425,7 @@ export default function EmployeesPage() {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-medium text-slate-600 mb-1">이름 *</label>
+                    <label className="block text-sm font-medium text-slate-600 mb-1">이름 *</label>
                     <input
                       type="text"
                       value={form.name}
@@ -431,7 +435,7 @@ export default function EmployeesPage() {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-medium text-slate-600 mb-1">고용유형</label>
+                    <label className="block text-sm font-medium text-slate-600 mb-1">고용유형</label>
                     <select
                       value={form.employee_type}
                       onChange={(e) => setForm((f) => ({ ...f, employee_type: e.target.value }))}
@@ -443,7 +447,7 @@ export default function EmployeesPage() {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-xs font-medium text-slate-600 mb-1">입사일 *</label>
+                    <label className="block text-sm font-medium text-slate-600 mb-1">입사일 *</label>
                     <input
                       type="date"
                       value={form.hire_date}
@@ -453,7 +457,7 @@ export default function EmployeesPage() {
                   </div>
                   {editingId && (
                     <div>
-                      <label className="block text-xs font-medium text-slate-600 mb-1">퇴사일</label>
+                      <label className="block text-sm font-medium text-slate-600 mb-1">퇴사일</label>
                       <input
                         type="date"
                         value={form.resign_date || ''}
@@ -470,7 +474,7 @@ export default function EmployeesPage() {
                 <legend className="text-sm font-semibold text-slate-600 px-2">급여 / 수당 정보</legend>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs font-medium text-slate-600 mb-1">기본급 (월)</label>
+                    <label className="block text-sm font-medium text-slate-600 mb-1">기본급 (월)</label>
                     <input
                       type="number"
                       value={form.base_salary}
@@ -479,7 +483,7 @@ export default function EmployeesPage() {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-medium text-slate-600 mb-1">연차 일수</label>
+                    <label className="block text-sm font-medium text-slate-600 mb-1">연차 일수</label>
                     <input
                       type="number"
                       value={form.annual_leave_days}
@@ -524,7 +528,7 @@ export default function EmployeesPage() {
                 <legend className="text-sm font-semibold text-slate-600 px-2">연락처 / 계좌</legend>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs font-medium text-slate-600 mb-1">연락처</label>
+                    <label className="block text-sm font-medium text-slate-600 mb-1">연락처</label>
                     <input
                       type="text"
                       value={form.phone || ''}
@@ -534,7 +538,7 @@ export default function EmployeesPage() {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-medium text-slate-600 mb-1">이메일</label>
+                    <label className="block text-sm font-medium text-slate-600 mb-1">이메일</label>
                     <input
                       type="email"
                       value={form.email || ''}
@@ -544,7 +548,7 @@ export default function EmployeesPage() {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-medium text-slate-600 mb-1">급여계좌 은행</label>
+                    <label className="block text-sm font-medium text-slate-600 mb-1">급여계좌 은행</label>
                     <input
                       type="text"
                       value={form.bank_name || ''}
@@ -554,7 +558,7 @@ export default function EmployeesPage() {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-medium text-slate-600 mb-1">계좌번호</label>
+                    <label className="block text-sm font-medium text-slate-600 mb-1">계좌번호</label>
                     <input
                       type="text"
                       value={form.bank_account || ''}
@@ -564,7 +568,7 @@ export default function EmployeesPage() {
                     />
                   </div>
                   <div className="col-span-2">
-                    <label className="block text-xs font-medium text-slate-600 mb-1">비고</label>
+                    <label className="block text-sm font-medium text-slate-600 mb-1">비고</label>
                     <textarea
                       value={form.memo || ''}
                       onChange={(e) => setForm((f) => ({ ...f, memo: e.target.value }))}
@@ -607,7 +611,7 @@ export default function EmployeesPage() {
             <p className="text-sm text-slate-500 mb-6">
               이 사원을 비활성화하시겠습니까?
               <br />
-              <span className="text-xs text-slate-400">
+              <span className="text-sm text-slate-400">
                 데이터는 삭제되지 않으며, 급여 계산 대상에서 제외됩니다.
               </span>
             </p>

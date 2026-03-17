@@ -275,7 +275,7 @@ export default function WorkOrdersPage() {
                   <tr key={wo.id} className={`border-t border-[#e8ecf2] ${isOverdue ? 'bg-red-50' : 'hover:bg-(--bg-hover)'}`}>
                     <td className="px-4 py-2 font-mono text-slate-700">{wo.wo_no}</td>
                     <td className="px-4 py-2 text-center">
-                      <span className={`text-xs px-1.5 py-0.5 rounded ${
+                      <span className={`text-sm px-2 py-0.5 rounded font-medium ${
                         wo.order_type === 'make_to_order' ? 'bg-blue-100 text-blue-600' : 'bg-slate-100 text-slate-600'
                       }`}>
                         {wo.order_type === 'make_to_order' ? '수주' : '계획'}
@@ -289,11 +289,11 @@ export default function WorkOrdersPage() {
                         <div className="flex-1 h-1.5 bg-slate-200 rounded-full">
                           <div className="h-full bg-emerald-500 rounded-full" style={{ width: `${wo.progress_pct}%` }} />
                         </div>
-                        <span className="text-xs text-slate-500 w-8">{wo.progress_pct}%</span>
+                        <span className="text-sm text-slate-500 w-8">{wo.progress_pct}%</span>
                       </div>
                     </td>
                     <td className="px-4 py-2 text-center">
-                      <span className={`text-xs px-2 py-0.5 rounded ${st.bg} ${st.color}`}>{st.label}</span>
+                      <span className={`text-sm px-2 py-0.5 rounded font-medium ${st.bg} ${st.color}`}>{st.label}</span>
                     </td>
                     <td className={`px-4 py-2 ${isOverdue ? 'text-red-600 font-semibold' : 'text-slate-600'}`}>{wo.due_date}</td>
                     <td className="px-4 py-2 text-center">

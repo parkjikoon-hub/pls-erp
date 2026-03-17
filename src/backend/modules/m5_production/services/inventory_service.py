@@ -240,6 +240,20 @@ async def issue_inventory(
         ip_address=ip_address,
     )
 
+    # ── M7 알림: 출고 후 안전재고 미달 시 알림 ──
+    try:
+        product = await db.get(Product, product_uuid)
+        if product and product.safety_stock > 0:
+            remaining_qty = float(inv.quantity)
+            if remaining_qty < product.safety_stock:
+                from ....shared.notification_helper import notify_safety_stock_alert
+                await notify_safety_stock_alert(
+                    db, product.name, remaining_qty,
+                    float(product.safety_stock), product_uuid,
+                )
+    except Exception:
+        pass  # 알림 실패는 무시
+
     return {"message": f"출고 완료 ({data.quantity}개)", "inventory_id": str(inv.id)}
 
 

@@ -49,6 +49,7 @@ export interface SalesOrderFormData {
   quotation_id?: string;
   sales_rep_id?: string;
   notes?: string;
+  auto_create_wo?: boolean;
   lines: SalesOrderLine[];
 }
 

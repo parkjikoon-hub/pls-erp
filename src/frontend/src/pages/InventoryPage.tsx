@@ -161,9 +161,9 @@ export default function InventoryPage() {
                 : 'bg-white border-(--border-main) hover:bg-slate-50'
             }`}
           >
-            <div className="text-xs text-slate-500">{ZONE_LABELS[wh.zone_type]}</div>
+            <div className="text-sm text-slate-500">{ZONE_LABELS[wh.zone_type]}</div>
             <div className="font-semibold text-slate-800">{wh.name}</div>
-            <div className="text-xs text-slate-400">{wh.code}</div>
+            <div className="text-sm text-slate-400">{wh.code}</div>
           </div>
         ))}
       </div>
@@ -234,7 +234,7 @@ export default function InventoryPage() {
                         </td>
                         <td className="px-4 py-2 text-center">
                           {isShortage && (
-                            <span className="text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded">부족</span>
+                            <span className="text-sm bg-red-100 text-red-700 px-2.5 py-1 rounded font-medium">부족</span>
                           )}
                         </td>
                       </tr>
@@ -268,11 +268,11 @@ export default function InventoryPage() {
               ) : (
                 transactions.map((tx: any) => (
                   <tr key={tx.id} className="border-t border-[#e8ecf2] hover:bg-(--bg-hover)">
-                    <td className="px-4 py-2 text-slate-500 text-xs">
+                    <td className="px-4 py-2 text-slate-500">
                       {tx.created_at ? new Date(tx.created_at).toLocaleString('ko') : '-'}
                     </td>
                     <td className="px-4 py-2 text-center">
-                      <span className="text-xs px-2 py-0.5 rounded bg-slate-100 text-slate-600">
+                      <span className="text-sm px-2.5 py-1 rounded bg-slate-100 text-slate-600 font-medium">
                         {TX_LABELS[tx.transaction_type] || tx.transaction_type}
                       </span>
                     </td>
@@ -280,7 +280,7 @@ export default function InventoryPage() {
                     <td className="px-4 py-2 text-slate-500">{tx.from_warehouse || '-'}</td>
                     <td className="px-4 py-2 text-slate-500">{tx.to_warehouse || '-'}</td>
                     <td className="px-4 py-2 text-right font-semibold text-slate-800">{tx.quantity}</td>
-                    <td className="px-4 py-2 text-slate-400 text-xs">{tx.notes || '-'}</td>
+                    <td className="px-4 py-2 text-slate-400">{tx.notes || '-'}</td>
                   </tr>
                 ))
               )}

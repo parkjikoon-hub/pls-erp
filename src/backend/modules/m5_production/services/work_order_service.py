@@ -302,6 +302,16 @@ async def create_from_order(
         memo=f"수주 {order.order_no}에서 작업지시서 {len(created_wos)}건 생성",
     )
 
+    # ── M7 알림 발송 (실패해도 메인 로직에 영향 없음) ──
+    from ....shared.notification_helper import (
+        notify_work_order_created, notify_material_shortage,
+    )
+    await notify_work_order_created(
+        db, created_wos, order.order_no, current_user.id,
+    )
+    if material_shortage:
+        await notify_material_shortage(db, material_shortage, order.order_no)
+
     return {
         "order_no": order.order_no,
         "work_orders": created_wos,

@@ -207,7 +207,10 @@ async def create_shipment(db: AsyncSession, data, current_user, ip: str | None =
         db.add(line)
 
     await db.commit()
-    await log_action(db, "shipment_create", "shipment", str(sh.id), current_user.id, ip)
+    await log_action(
+        db=db, table_name="shipments", record_id=sh.id,
+        action="CREATE", changed_by=current_user.id, ip_address=ip,
+    )
 
     return await get_shipment(db, sh.id)
 
@@ -256,7 +259,10 @@ async def create_from_order(db: AsyncSession, order_id: uuid.UUID, current_user,
         db.add(line)
 
     await db.commit()
-    await log_action(db, "shipment_from_order", "shipment", str(sh.id), current_user.id, ip)
+    await log_action(
+        db=db, table_name="shipments", record_id=sh.id,
+        action="CREATE_FROM_ORDER", changed_by=current_user.id, ip_address=ip,
+    )
 
     return await get_shipment(db, sh.id)
 
@@ -282,7 +288,10 @@ async def update_shipment(db: AsyncSession, shipment_id: uuid.UUID, data, curren
 
     sh.updated_by = current_user.id
     await db.commit()
-    await log_action(db, "shipment_update", "shipment", str(sh.id), current_user.id, ip)
+    await log_action(
+        db=db, table_name="shipments", record_id=sh.id,
+        action="UPDATE", changed_by=current_user.id, ip_address=ip,
+    )
 
     return await get_shipment(db, sh.id)
 
@@ -360,7 +369,10 @@ async def update_status(
     sh.status = new_status
     sh.updated_by = current_user.id
     await db.commit()
-    await log_action(db, f"shipment_{new_status}", "shipment", str(sh.id), current_user.id, ip)
+    await log_action(
+        db=db, table_name="shipments", record_id=sh.id,
+        action=f"STATUS_{new_status.upper()}", changed_by=current_user.id, ip_address=ip,
+    )
 
     return await get_shipment(db, sh.id)
 

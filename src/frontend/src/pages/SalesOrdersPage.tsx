@@ -15,6 +15,7 @@ import {
 } from '../api/sales/orders';
 import api from '../api/client';
 import BackButton from '../components/BackButton';
+import PdfOcrModal from '../components/PdfOcrModal';
 
 /* ── 상태 라벨/색상 ── */
 const STATUS_MAP: Record<string, { label: string; color: string }> = {
@@ -75,6 +76,16 @@ export default function SalesOrdersPage() {
     shipments: any[];
     loading: boolean;
   }>({ workOrders: [], shipments: [], loading: false });
+
+  /* 자동 WO 생성 결과 */
+  const [woResult, setWoResult] = useState<{
+    work_orders?: any[];
+    material_shortage?: any[];
+    has_shortage?: boolean;
+  } | null>(null);
+
+  /* OCR 모달 */
+  const [showOcrModal, setShowOcrModal] = useState(false);
 
   /* 거래처 목록 */
   const [customers, setCustomers] = useState<{ id: string; name: string }[]>([]);
@@ -155,10 +166,16 @@ export default function SalesOrdersPage() {
     try {
       if (editId) {
         await updateOrder(editId, form);
+        setShowModal(false);
       } else {
-        await createOrder(form);
+        const result = await createOrder(form);
+        setShowModal(false);
+        // 자동 WO 생성 결과가 있으면 표시
+        const resultData = result?.data || result;
+        if (resultData?.work_orders && resultData.work_orders.length > 0) {
+          setWoResult(resultData);
+        }
       }
-      setShowModal(false);
       fetchData();
     } catch (e: any) {
       alert(e?.response?.data?.detail || '저장 실패');
@@ -253,12 +270,20 @@ export default function SalesOrdersPage() {
             수주 등록, 진행률 추적, 상태 관리 (총 {total}건)
           </p>
         </div>
-        <button
-          onClick={openCreate}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium"
-        >
-          + 수주 등록
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={() => setShowOcrModal(true)}
+            className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 text-sm font-medium"
+          >
+            📄 발주서 OCR
+          </button>
+          <button
+            onClick={openCreate}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium"
+          >
+            + 수주 등록
+          </button>
+        </div>
       </div>
 
       {/* 필터 */}
@@ -316,7 +341,7 @@ export default function SalesOrdersPage() {
                       {o.grand_total.toLocaleString()}
                     </td>
                     <td className="px-4 py-2 text-center">
-                      <span className={`px-2 py-0.5 rounded text-xs font-medium ${st.color}`}>
+                      <span className={`px-2.5 py-1 rounded text-sm font-medium ${st.color}`}>
                         {st.label}
                       </span>
                     </td>
@@ -328,7 +353,7 @@ export default function SalesOrdersPage() {
                             style={{ width: `${o.progress_pct}%` }}
                           />
                         </div>
-                        <span className="text-xs text-slate-500 w-8 text-right">{o.progress_pct}%</span>
+                        <span className="text-sm text-slate-500 w-8 text-right">{o.progress_pct}%</span>
                       </div>
                     </td>
                     <td className="px-4 py-2 text-center text-slate-600">
@@ -340,22 +365,22 @@ export default function SalesOrdersPage() {
                           <>
                             <button
                               onClick={() => openEdit(o)}
-                              className="text-xs px-2 py-1 rounded bg-blue-50 text-blue-600 hover:bg-blue-100"
+                              className="text-sm px-2 py-1 rounded bg-blue-50 text-blue-600 hover:bg-blue-100"
                             >수정</button>
                             <button
                               onClick={() => handleDelete(o.id, o.order_no)}
-                              className="text-xs px-2 py-1 rounded bg-red-50 text-red-600 hover:bg-red-100"
+                              className="text-sm px-2 py-1 rounded bg-red-50 text-red-600 hover:bg-red-100"
                             >삭제</button>
                           </>
                         )}
                         <button
                           onClick={() => openTracking(o)}
-                          className="text-xs px-2 py-1 rounded bg-indigo-50 text-indigo-600 hover:bg-indigo-100 font-medium"
+                          className="text-sm px-2 py-1 rounded bg-indigo-50 text-indigo-600 hover:bg-indigo-100 font-medium"
                         >연동현황</button>
                         {nextStatuses.length > 0 && (
                           <button
                             onClick={() => openStatusModal(o.id, o.status)}
-                            className="text-xs px-2 py-1 rounded bg-amber-50 text-amber-600 hover:bg-amber-100"
+                            className="text-sm px-2 py-1 rounded bg-amber-50 text-amber-600 hover:bg-amber-100"
                           >상태변경</button>
                         )}
                       </div>
@@ -393,7 +418,7 @@ export default function SalesOrdersPage() {
 
             <div className="grid grid-cols-2 gap-4 mb-4">
               <div>
-                <label className="block text-xs font-medium text-slate-600 mb-1">수주일 *</label>
+                <label className="block text-sm font-medium text-slate-600 mb-1">수주일 *</label>
                 <input
                   type="date"
                   value={form.order_date}
@@ -402,7 +427,7 @@ export default function SalesOrdersPage() {
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-slate-600 mb-1">납기일</label>
+                <label className="block text-sm font-medium text-slate-600 mb-1">납기일</label>
                 <input
                   type="date"
                   value={form.delivery_date || ''}
@@ -411,7 +436,7 @@ export default function SalesOrdersPage() {
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-slate-600 mb-1">거래처 *</label>
+                <label className="block text-sm font-medium text-slate-600 mb-1">거래처 *</label>
                 <select
                   value={form.customer_id}
                   onChange={(e) => setForm({ ...form, customer_id: e.target.value })}
@@ -424,7 +449,7 @@ export default function SalesOrdersPage() {
                 </select>
               </div>
               <div>
-                <label className="block text-xs font-medium text-slate-600 mb-1">비고</label>
+                <label className="block text-sm font-medium text-slate-600 mb-1">비고</label>
                 <input
                   value={form.notes || ''}
                   onChange={(e) => setForm({ ...form, notes: e.target.value })}
@@ -434,11 +459,30 @@ export default function SalesOrdersPage() {
               </div>
             </div>
 
+            {/* 자동 작업지시서 생성 옵션 (신규 등록 시만 표시) */}
+            {!editId && (
+              <div className="flex items-center gap-2 mb-4 bg-amber-50 rounded-lg px-4 py-3 border border-amber-200">
+                <input
+                  type="checkbox"
+                  id="auto_create_wo"
+                  checked={form.auto_create_wo || false}
+                  onChange={(e) => setForm({ ...form, auto_create_wo: e.target.checked })}
+                  className="w-4 h-4 rounded border-amber-300 text-amber-600 focus:ring-amber-500"
+                />
+                <label htmlFor="auto_create_wo" className="text-sm text-amber-800 font-medium cursor-pointer">
+                  작업지시서 자동 생성
+                </label>
+                <span className="text-sm text-amber-600 ml-1">
+                  (수주 등록과 동시에 작업지시서를 자동으로 생성합니다)
+                </span>
+              </div>
+            )}
+
             {/* 라인 */}
             <div className="mb-4">
               <div className="flex items-center justify-between mb-2">
                 <h3 className="text-sm font-semibold text-slate-700">품목 라인</h3>
-                <button onClick={addLine} className="text-xs px-3 py-1 bg-slate-100 rounded hover:bg-slate-200 text-slate-600">
+                <button onClick={addLine} className="text-sm px-3 py-1 bg-slate-100 rounded hover:bg-slate-200 text-slate-600">
                   + 라인 추가
                 </button>
               </div>
@@ -446,7 +490,7 @@ export default function SalesOrdersPage() {
                 {form.lines.map((line, idx) => (
                   <div key={idx} className="flex gap-2 items-end bg-(--bg-hover) rounded-lg p-3">
                     <div className="flex-1">
-                      <label className="block text-xs text-slate-500 mb-0.5">품목명</label>
+                      <label className="block text-sm text-slate-500 mb-0.5">품목명</label>
                       <input
                         value={line.product_name}
                         onChange={(e) => updateLine(idx, 'product_name', e.target.value)}
@@ -454,7 +498,7 @@ export default function SalesOrdersPage() {
                       />
                     </div>
                     <div className="w-20">
-                      <label className="block text-xs text-slate-500 mb-0.5">수량</label>
+                      <label className="block text-sm text-slate-500 mb-0.5">수량</label>
                       <input
                         type="number"
                         value={line.quantity}
@@ -463,7 +507,7 @@ export default function SalesOrdersPage() {
                       />
                     </div>
                     <div className="w-28">
-                      <label className="block text-xs text-slate-500 mb-0.5">단가</label>
+                      <label className="block text-sm text-slate-500 mb-0.5">단가</label>
                       <input
                         type="number"
                         value={line.unit_price}
@@ -472,7 +516,7 @@ export default function SalesOrdersPage() {
                       />
                     </div>
                     <div className="w-28 text-right">
-                      <label className="block text-xs text-slate-500 mb-0.5">금액</label>
+                      <label className="block text-sm text-slate-500 mb-0.5">금액</label>
                       <div className="text-sm font-medium text-slate-700 py-1">
                         {calcLineAmount(line).toLocaleString()}
                       </div>
@@ -514,7 +558,7 @@ export default function SalesOrdersPage() {
               현재 상태: <span className="font-medium">{STATUS_MAP[statusModal.current]?.label}</span>
             </p>
             <div className="mb-3">
-              <label className="block text-xs font-medium text-slate-600 mb-1">변경할 상태 *</label>
+              <label className="block text-sm font-medium text-slate-600 mb-1">변경할 상태 *</label>
               <select
                 value={newStatus}
                 onChange={(e) => setNewStatus(e.target.value)}
@@ -527,7 +571,7 @@ export default function SalesOrdersPage() {
               </select>
             </div>
             <div className="mb-4">
-              <label className="block text-xs font-medium text-slate-600 mb-1">사유 (선택)</label>
+              <label className="block text-sm font-medium text-slate-600 mb-1">사유 (선택)</label>
               <input
                 value={statusMemo}
                 onChange={(e) => setStatusMemo(e.target.value)}
@@ -546,6 +590,54 @@ export default function SalesOrdersPage() {
           </div>
         </div>
       )}
+      {/* ── 자동 WO 생성 결과 모달 ── */}
+      {woResult && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-lg p-6">
+            <h2 className="text-lg font-bold text-slate-800 mb-4">작업지시서 자동 생성 결과</h2>
+
+            {/* 생성된 WO 목록 */}
+            {woResult.work_orders && woResult.work_orders.length > 0 && (
+              <div className="mb-4">
+                <h3 className="text-sm font-semibold text-emerald-700 mb-2">생성된 작업지시서 ({woResult.work_orders.length}건)</h3>
+                <div className="space-y-1">
+                  {woResult.work_orders.map((wo: any, idx: number) => (
+                    <div key={idx} className="flex justify-between text-sm bg-emerald-50 rounded px-3 py-2">
+                      <span className="font-medium text-emerald-800">{wo.wo_no}</span>
+                      <span className="text-emerald-600">{wo.product_name} — {wo.qty}개</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* 부족 원자재 */}
+            {woResult.has_shortage && woResult.material_shortage && (
+              <div className="mb-4">
+                <h3 className="text-sm font-semibold text-red-700 mb-2">원자재 부족 알림 ({woResult.material_shortage.length}건)</h3>
+                <div className="space-y-1">
+                  {woResult.material_shortage.map((m: any, idx: number) => (
+                    <div key={idx} className="flex justify-between text-sm bg-red-50 rounded px-3 py-2">
+                      <span className="text-red-800">{m.product_name}</span>
+                      <span className="text-red-600">
+                        필요: {m.required_qty} | 현재: {m.current_qty} | 부족: {m.shortage_qty}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div className="flex justify-end">
+              <button
+                onClick={() => setWoResult(null)}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700"
+              >확인</button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* ── 연동 현황 모달 ── */}
       {trackingOrder && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
@@ -775,6 +867,15 @@ export default function SalesOrdersPage() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* ── PDF OCR 모달 ── */}
+      {showOcrModal && (
+        <PdfOcrModal
+          customers={customers}
+          onClose={() => setShowOcrModal(false)}
+          onOrderCreated={fetchData}
+        />
       )}
     </div>
   );

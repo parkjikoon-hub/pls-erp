@@ -1,6 +1,5 @@
 /**
- * 품목 관리 페이지 — 목록 조회, 등록, 수정, 삭제(비활성화)
- * 시안 C 기반 디자인 (거래처 관리와 동일한 패턴)
+ * 품목 관리 페이지 — 원자재/완제품/반제품 카드 UI + 목록 조회/등록/수정/삭제
  */
 import { useState, useEffect, useCallback } from 'react';
 import {
@@ -13,6 +12,8 @@ import {
   XMarkIcon,
   ArrowUpTrayIcon,
   CubeIcon,
+  WrenchScrewdriverIcon,
+  CpuChipIcon,
 } from '@heroicons/react/24/outline';
 import BackButton from '../components/BackButton';
 import {
@@ -32,10 +33,44 @@ import ExcelImportModal from '../components/ExcelImportModal';
 
 /** 품목 유형 한글 매핑 */
 const TYPE_LABELS: Record<string, string> = {
-  product: '제품',
-  material: '자재',
+  product: '완제품',
+  material: '원자재',
   semi: '반제품',
 };
+
+/** 카드 설정 (유형별 아이콘, 색상) */
+const TYPE_CARDS = [
+  {
+    key: 'material',
+    label: '원자재',
+    icon: WrenchScrewdriverIcon,
+    color: 'amber',
+    bgClass: 'bg-amber-50 border-amber-200 hover:border-amber-400',
+    activeClass: 'bg-amber-100 border-amber-400 ring-2 ring-amber-300',
+    iconClass: 'text-amber-600',
+    countClass: 'text-amber-700',
+  },
+  {
+    key: 'product',
+    label: '완제품',
+    icon: CubeIcon,
+    color: 'emerald',
+    bgClass: 'bg-emerald-50 border-emerald-200 hover:border-emerald-400',
+    activeClass: 'bg-emerald-100 border-emerald-400 ring-2 ring-emerald-300',
+    iconClass: 'text-emerald-600',
+    countClass: 'text-emerald-700',
+  },
+  {
+    key: 'semi',
+    label: '반제품',
+    icon: CpuChipIcon,
+    color: 'purple',
+    bgClass: 'bg-purple-50 border-purple-200 hover:border-purple-400',
+    activeClass: 'bg-purple-100 border-purple-400 ring-2 ring-purple-300',
+    iconClass: 'text-purple-600',
+    countClass: 'text-purple-700',
+  },
+];
 
 /** 폼 초기값 */
 const EMPTY_FORM: ProductFormData = {
@@ -65,6 +100,9 @@ export default function ProductsPage() {
   const [activeFilter, setActiveFilter] = useState<string>('');
   const [sortBy, setSortBy] = useState('created_at');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+
+  // 유형별 건수
+  const [typeCounts, setTypeCounts] = useState<Record<string, number>>({ material: 0, product: 0, semi: 0 });
 
   // 카테고리 목록 (드롭다운용)
   const [categories, setCategories] = useState<ProductCategory[]>([]);
@@ -97,6 +135,24 @@ export default function ProductsPage() {
     }
   }, []);
 
+  // 유형별 건수 불러오기
+  const loadTypeCounts = useCallback(async () => {
+    try {
+      const [mat, prod, semi] = await Promise.all([
+        fetchProducts({ product_type: 'material', size: 1 }),
+        fetchProducts({ product_type: 'product', size: 1 }),
+        fetchProducts({ product_type: 'semi', size: 1 }),
+      ]);
+      setTypeCounts({
+        material: mat.total,
+        product: prod.total,
+        semi: semi.total,
+      });
+    } catch {
+      /* 건수 로딩 실패 무시 */
+    }
+  }, []);
+
   // 품목 목록 불러오기
   const loadProducts = useCallback(async () => {
     setLoading(true);
@@ -121,7 +177,8 @@ export default function ProductsPage() {
 
   useEffect(() => {
     loadCategories();
-  }, [loadCategories]);
+    loadTypeCounts();
+  }, [loadCategories, loadTypeCounts]);
 
   useEffect(() => {
     loadProducts();
@@ -160,9 +217,27 @@ export default function ProductsPage() {
     return cat ? cat.name : '-';
   };
 
+  // 카드 클릭 → 유형 필터 토글
+  const handleCardClick = (type: string) => {
+    if (typeFilter === type) {
+      setTypeFilter('');
+    } else {
+      setTypeFilter(type);
+    }
+    setPage(1);
+  };
+
+  // 카드 내 "새로 등록" → 해당 유형 선택된 폼 열기
+  const openCreateWithType = (type: string) => {
+    setForm({ ...EMPTY_FORM, product_type: type });
+    setEditingId(null);
+    setError('');
+    setShowModal(true);
+  };
+
   // 등록 모달 열기
   const openCreateModal = () => {
-    setForm({ ...EMPTY_FORM });
+    setForm({ ...EMPTY_FORM, product_type: typeFilter || 'product' });
     setEditingId(null);
     setError('');
     setShowModal(true);
@@ -209,9 +284,14 @@ export default function ProductsPage() {
       }
       setShowModal(false);
       loadProducts();
+      loadTypeCounts();
     } catch (err: unknown) {
-      const axiosErr = err as { response?: { data?: { detail?: string } } };
-      setError(axiosErr.response?.data?.detail || '저장 중 오류가 발생했습니다.');
+      const axiosErr = err as { response?: { data?: { detail?: string } }; code?: string };
+      if (axiosErr.code === 'ECONNABORTED') {
+        setError('서버 응답 시간이 초과되었습니다. 잠시 후 다시 시도해주세요.');
+      } else {
+        setError(axiosErr.response?.data?.detail || '저장 중 오류가 발생했습니다.');
+      }
     } finally {
       setSaving(false);
     }
@@ -224,6 +304,7 @@ export default function ProductsPage() {
       await deleteProduct(deleteTarget.id);
       setDeleteTarget(null);
       loadProducts();
+      loadTypeCounts();
     } catch (err: unknown) {
       const axiosErr = err as { response?: { data?: { detail?: string } } };
       alert(axiosErr.response?.data?.detail || '삭제 중 오류가 발생했습니다.');
@@ -252,6 +333,9 @@ export default function ProductsPage() {
     return value.toLocaleString('ko-KR');
   };
 
+  // 현재 선택된 유형의 라벨
+  const currentTypeLabel = typeFilter ? TYPE_LABELS[typeFilter] : '전체 품목';
+
   return (
     <div>
       {/* 상단: 뒤로가기 + 제목 */}
@@ -264,6 +348,48 @@ export default function ProductsPage() {
           </h1>
           <p className="text-sm text-slate-500">제품 / 자재 / 반제품을 등록하고 관리합니다</p>
         </div>
+      </div>
+
+      {/* 유형별 카드 3개 */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-5">
+        {TYPE_CARDS.map((card) => {
+          const Icon = card.icon;
+          const isActive = typeFilter === card.key;
+          return (
+            <div
+              key={card.key}
+              onClick={() => handleCardClick(card.key)}
+              className={`relative rounded-xl border-2 p-5 cursor-pointer transition-all duration-200 ${
+                isActive ? card.activeClass : card.bgClass
+              }`}
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className={`w-11 h-11 rounded-lg flex items-center justify-center bg-white/70 shadow-sm`}>
+                    <Icon className={`w-6 h-6 ${card.iconClass}`} />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-bold text-slate-800">{card.label}</h3>
+                    <p className={`text-2xl font-bold ${card.countClass}`}>{typeCounts[card.key]}건</p>
+                  </div>
+                </div>
+                {isManager && (
+                  <button
+                    onClick={(e) => { e.stopPropagation(); openCreateWithType(card.key); }}
+                    className="px-3 py-1.5 text-sm font-medium text-white bg-slate-700 hover:bg-slate-800 rounded-lg transition-colors shadow-sm"
+                  >
+                    + 등록
+                  </button>
+                )}
+              </div>
+              {isActive && (
+                <div className="absolute top-2 right-2">
+                  <span className="text-xs font-semibold text-slate-500 bg-white/80 px-2 py-0.5 rounded-full">선택됨</span>
+                </div>
+              )}
+            </div>
+          );
+        })}
       </div>
 
       {/* 필터 바 */}
@@ -280,18 +406,6 @@ export default function ProductsPage() {
               className="w-full pl-9 pr-3 py-2 text-sm rounded-lg border border-(--border-main) bg-white focus:outline-none focus:border-emerald-500 transition-colors"
             />
           </div>
-
-          {/* 유형 필터 */}
-          <select
-            value={typeFilter}
-            onChange={(e) => { setTypeFilter(e.target.value); setPage(1); }}
-            className="px-3 py-2 text-sm rounded-lg border border-(--border-main) bg-white focus:outline-none focus:border-emerald-500"
-          >
-            <option value="">전체 유형</option>
-            <option value="product">제품</option>
-            <option value="material">자재</option>
-            <option value="semi">반제품</option>
-          </select>
 
           {/* 카테고리 필터 */}
           <select
@@ -316,6 +430,17 @@ export default function ProductsPage() {
             <option value="false">비활성</option>
           </select>
 
+          {/* 유형 필터 해제 버튼 */}
+          {typeFilter && (
+            <button
+              onClick={() => { setTypeFilter(''); setPage(1); }}
+              className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-slate-600 bg-slate-100 rounded-lg hover:bg-slate-200 transition-colors"
+            >
+              <XMarkIcon className="w-4 h-4" />
+              필터 해제
+            </button>
+          )}
+
           {/* 버튼 (관리자/매니저만) */}
           {isManager && (
             <>
@@ -338,12 +463,18 @@ export default function ProductsPage() {
         </div>
       </div>
 
+      {/* 테이블 제목 */}
+      <div className="flex items-center gap-2 mb-2 px-1">
+        <h2 className="text-base font-semibold text-slate-700">{currentTypeLabel} 목록</h2>
+        {data && <span className="text-sm text-slate-400">({data.total}건)</span>}
+      </div>
+
       {/* 테이블 */}
       <div className="bg-(--bg-card) rounded-xl border border-(--border-main) overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+          <table className="w-full">
             <thead>
-              <tr className="bg-(--bg-main) text-slate-600">
+              <tr className="bg-(--bg-main) text-sm text-slate-600">
                 <th className="text-left px-4 py-3 font-semibold cursor-pointer hover:text-slate-800" onClick={() => handleSort('code')}>
                   코드{sortIcon('code')}
                 </th>
@@ -368,24 +499,24 @@ export default function ProductsPage() {
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan={isManager ? 9 : 8} className="text-center py-12 text-slate-400">
+                  <td colSpan={isManager ? 9 : 8} className="text-center py-12 text-sm text-slate-400">
                     불러오는 중...
                   </td>
                 </tr>
               ) : !data || data.items.length === 0 ? (
                 <tr>
-                  <td colSpan={isManager ? 9 : 8} className="text-center py-12 text-slate-400">
+                  <td colSpan={isManager ? 9 : 8} className="text-center py-12 text-sm text-slate-400">
                     {search ? '검색 결과가 없습니다' : '등록된 품목이 없습니다'}
                   </td>
                 </tr>
               ) : (
                 data.items.map((p) => (
                   <tr key={p.id} className="border-t border-(--border-main) hover:bg-(--bg-main)/50 transition-colors">
-                    <td className="px-4 py-3 font-mono text-xs text-slate-600">{p.code}</td>
-                    <td className="px-4 py-3 font-medium text-slate-800">{p.name}</td>
-                    <td className="px-4 py-3 text-slate-600">{getCategoryName(p.category_id)}</td>
+                    <td className="px-4 py-3 text-sm text-slate-600">{p.code}</td>
+                    <td className="px-4 py-3 text-sm font-medium text-slate-800">{p.name}</td>
+                    <td className="px-4 py-3 text-sm text-slate-600">{getCategoryName(p.category_id)}</td>
                     <td className="px-4 py-3">
-                      <span className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${
+                      <span className={`inline-block px-2.5 py-1 rounded text-sm font-medium ${
                         p.product_type === 'product' ? 'bg-emerald-100 text-emerald-700' :
                         p.product_type === 'material' ? 'bg-amber-100 text-amber-700' :
                         'bg-purple-100 text-purple-700'
@@ -393,11 +524,11 @@ export default function ProductsPage() {
                         {TYPE_LABELS[p.product_type] || p.product_type}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-slate-600">{p.unit}</td>
-                    <td className="px-4 py-3 text-right text-slate-700 font-mono text-xs">{formatPrice(p.standard_price)}</td>
-                    <td className="px-4 py-3 text-right text-slate-700 font-mono text-xs">{formatPrice(p.cost_price)}</td>
+                    <td className="px-4 py-3 text-sm text-slate-600">{p.unit}</td>
+                    <td className="px-4 py-3 text-right text-sm text-slate-700">{formatPrice(p.standard_price)}</td>
+                    <td className="px-4 py-3 text-right text-sm text-slate-700">{formatPrice(p.cost_price)}</td>
                     <td className="px-4 py-3 text-center">
-                      <span className={`inline-block w-2 h-2 rounded-full ${p.is_active ? 'bg-emerald-500' : 'bg-slate-300'}`} />
+                      <span className={`inline-block w-2.5 h-2.5 rounded-full ${p.is_active ? 'bg-emerald-500' : 'bg-slate-300'}`} />
                     </td>
                     {isManager && (
                       <td className="px-4 py-3 text-center">
@@ -431,7 +562,7 @@ export default function ProductsPage() {
         {/* 페이지네이션 */}
         {data && data.total_pages > 1 && (
           <div className="flex items-center justify-between px-4 py-3 border-t border-(--border-main)">
-            <span className="text-xs text-slate-500">
+            <span className="text-sm text-slate-500">
               전체 {data.total}건 중 {(data.page - 1) * data.size + 1}-{Math.min(data.page * data.size, data.total)}건
             </span>
             <div className="flex items-center gap-1">
@@ -451,7 +582,7 @@ export default function ProductsPage() {
                   <button
                     key={pageNum}
                     onClick={() => setPage(pageNum)}
-                    className={`w-8 h-8 rounded-lg text-xs font-medium transition-colors ${
+                    className={`w-8 h-8 rounded-lg text-sm font-medium transition-colors ${
                       pageNum === page
                         ? 'bg-emerald-500 text-white'
                         : 'hover:bg-(--bg-main) text-slate-600'
@@ -480,7 +611,7 @@ export default function ProductsPage() {
             {/* 모달 헤더 */}
             <div className="flex items-center justify-between px-6 py-4 border-b border-(--border-main)">
               <h2 className="text-lg font-bold text-slate-800">
-                {editingId ? '품목 수정' : '품목 등록'}
+                {editingId ? '품목 수정' : `${TYPE_LABELS[form.product_type] || '품목'} 등록`}
               </h2>
               <button onClick={() => setShowModal(false)} className="p-1 hover:bg-(--bg-main) rounded-lg transition-colors">
                 <XMarkIcon className="w-5 h-5 text-slate-500" />
@@ -515,7 +646,7 @@ export default function ProductsPage() {
 
                   {/* 카테고리 선택 */}
                   <div>
-                    <label className="block text-xs font-medium text-slate-600 mb-1">카테고리</label>
+                    <label className="block text-sm font-medium text-slate-600 mb-1">카테고리</label>
                     <div className="flex gap-2">
                       <select
                         value={form.category_id || ''}
@@ -542,14 +673,14 @@ export default function ProductsPage() {
 
                   {/* 품목 유형 */}
                   <div>
-                    <label className="block text-xs font-medium text-slate-600 mb-1">품목 유형</label>
+                    <label className="block text-sm font-medium text-slate-600 mb-1">품목 유형</label>
                     <select
                       value={form.product_type}
                       onChange={(e) => handleChange('product_type', e.target.value)}
                       className="w-full px-3 py-2 text-sm rounded-lg border border-(--border-main) bg-white focus:outline-none focus:border-emerald-500"
                     >
-                      <option value="product">제품</option>
-                      <option value="material">자재</option>
+                      <option value="product">완제품</option>
+                      <option value="material">원자재</option>
                       <option value="semi">반제품</option>
                     </select>
                   </div>
@@ -564,7 +695,7 @@ export default function ProductsPage() {
 
                   {/* 재고평가 방법 */}
                   <div>
-                    <label className="block text-xs font-medium text-slate-600 mb-1">재고평가 방법</label>
+                    <label className="block text-sm font-medium text-slate-600 mb-1">재고평가 방법</label>
                     <select
                       value={form.inventory_method}
                       onChange={(e) => handleChange('inventory_method', e.target.value)}
@@ -676,7 +807,7 @@ export default function ProductsPage() {
           module="products"
           moduleName="품목"
           onClose={() => setShowExcelModal(false)}
-          onComplete={() => loadProducts()}
+          onComplete={() => { loadProducts(); loadTypeCounts(); }}
         />
       )}
 
@@ -690,7 +821,7 @@ export default function ProductsPage() {
             </p>
             <p className="text-sm text-slate-500 mb-6">
               이 품목을 비활성화하시겠습니까?<br />
-              <span className="text-xs text-slate-400">데이터는 삭제되지 않으며, 목록에서 숨겨집니다.</span>
+              <span className="text-sm text-slate-400">데이터는 삭제되지 않으며, 목록에서 숨겨집니다.</span>
             </p>
             <div className="flex justify-end gap-2">
               <button
@@ -730,7 +861,7 @@ function FormField({
 }) {
   return (
     <div>
-      <label className="block text-xs font-medium text-slate-600 mb-1">{label}</label>
+      <label className="block text-sm font-medium text-slate-600 mb-1">{label}</label>
       <input
         type="text"
         value={value}
@@ -762,7 +893,7 @@ function NumberField({
 }) {
   return (
     <div>
-      <label className="block text-xs font-medium text-slate-600 mb-1">{label}</label>
+      <label className="block text-sm font-medium text-slate-600 mb-1">{label}</label>
       <input
         type="number"
         value={value}

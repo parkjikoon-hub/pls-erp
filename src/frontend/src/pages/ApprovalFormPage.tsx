@@ -164,8 +164,8 @@ export default function ApprovalFormPage() {
           <textarea
             value={contentText}
             onChange={e => setContentText(e.target.value)}
-            rows={5}
-            className="w-full border border-(--border-main) rounded-lg px-3 py-2 text-sm resize-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
+            rows={10}
+            className="w-full border border-(--border-main) rounded-lg px-3 py-2 text-sm resize-y focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
             placeholder="품의 내용을 입력하세요"
           />
         </div>

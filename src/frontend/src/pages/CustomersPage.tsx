@@ -192,8 +192,12 @@ export default function CustomersPage() {
       setShowModal(false);
       loadCustomers();
     } catch (err: unknown) {
-      const axiosErr = err as { response?: { data?: { detail?: string } } };
-      setError(axiosErr.response?.data?.detail || '저장 중 오류가 발생했습니다.');
+      const axiosErr = err as { response?: { data?: { detail?: string } }; code?: string };
+      if (axiosErr.code === 'ECONNABORTED') {
+        setError('서버 응답 시간이 초과되었습니다. 잠시 후 다시 시도해주세요.');
+      } else {
+        setError(axiosErr.response?.data?.detail || '저장 중 오류가 발생했습니다.');
+      }
     } finally {
       setSaving(false);
     }
@@ -326,12 +330,12 @@ export default function CustomersPage() {
               ) : (
                 data.items.map((c) => (
                   <tr key={c.id} className="border-t border-(--border-main) hover:bg-(--bg-main)/50 transition-colors">
-                    <td className="px-4 py-3 font-mono text-xs text-slate-600">{c.code}</td>
+                    <td className="px-4 py-3 text-slate-600">{c.code}</td>
                     <td className="px-4 py-3 font-medium text-slate-800">{c.name}</td>
                     <td className="px-4 py-3 text-slate-600">{c.business_no || '-'}</td>
                     <td className="px-4 py-3 text-slate-600">{c.ceo_name || '-'}</td>
                     <td className="px-4 py-3">
-                      <span className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${
+                      <span className={`inline-block px-2.5 py-1 rounded text-sm font-medium ${
                         c.customer_type === 'customer' ? 'bg-blue-100 text-blue-700' :
                         c.customer_type === 'supplier' ? 'bg-amber-100 text-amber-700' :
                         'bg-emerald-100 text-emerald-700'
@@ -341,7 +345,7 @@ export default function CustomersPage() {
                     </td>
                     <td className="px-4 py-3 text-slate-600">{c.phone || '-'}</td>
                     <td className="px-4 py-3 text-center">
-                      <span className={`inline-block w-2 h-2 rounded-full ${c.is_active ? 'bg-emerald-500' : 'bg-slate-300'}`} />
+                      <span className={`inline-block w-2.5 h-2.5 rounded-full ${c.is_active ? 'bg-emerald-500' : 'bg-slate-300'}`} />
                     </td>
                     {isManager && (
                       <td className="px-4 py-3 text-center">
@@ -375,7 +379,7 @@ export default function CustomersPage() {
         {/* 페이지네이션 */}
         {data && data.total_pages > 1 && (
           <div className="flex items-center justify-between px-4 py-3 border-t border-(--border-main)">
-            <span className="text-xs text-slate-500">
+            <span className="text-sm text-slate-500">
               전체 {data.total}건 중 {(data.page - 1) * data.size + 1}-{Math.min(data.page * data.size, data.total)}건
             </span>
             <div className="flex items-center gap-1">
@@ -396,7 +400,7 @@ export default function CustomersPage() {
                   <button
                     key={pageNum}
                     onClick={() => setPage(pageNum)}
-                    className={`w-8 h-8 rounded-lg text-xs font-medium transition-colors ${
+                    className={`w-8 h-8 rounded-lg text-sm font-medium transition-colors ${
                       pageNum === page
                         ? 'bg-emerald-500 text-white'
                         : 'hover:bg-(--bg-main) text-slate-600'
@@ -481,7 +485,7 @@ export default function CustomersPage() {
                     placeholder="예: 전자제품"
                   />
                   <div className="md:col-span-2">
-                    <label className="block text-xs font-medium text-slate-600 mb-1">거래처 유형</label>
+                    <label className="block text-sm font-medium text-slate-600 mb-1">거래처 유형</label>
                     <select
                       value={form.customer_type}
                       onChange={(e) => handleChange('customer_type', e.target.value)}
@@ -514,7 +518,7 @@ export default function CustomersPage() {
                 <legend className="text-sm font-semibold text-slate-600 px-2">거래 조건</legend>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs font-medium text-slate-600 mb-1">신용한도 (원)</label>
+                    <label className="block text-sm font-medium text-slate-600 mb-1">신용한도 (원)</label>
                     <input
                       type="number"
                       value={form.credit_limit}
@@ -524,7 +528,7 @@ export default function CustomersPage() {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-medium text-slate-600 mb-1">결제조건 (일)</label>
+                    <label className="block text-sm font-medium text-slate-600 mb-1">결제조건 (일)</label>
                     <input
                       type="number"
                       value={form.payment_terms}
@@ -588,7 +592,7 @@ export default function CustomersPage() {
             </p>
             <p className="text-sm text-slate-500 mb-6">
               이 거래처를 비활성화하시겠습니까?<br />
-              <span className="text-xs text-slate-400">데이터는 삭제되지 않으며, 목록에서 숨겨집니다.</span>
+              <span className="text-sm text-slate-400">데이터는 삭제되지 않으며, 목록에서 숨겨집니다.</span>
             </p>
             <div className="flex justify-end gap-2">
               <button
@@ -628,7 +632,7 @@ function FormField({
 }) {
   return (
     <div>
-      <label className="block text-xs font-medium text-slate-600 mb-1">{label}</label>
+      <label className="block text-sm font-medium text-slate-600 mb-1">{label}</label>
       <input
         type="text"
         value={value}

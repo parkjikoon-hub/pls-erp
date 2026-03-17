@@ -48,6 +48,7 @@ class SalesOrderCreate(BaseModel):
     quotation_id: Optional[str] = Field(None, description="연결 견적서 ID")
     sales_rep_id: Optional[str] = Field(None, description="담당 영업사원 ID")
     notes: Optional[str] = None
+    auto_create_wo: bool = Field(False, description="수주 확정 시 작업지시서 자동 생성 여부")
     lines: list[SalesOrderLineCreate] = Field(
         ..., min_length=1, description="수주 품목 (최소 1줄)",
     )

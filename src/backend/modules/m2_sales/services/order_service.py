@@ -13,6 +13,7 @@ from fastapi import HTTPException, status
 from ..models import SalesOrder, SalesOrderLine, Quotation, QuotationLine
 from ..schemas.orders import SalesOrderCreate, SalesOrderUpdate
 from ....audit.service import log_action
+from ...m1_system.models import Customer
 
 
 async def _generate_order_no(db: AsyncSession, order_date: date) -> str:
@@ -207,7 +208,27 @@ async def create_order(
         ip_address=ip_address,
     )
 
-    return {"id": str(order.id), "order_no": order_no}
+    # ── M7 알림: 수주 등록 알림 ──
+    from ....shared.notification_helper import notify_order_created
+    cust = await db.get(Customer, uuid.UUID(data.customer_id))
+    cust_name = cust.name if cust else "알 수 없음"
+    await notify_order_created(db, order_no, cust_name, order.id, current_user.id)
+
+    result_data = {"id": str(order.id), "order_no": order_no}
+
+    # ── 자동 작업지시서 생성 (옵션) ──
+    if data.auto_create_wo:
+        try:
+            from ...m5_production.services.work_order_service import create_from_order
+            wo_result = await create_from_order(db, order.id, current_user, ip_address)
+            result_data["work_orders"] = wo_result.get("work_orders", [])
+            result_data["material_shortage"] = wo_result.get("material_shortage", [])
+            result_data["has_shortage"] = wo_result.get("has_shortage", False)
+        except Exception:
+            # 작업지시서 생성 실패해도 수주는 정상 반환
+            result_data["wo_error"] = "작업지시서 자동 생성 중 오류가 발생했습니다."
+
+    return result_data
 
 
 async def create_order_from_quotation(
