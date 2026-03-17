@@ -2,7 +2,8 @@
 M6 그룹웨어 — 결재 요청/승인/반려 서비스
 """
 import uuid
-from datetime import date, datetime
+import logging
+from datetime import date, datetime, timedelta
 
 from fastapi import HTTPException
 from sqlalchemy import select, func, and_
@@ -11,7 +12,97 @@ from sqlalchemy.orm import selectinload
 
 from ..models import ApprovalRequest, ApprovalStep
 from ...m1_system.models import User
+from ...m3_hr.models import Employee, AttendanceRecord
 from ....audit.service import log_action
+
+logger = logging.getLogger(__name__)
+
+
+async def _create_attendance_from_approval(db: AsyncSession, req: ApprovalRequest):
+    """휴가 결재 최종 승인 시 → 근태 기록 자동 생성 + 연차 차감"""
+    content = req.content or {}
+    leave_start_str = content.get("leave_start")
+    leave_end_str = content.get("leave_end", leave_start_str)
+    if not leave_start_str:
+        logger.warning("휴가 결재 %s: leave_start 없음, 근태 생성 건너뜀", req.request_no)
+        return
+
+    # 기안자(User) → 직원(Employee) 매칭
+    emp_result = await db.execute(
+        select(Employee).where(and_(Employee.user_id == req.requester_id, Employee.is_active == True))
+    )
+    emp = emp_result.scalar_one_or_none()
+    if not emp:
+        logger.warning("휴가 결재 %s: 기안자에 매칭되는 직원 없음 (user_id=%s)", req.request_no, req.requester_id)
+        return
+
+    leave_start = date.fromisoformat(leave_start_str)
+    leave_end = date.fromisoformat(leave_end_str)
+
+    # 문서 유형별 근태 설정
+    doc_type = req.document_type
+    if doc_type == "leave":
+        att_type, leave_type = "leave", "annual"
+        days_per_record = 1.0
+    elif doc_type == "half_leave":
+        att_type, leave_type = "half", content.get("leave_type", "half_am")
+        days_per_record = 0.5
+    else:  # early_leave
+        att_type, leave_type = "early", None
+        days_per_record = 0.0
+
+    # 연차 총 차감량 계산
+    if doc_type == "leave":
+        total_days = (leave_end - leave_start).days + 1
+    elif doc_type == "half_leave":
+        total_days = 0.5
+    else:
+        total_days = 0.0
+
+    # 연차 잔여량 확인 (차감이 필요한 경우만)
+    if total_days > 0 and float(emp.remaining_leaves) < total_days:
+        logger.warning(
+            "휴가 결재 %s: 잔여 연차 부족 (필요 %.1f, 잔여 %.1f). 근태는 생성하되 연차 부족 메모 추가",
+            req.request_no, total_days, float(emp.remaining_leaves),
+        )
+
+    # 날짜 범위만큼 근태 기록 생성
+    created_count = 0
+    current_date = leave_start
+    while current_date <= leave_end:
+        # 중복 검사 (이미 해당 날짜에 근태 기록이 있으면 건너뜀)
+        dup = await db.execute(
+            select(AttendanceRecord).where(
+                AttendanceRecord.employee_id == emp.id,
+                AttendanceRecord.work_date == current_date,
+            )
+        )
+        if dup.scalar_one_or_none():
+            logger.info("근태 중복: %s %s 건너뜀", emp.name, current_date)
+            current_date += timedelta(days=1)
+            continue
+
+        rec = AttendanceRecord(
+            employee_id=emp.id,
+            work_date=current_date,
+            attendance_type=att_type,
+            leave_type=leave_type,
+            leave_days=days_per_record,
+            memo=f"전자결재 자동생성 ({req.request_no})",
+            approved_at=func.now(),
+        )
+        db.add(rec)
+        created_count += 1
+        current_date += timedelta(days=1)
+
+    # 연차 차감
+    if total_days > 0:
+        deduct = min(total_days, float(emp.remaining_leaves))
+        emp.remaining_leaves = float(emp.remaining_leaves) - deduct
+
+    if created_count > 0:
+        await db.flush()
+        logger.info("휴가 결재 %s → 근태 %d건 생성, 연차 %.1f일 차감", req.request_no, created_count, total_days)
 
 
 async def _generate_request_no(db: AsyncSession) -> str:
@@ -289,6 +380,13 @@ async def approve_step(db: AsyncSession, request_id: uuid.UUID, current_user, co
     remaining = [s for s in approval_steps if s.status == "pending" and s.id != current_step.id]
     if not remaining:
         req.status = "approved"  # 최종 승인
+
+        # 휴가 결재 최종 승인 → 근태 자동 생성 + 연차 차감
+        if req.document_type in ("leave", "half_leave", "early_leave"):
+            try:
+                await _create_attendance_from_approval(db, req)
+            except Exception as e:
+                logger.error("근태 자동 생성 실패 (%s): %s", req.request_no, e)
 
     await db.commit()
     await log_action(

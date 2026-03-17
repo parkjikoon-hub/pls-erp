@@ -18,6 +18,7 @@ const STATUS_BADGE: Record<string, { text: string; cls: string }> = {
 const DOC_TYPE_LABEL: Record<string, string> = {
   general: '일반 품의', journal: '전표 결재', quotation: '견적 결재',
   sales_order: '수주 결재', expense: '경비 결재',
+  leave: '연차/휴가', half_leave: '반차', early_leave: '조퇴',
 };
 
 export default function ApprovalDetailPage() {
@@ -100,6 +101,40 @@ export default function ApprovalDetailPage() {
             </p>
           </div>
         </div>
+
+        {/* 휴가 정보 카드 — leave_start가 있으면 표시 */}
+        {!!detail.content?.leave_start && (
+          <div className="mt-4 pt-4 border-t border-(--border-main)">
+            <h3 className="text-sm font-medium text-cyan-700 mb-2">휴가 정보</h3>
+            <div className="bg-cyan-50 border border-cyan-200 rounded-lg p-4 grid grid-cols-2 md:grid-cols-3 gap-3 text-sm">
+              <div>
+                <span className="text-slate-400">기간</span>
+                <p className="font-medium text-slate-700 mt-0.5">
+                  {String(detail.content.leave_start)}
+                  {detail.content.leave_end && detail.content.leave_end !== detail.content.leave_start
+                    ? ` ~ ${String(detail.content.leave_end)}`
+                    : ''}
+                </p>
+              </div>
+              <div>
+                <span className="text-slate-400">차감 일수</span>
+                <p className="font-medium text-slate-700 mt-0.5">
+                  {detail.content.leave_days != null
+                    ? `${Number(detail.content.leave_days)}일`
+                    : '없음'}
+                </p>
+              </div>
+              {!!detail.content.half_type && (
+                <div>
+                  <span className="text-slate-400">반차 유형</span>
+                  <p className="font-medium text-slate-700 mt-0.5">
+                    {detail.content.half_type === 'am' ? '오전 반차' : '오후 반차'}
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* 본문 */}
         {detail.content?.body != null && (

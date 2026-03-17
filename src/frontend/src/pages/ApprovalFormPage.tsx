@@ -23,7 +23,12 @@ const DOC_TYPES = [
   { value: 'quotation', label: '견적 결재' },
   { value: 'sales_order', label: '수주 결재' },
   { value: 'expense', label: '경비 결재' },
+  { value: 'leave', label: '연차/휴가' },
+  { value: 'half_leave', label: '반차' },
+  { value: 'early_leave', label: '조퇴' },
 ];
+
+const LEAVE_TYPES = ['leave', 'half_leave', 'early_leave'];
 
 export default function ApprovalFormPage() {
   const navigate = useNavigate();
@@ -35,6 +40,11 @@ export default function ApprovalFormPage() {
   const [users, setUsers] = useState<UserOption[]>([]);
   const [templates, setTemplates] = useState<Template[]>([]);
   const [submitting, setSubmitting] = useState(false);
+  /* 휴가 전용 필드 */
+  const [leaveStart, setLeaveStart] = useState('');
+  const [leaveEnd, setLeaveEnd] = useState('');
+  const [halfType, setHalfType] = useState<'am' | 'pm'>('am');
+  const isLeaveType = LEAVE_TYPES.includes(documentType);
 
   useEffect(() => {
     /* 사용자 목록 + 템플릿 목록 로드 */
@@ -91,6 +101,15 @@ export default function ApprovalFormPage() {
     })));
   };
 
+  /* 휴가 일수 계산 */
+  const calcLeaveDays = (): number => {
+    if (documentType === 'leave' && leaveStart && leaveEnd) {
+      return Math.max(1, Math.round((new Date(leaveEnd).getTime() - new Date(leaveStart).getTime()) / 86400000) + 1);
+    }
+    if (documentType === 'half_leave') return 0.5;
+    return 0; // early_leave
+  };
+
   /* 제출 */
   const handleSubmit = async () => {
     if (!title.trim()) return alert('제목을 입력하세요');
@@ -98,12 +117,26 @@ export default function ApprovalFormPage() {
     if (approvalSteps.length === 0) return alert('결재자를 최소 1명 추가하세요');
     if (steps.some(s => !s.approver_id)) return alert('모든 결재자를 선택하세요');
 
+    /* 휴가 유형 검증 */
+    if (isLeaveType && !leaveStart) return alert('날짜를 입력하세요');
+    if (documentType === 'leave' && !leaveEnd) return alert('종료일을 입력하세요');
+
+    /* content JSON 구성 — 휴가 정보 포함 */
+    const content: Record<string, any> = { body: contentText };
+    if (isLeaveType) {
+      content.leave_start = leaveStart;
+      content.leave_end = documentType === 'leave' ? leaveEnd : leaveStart;
+      content.leave_type = documentType === 'half_leave' ? `half_${halfType}` : 'annual';
+      content.leave_days = calcLeaveDays();
+      if (documentType === 'half_leave') content.half_type = halfType;
+    }
+
     setSubmitting(true);
     try {
       await createApproval({
         title,
         document_type: documentType,
-        content: { body: contentText },
+        content,
         amount: amount ? parseFloat(amount) : undefined,
         steps: steps.map(s => ({
           step_type: s.step_type,
@@ -159,6 +192,78 @@ export default function ApprovalFormPage() {
             />
           </div>
         </div>
+
+        {/* 휴가 전용 필드 — 문서 유형이 연차/반차/조퇴일 때만 표시 */}
+        {isLeaveType && (
+          <div className="bg-cyan-50 border border-cyan-200 rounded-lg p-4 space-y-3">
+            <h3 className="text-sm font-bold text-cyan-700">휴가 정보</h3>
+            {documentType === 'leave' && (
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-medium text-slate-600 mb-1">시작일</label>
+                  <input
+                    type="date"
+                    value={leaveStart}
+                    onChange={e => setLeaveStart(e.target.value)}
+                    className="w-full border border-(--border-main) rounded-lg px-3 py-2 text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-slate-600 mb-1">종료일</label>
+                  <input
+                    type="date"
+                    value={leaveEnd}
+                    onChange={e => setLeaveEnd(e.target.value)}
+                    className="w-full border border-(--border-main) rounded-lg px-3 py-2 text-sm"
+                  />
+                </div>
+                {leaveStart && leaveEnd && (
+                  <p className="col-span-2 text-sm text-cyan-700 font-medium">
+                    차감 일수: {Math.max(1, Math.round((new Date(leaveEnd).getTime() - new Date(leaveStart).getTime()) / 86400000) + 1)}일
+                  </p>
+                )}
+              </div>
+            )}
+            {documentType === 'half_leave' && (
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-medium text-slate-600 mb-1">날짜</label>
+                  <input
+                    type="date"
+                    value={leaveStart}
+                    onChange={e => setLeaveStart(e.target.value)}
+                    className="w-full border border-(--border-main) rounded-lg px-3 py-2 text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-slate-600 mb-1">반차 유형</label>
+                  <select
+                    value={halfType}
+                    onChange={e => setHalfType(e.target.value as 'am' | 'pm')}
+                    className="w-full border border-(--border-main) rounded-lg px-3 py-2 text-sm"
+                  >
+                    <option value="am">오전 반차</option>
+                    <option value="pm">오후 반차</option>
+                  </select>
+                </div>
+                <p className="col-span-2 text-sm text-cyan-700 font-medium">차감 일수: 0.5일</p>
+              </div>
+            )}
+            {documentType === 'early_leave' && (
+              <div>
+                <label className="block text-xs font-medium text-slate-600 mb-1">날짜</label>
+                <input
+                  type="date"
+                  value={leaveStart}
+                  onChange={e => setLeaveStart(e.target.value)}
+                  className="w-1/2 border border-(--border-main) rounded-lg px-3 py-2 text-sm"
+                />
+                <p className="mt-2 text-sm text-cyan-700 font-medium">차감 일수: 없음 (조퇴)</p>
+              </div>
+            )}
+          </div>
+        )}
+
         <div>
           <label className="block text-sm font-medium text-slate-600 mb-1">내용</label>
           <textarea
