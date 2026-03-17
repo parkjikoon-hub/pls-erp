@@ -22,23 +22,23 @@ async def lifespan(app: FastAPI):
     import logging
     _log = logging.getLogger(__name__)
 
-    # 시작 1: 누락된 DB 마이그레이션 자동 실행
+    # 시작 1: 누락된 DB 테이블/컬럼 자동 생성
     try:
-        from sqlalchemy import text
-        async with AsyncSessionLocal() as db:
-            # users.allowed_modules 컬럼 존재 확인 후 없으면 추가
-            check = await db.execute(text(
-                "SELECT column_name FROM information_schema.columns "
-                "WHERE table_name='users' AND column_name='allowed_modules'"
-            ))
-            if check.scalar_one_or_none() is None:
-                await db.execute(text(
-                    "ALTER TABLE users ADD COLUMN allowed_modules JSONB"
-                ))
-                await db.commit()
-                _log.info("DB 마이그레이션: users.allowed_modules 컬럼 추가 완료")
+        from .database import Base
+        # 모든 모듈의 모델을 import (테이블 메타데이터 등록)
+        from .modules.m1_system import models as _m1  # noqa: F401
+        from .modules.m4_finance import models as _m4  # noqa: F401
+        from .modules.m3_hr import models as _m3  # noqa: F401
+        from .modules.m2_sales import models as _m2  # noqa: F401
+        from .modules.m5_production import models as _m5  # noqa: F401
+        from .modules.m6_groupware import models as _m6  # noqa: F401
+        from .modules.m7_notifications import models as _m7  # noqa: F401
+        # 누락된 테이블 자동 생성 (기존 테이블은 건드리지 않음)
+        async with engine.begin() as conn:
+            await conn.run_sync(Base.metadata.create_all)
+        _log.info("DB 테이블 동기화 완료 (누락 테이블 자동 생성)")
     except Exception as e:
-        _log.warning(f"DB 마이그레이션 실패 (무시): {e}")
+        _log.warning(f"DB 테이블 동기화 실패 (무시): {e}")
 
     # 시작 2: M5 창고 시드 데이터 (실패해도 앱은 계속 실행)
     try:
