@@ -27,3 +27,4 @@ class UserInfo(BaseModel):
     role: str
     department_name: str | None = None
     position_name: str | None = None
+    allowed_modules: list[str] | None = None

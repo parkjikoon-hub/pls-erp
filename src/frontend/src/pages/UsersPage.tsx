@@ -32,6 +32,17 @@ const ROLE_LABELS: Record<string, string> = {
   user: '일반',
 };
 
+/** 모듈 키-라벨 매핑 (권한 체크박스용) */
+const MODULE_OPTIONS = [
+  { key: 'system', label: '시스템관리' },
+  { key: 'sales', label: '영업관리' },
+  { key: 'production', label: '생산관리' },
+  { key: 'finance', label: '재무회계' },
+  { key: 'hr', label: '인사급여' },
+  { key: 'groupware', label: '그룹웨어' },
+  { key: 'notifications', label: '알림센터' },
+] as const;
+
 /** 탭 정의 */
 const TABS = [
   { key: 'users', label: '사용자' },
@@ -144,7 +155,7 @@ function UsersTab({ isAdmin }: { isAdmin: boolean }) {
   const getPosName = (id: string | null) => id ? positions.find(p => p.id === id)?.name || '-' : '-';
 
   const openCreateModal = () => {
-    setForm({ employee_no: '', name: '', email: '', password: '', role: 'user' });
+    setForm({ employee_no: '', name: '', email: '', password: '', role: 'user', allowed_modules: null });
     setEditingUser(null);
     setError('');
     setShowModal(true);
@@ -152,7 +163,7 @@ function UsersTab({ isAdmin }: { isAdmin: boolean }) {
 
   const openEditModal = (u: UserInfo) => {
     setEditingUser(u);
-    setForm({ employee_no: u.employee_no, name: u.name, email: u.email, password: '', department_id: u.department_id, position_id: u.position_id, role: u.role });
+    setForm({ employee_no: u.employee_no, name: u.name, email: u.email, password: '', department_id: u.department_id, position_id: u.position_id, role: u.role, allowed_modules: u.allowed_modules });
     setError('');
     setShowModal(true);
   };
@@ -163,9 +174,9 @@ function UsersTab({ isAdmin }: { isAdmin: boolean }) {
     setSaving(true); setError('');
     try {
       if (editingUser) {
-        await updateUser(editingUser.id, { name: form.name, department_id: form.department_id, position_id: form.position_id, role: form.role });
+        await updateUser(editingUser.id, { name: form.name, department_id: form.department_id, position_id: form.position_id, role: form.role, allowed_modules: form.role === 'admin' ? null : form.allowed_modules });
       } else {
-        await createUser(form);
+        await createUser({ ...form, allowed_modules: form.role === 'admin' ? null : form.allowed_modules });
       }
       setShowModal(false);
       loadData();
@@ -369,6 +380,43 @@ function UsersTab({ isAdmin }: { isAdmin: boolean }) {
                   <option value="manager">매니저</option>
                   <option value="admin">관리자</option>
                 </select>
+              </div>
+
+              {/* 접근 가능 모듈 체크박스 */}
+              <div>
+                <label className="block text-xs font-medium text-slate-600 mb-2">접근 가능 모듈</label>
+                {form.role === 'admin' ? (
+                  <p className="text-xs text-emerald-600 bg-emerald-50 border border-emerald-200 rounded-lg px-3 py-2">
+                    관리자는 모든 모듈에 접근할 수 있습니다
+                  </p>
+                ) : (
+                  <div className="grid grid-cols-2 gap-2">
+                    {MODULE_OPTIONS.map((mod) => {
+                      const checked = form.allowed_modules === null || form.allowed_modules === undefined
+                        ? true
+                        : form.allowed_modules.includes(mod.key);
+                      return (
+                        <label key={mod.key} className="flex items-center gap-2 px-3 py-2 rounded-lg border border-(--border-main) bg-white hover:bg-(--bg-hover) cursor-pointer transition-colors">
+                          <input
+                            type="checkbox"
+                            checked={checked}
+                            onChange={(e) => {
+                              setForm(f => {
+                                const current = f.allowed_modules ?? MODULE_OPTIONS.map(m => m.key);
+                                const next = e.target.checked
+                                  ? [...current, mod.key]
+                                  : current.filter(k => k !== mod.key);
+                                return { ...f, allowed_modules: next.length === MODULE_OPTIONS.length ? null : next };
+                              });
+                            }}
+                            className="w-4 h-4 rounded border-slate-300 text-emerald-500 focus:ring-emerald-500"
+                          />
+                          <span className="text-sm text-slate-700">{mod.label}</span>
+                        </label>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
             </div>
             <div className="flex items-center justify-end gap-2 px-6 py-4 border-t border-(--border-main)">

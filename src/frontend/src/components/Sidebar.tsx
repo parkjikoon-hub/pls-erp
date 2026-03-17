@@ -1,6 +1,7 @@
 /**
  * 사이드바 — 아이콘 박스 + 텍스트 박스 분리 디자인
  * 각 모듈별 컬러 아이콘이 독립된 사각 박스 안에 표시됩니다.
+ * 사용자의 allowed_modules에 따라 접근 가능한 모듈만 표시합니다.
  */
 import { NavLink } from 'react-router-dom';
 import {
@@ -16,21 +17,28 @@ import {
   ChevronDoubleRightIcon,
 } from '@heroicons/react/24/solid';
 import { useSidebarStore } from '../stores/sidebarStore';
+import { useAuthStore } from '../stores/authStore';
 
-/* 모듈별 네비게이션 항목 — 컬러와 아이콘 */
+/* 모듈별 네비게이션 항목 — moduleKey로 권한 필터링 */
 const navItems = [
-  { path: '/', label: '대시보드', icon: HomeIcon, bg: 'from-emerald-400 to-emerald-600', color: '#10b981' },
-  { path: '/system', label: '시스템관리', icon: Cog6ToothIcon, bg: 'from-blue-400 to-blue-600', color: '#3b82f6' },
-  { path: '/sales', label: '영업관리', icon: ShoppingCartIcon, bg: 'from-emerald-400 to-emerald-600', color: '#10b981' },
-  { path: '/production', label: '생산관리', icon: WrenchScrewdriverIcon, bg: 'from-red-400 to-red-600', color: '#ef4444' },
-  { path: '/finance', label: '재무회계', icon: CurrencyDollarIcon, bg: 'from-amber-400 to-amber-600', color: '#f59e0b' },
-  { path: '/hr', label: '인사급여', icon: UserGroupIcon, bg: 'from-purple-400 to-purple-600', color: '#8b5cf6' },
-  { path: '/groupware', label: '그룹웨어', icon: ChatBubbleLeftRightIcon, bg: 'from-cyan-400 to-cyan-600', color: '#06b6d4' },
-  { path: '/notifications', label: '알림센터', icon: BellIcon, bg: 'from-orange-400 to-orange-600', color: '#f97316' },
+  { path: '/', label: '대시보드', icon: HomeIcon, bg: 'from-emerald-400 to-emerald-600', color: '#10b981', moduleKey: null },
+  { path: '/system', label: '시스템관리', icon: Cog6ToothIcon, bg: 'from-blue-400 to-blue-600', color: '#3b82f6', moduleKey: 'system' },
+  { path: '/sales', label: '영업관리', icon: ShoppingCartIcon, bg: 'from-emerald-400 to-emerald-600', color: '#10b981', moduleKey: 'sales' },
+  { path: '/production', label: '생산관리', icon: WrenchScrewdriverIcon, bg: 'from-red-400 to-red-600', color: '#ef4444', moduleKey: 'production' },
+  { path: '/finance', label: '재무회계', icon: CurrencyDollarIcon, bg: 'from-amber-400 to-amber-600', color: '#f59e0b', moduleKey: 'finance' },
+  { path: '/hr', label: '인사급여', icon: UserGroupIcon, bg: 'from-purple-400 to-purple-600', color: '#8b5cf6', moduleKey: 'hr' },
+  { path: '/groupware', label: '그룹웨어', icon: ChatBubbleLeftRightIcon, bg: 'from-cyan-400 to-cyan-600', color: '#06b6d4', moduleKey: 'groupware' },
+  { path: '/notifications', label: '알림센터', icon: BellIcon, bg: 'from-orange-400 to-orange-600', color: '#f97316', moduleKey: 'notifications' },
 ];
 
 export default function Sidebar() {
   const { isCollapsed, toggle } = useSidebarStore();
+  const { hasModuleAccess } = useAuthStore();
+
+  /* 접근 가능한 모듈만 필터링 (대시보드는 항상 표시) */
+  const visibleItems = navItems.filter(
+    (item) => item.moduleKey === null || hasModuleAccess(item.moduleKey)
+  );
 
   return (
     <aside
@@ -52,7 +60,7 @@ export default function Sidebar() {
 
       {/* 네비게이션 */}
       <nav className="flex-1 py-3 px-2 overflow-y-auto space-y-1">
-        {navItems.map((item) => {
+        {visibleItems.map((item) => {
           const Icon = item.icon;
           return (
             <NavLink

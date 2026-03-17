@@ -63,4 +63,5 @@ async def get_me(current_user: User = Depends(get_current_user)):
         role=current_user.role,
         department_name=current_user.department.name if current_user.department else None,
         position_name=current_user.position.name if current_user.position else None,
+        allowed_modules=current_user.allowed_modules,
     )

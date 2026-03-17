@@ -315,6 +315,7 @@ class UserCreate(BaseModel):
     department_id: Optional[uuid.UUID] = Field(None, description="부서 ID")
     position_id: Optional[uuid.UUID] = Field(None, description="직급 ID")
     role: str = Field("user", description="역할: admin, manager, user")
+    allowed_modules: Optional[list[str]] = Field(None, description="접근 가능 모듈 목록 (null=전체)")
 
     @field_validator("role")
     @classmethod
@@ -339,6 +340,7 @@ class UserUpdate(BaseModel):
     position_id: Optional[uuid.UUID] = None
     role: Optional[str] = None
     is_active: Optional[bool] = None
+    allowed_modules: Optional[list[str]] = None
 
     @field_validator("role")
     @classmethod
@@ -365,6 +367,7 @@ class UserResponse(BaseModel):
     department_id: Optional[uuid.UUID] = None
     position_id: Optional[uuid.UUID] = None
     role: str
+    allowed_modules: Optional[list[str]] = None
     is_active: bool
     last_login_at: Optional[datetime] = None
     created_at: datetime

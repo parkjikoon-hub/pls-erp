@@ -741,6 +741,7 @@ async def create_user(
         department_id=data.department_id,
         position_id=data.position_id,
         role=data.role,
+        allowed_modules=data.allowed_modules,
     )
     db.add(user)
     await db.flush()
@@ -748,7 +749,7 @@ async def create_user(
     await log_action(
         db=db, table_name="users", record_id=user.id,
         action="INSERT", changed_by=current_user.id,
-        new_values={"employee_no": data.employee_no, "name": data.name, "email": data.email, "role": data.role},
+        new_values={"employee_no": data.employee_no, "name": data.name, "email": data.email, "role": data.role, "allowed_modules": data.allowed_modules},
         ip_address=ip_address,
     )
     return user

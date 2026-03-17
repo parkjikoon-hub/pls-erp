@@ -13,6 +13,7 @@ interface User {
   role: string;
   department_name: string | null;
   position_name: string | null;
+  allowed_modules: string[] | null;
 }
 
 interface AuthState {
@@ -22,9 +23,11 @@ interface AuthState {
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
   fetchUser: () => Promise<void>;
+  /** 특정 모듈에 접근 가능한지 확인 (admin 또는 allowed_modules가 null이면 전체 접근) */
+  hasModuleAccess: (moduleKey: string) => boolean;
 }
 
-export const useAuthStore = create<AuthState>((set) => ({
+export const useAuthStore = create<AuthState>((set, get) => ({
   user: null,
   isAuthenticated: !!localStorage.getItem('access_token'),
   isLoading: false,
@@ -57,5 +60,15 @@ export const useAuthStore = create<AuthState>((set) => ({
         set({ user: null, isAuthenticated: false });
       }
     }
+  },
+
+  hasModuleAccess: (moduleKey: string) => {
+    const { user } = get();
+    if (!user) return false;
+    // admin은 항상 전체 접근
+    if (user.role === 'admin') return true;
+    // allowed_modules가 null이면 전체 접근
+    if (user.allowed_modules === null || user.allowed_modules === undefined) return true;
+    return user.allowed_modules.includes(moduleKey);
   },
 }));

@@ -80,6 +80,7 @@ export interface UserInfo {
   department_id: string | null;
   position_id: string | null;
   role: 'admin' | 'manager' | 'user';
+  allowed_modules: string[] | null;
   is_active: boolean;
   last_login_at: string | null;
   created_at: string;
@@ -94,6 +95,7 @@ export interface UserFormData {
   department_id?: string | null;
   position_id?: string | null;
   role: string;
+  allowed_modules?: string[] | null;
 }
 
 export interface UserListParams {
@@ -115,7 +117,7 @@ export async function createUser(data: UserFormData) {
   return res.data;
 }
 
-export async function updateUser(id: string, data: { name?: string; department_id?: string | null; position_id?: string | null; role?: string; is_active?: boolean }) {
+export async function updateUser(id: string, data: { name?: string; department_id?: string | null; position_id?: string | null; role?: string; is_active?: boolean; allowed_modules?: string[] | null }) {
   const res = await api.put(`/system/users/${id}`, data);
   return res.data;
 }
