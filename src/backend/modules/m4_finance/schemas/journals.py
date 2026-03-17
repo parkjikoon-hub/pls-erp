@@ -1,6 +1,7 @@
 """
 M4 재무/회계 — 전표(Journal Entry) Pydantic 스키마
 """
+import uuid
 from datetime import date, datetime
 from typing import Optional
 from pydantic import BaseModel, Field
@@ -21,14 +22,14 @@ class JournalLineCreate(BaseModel):
 
 class JournalLineResponse(BaseModel):
     """분개 라인 응답"""
-    id: str
+    id: uuid.UUID
     line_no: int
-    account_id: str
+    account_id: uuid.UUID
     account_code: Optional[str] = None
     account_name: Optional[str] = None
     debit_amount: float
     credit_amount: float
-    customer_id: Optional[str] = None
+    customer_id: Optional[uuid.UUID] = None
     customer_name: Optional[str] = None
     description: Optional[str] = None
     tax_code: Optional[str] = None
@@ -61,7 +62,7 @@ class JournalUpdate(BaseModel):
 
 class JournalResponse(BaseModel):
     """전표 조회 응답"""
-    id: str
+    id: uuid.UUID
     entry_no: str
     entry_date: date
     entry_type: str
@@ -70,19 +71,19 @@ class JournalResponse(BaseModel):
     total_credit: float
     status: str
     source_module: Optional[str] = None
-    source_id: Optional[str] = None
-    fiscal_year_id: Optional[str] = None
-    approved_by: Optional[str] = None
+    source_id: Optional[uuid.UUID] = None
+    fiscal_year_id: Optional[uuid.UUID] = None
+    approved_by: Optional[uuid.UUID] = None
     approved_at: Optional[datetime] = None
     created_at: Optional[datetime] = None
-    created_by: Optional[str] = None
+    created_by: Optional[uuid.UUID] = None
     created_by_name: Optional[str] = None
     lines: list[JournalLineResponse] = []
 
 
 class JournalListItem(BaseModel):
     """전표 목록 응답 (라인 미포함)"""
-    id: str
+    id: uuid.UUID
     entry_no: str
     entry_date: date
     entry_type: str

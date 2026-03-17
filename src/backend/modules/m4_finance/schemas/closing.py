@@ -1,6 +1,7 @@
 """
 M4 재무/회계 — 결산/재무제표 Pydantic 스키마
 """
+import uuid
 from datetime import date
 from typing import Optional
 from pydantic import BaseModel, Field
@@ -8,7 +9,7 @@ from pydantic import BaseModel, Field
 
 class TrialBalanceRow(BaseModel):
     """시산표 행"""
-    account_id: str
+    account_id: uuid.UUID
     account_code: str
     account_name: str
     account_type: str
@@ -28,7 +29,7 @@ class TrialBalanceResponse(BaseModel):
 
 class IncomeStatementRow(BaseModel):
     """손익계산서 항목"""
-    account_id: str
+    account_id: uuid.UUID
     account_code: str
     account_name: str
     amount: float
@@ -47,7 +48,7 @@ class IncomeStatementResponse(BaseModel):
 
 class BalanceSheetRow(BaseModel):
     """재무상태표 항목"""
-    account_id: str
+    account_id: uuid.UUID
     account_code: str
     account_name: str
     amount: float

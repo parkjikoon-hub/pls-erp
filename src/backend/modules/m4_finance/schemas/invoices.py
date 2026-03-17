@@ -1,6 +1,7 @@
 """
 M4 재무/회계 — 세금계산서(Tax Invoice) Pydantic 스키마
 """
+import uuid
 from datetime import date, datetime
 from typing import Optional
 from pydantic import BaseModel, Field
@@ -29,25 +30,25 @@ class InvoiceUpdate(BaseModel):
 
 class InvoiceResponse(BaseModel):
     """세금계산서 응답"""
-    id: str
+    id: uuid.UUID
     invoice_no: str
     invoice_type: str
     issue_date: date
-    customer_id: str
+    customer_id: uuid.UUID
     customer_name: Optional[str] = None
     supply_amount: float
     tax_amount: float
     total_amount: float
     status: str
-    journal_id: Optional[str] = None
+    journal_id: Optional[uuid.UUID] = None
     description: Optional[str] = None
     created_at: Optional[datetime] = None
-    created_by: Optional[str] = None
+    created_by: Optional[uuid.UUID] = None
 
 
 class InvoiceListItem(BaseModel):
     """세금계산서 목록 응답"""
-    id: str
+    id: uuid.UUID
     invoice_no: str
     invoice_type: str
     issue_date: date

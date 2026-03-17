@@ -1,6 +1,7 @@
 """
 M4 재무/회계 — 회계연도 Pydantic 스키마
 """
+import uuid
 from datetime import date, datetime
 from typing import Optional
 from pydantic import BaseModel, Field
@@ -21,12 +22,12 @@ class FiscalYearUpdate(BaseModel):
 
 class FiscalYearResponse(BaseModel):
     """회계연도 조회 응답"""
-    id: str
+    id: uuid.UUID
     year: int
     start_date: date
     end_date: date
     is_closed: bool
-    closed_by: Optional[str] = None
+    closed_by: Optional[uuid.UUID] = None
     closed_at: Optional[datetime] = None
 
     model_config = {"from_attributes": True}

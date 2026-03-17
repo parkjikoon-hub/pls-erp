@@ -1,6 +1,7 @@
 """
 M4 재무/회계 — 계정과목 Pydantic 스키마
 """
+import uuid
 from datetime import datetime
 from typing import Optional
 from pydantic import BaseModel, Field
@@ -39,13 +40,13 @@ class AccountUpdate(BaseModel):
 # ── 응답 ──
 class AccountResponse(BaseModel):
     """계정과목 조회 응답"""
-    id: str
+    id: uuid.UUID
     code: str
     name: str
     account_type: str
     account_group: Optional[str] = None
     normal_balance: str
-    parent_id: Optional[str] = None
+    parent_id: Optional[uuid.UUID] = None
     sort_order: int
     is_active: bool
     created_at: Optional[datetime] = None
@@ -57,7 +58,7 @@ class AccountResponse(BaseModel):
 # ── 검색 결과 (드롭다운용, 간결한 응답) ──
 class AccountSearchResult(BaseModel):
     """계정과목 검색 결과 (전표 입력 시 드롭다운)"""
-    id: str
+    id: uuid.UUID
     code: str
     name: str
     account_type: str
