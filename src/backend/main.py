@@ -5,11 +5,12 @@ PLS ERP — FastAPI 메인 애플리케이션
 """
 from pathlib import Path
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, JSONResponse
 from contextlib import asynccontextmanager
+import traceback
 
 from .config import settings
 from .database import engine, AsyncSessionLocal
@@ -18,11 +19,15 @@ from .database import engine, AsyncSessionLocal
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """앱 시작/종료 시 수행 작업"""
-    # 시작: M5 창고 시드 데이터
-    from .modules.m5_production.seed import seed_warehouses
-    async with AsyncSessionLocal() as db:
-        await seed_warehouses(db)
-        await db.commit()
+    # 시작: M5 창고 시드 데이터 (실패해도 앱은 계속 실행)
+    try:
+        from .modules.m5_production.seed import seed_warehouses
+        async with AsyncSessionLocal() as db:
+            await seed_warehouses(db)
+            await db.commit()
+    except Exception as e:
+        import logging
+        logging.getLogger(__name__).warning(f"시드 데이터 초기화 실패 (무시): {e}")
     yield
     # 종료: DB 연결 정리
     await engine.dispose()
@@ -57,6 +62,48 @@ async def health_check():
         "app": settings.APP_NAME,
         "version": settings.APP_VERSION,
     }
+
+
+# 디버그: DB 연결 테스트 (배포 후 삭제 예정)
+@app.get("/api/debug/db-test", tags=["시스템"])
+async def db_test():
+    """DB 연결 상태를 확인합니다"""
+    import traceback
+    try:
+        async with AsyncSessionLocal() as session:
+            from sqlalchemy import text
+            result = await session.execute(text("SELECT 1"))
+            val = result.scalar()
+            # 사용자 테이블 존재 확인
+            result2 = await session.execute(
+                text("SELECT count(*) FROM users")
+            )
+            user_count = result2.scalar()
+            return {
+                "db_connected": True,
+                "select_1": val,
+                "user_count": user_count,
+            }
+    except Exception as e:
+        return {
+            "db_connected": False,
+            "error": str(e),
+            "traceback": traceback.format_exc(),
+        }
+
+
+# 글로벌 에러 핸들러 (디버그: 500 에러 상세 내용 반환)
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    """처리되지 않은 예외를 JSON으로 반환 (디버그용, 배포 후 삭제 예정)"""
+    return JSONResponse(
+        status_code=500,
+        content={
+            "detail": str(exc),
+            "type": type(exc).__name__,
+            "traceback": traceback.format_exc(),
+        },
+    )
 
 
 # ── 모듈 라우터 등록 (개발 순서에 따라 순차 추가) ──
