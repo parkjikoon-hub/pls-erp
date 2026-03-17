@@ -50,9 +50,9 @@ class ChartOfAccounts(Base):
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
     )
 
-    # 관계: 계층 구조 (자기참조)
-    parent = relationship("ChartOfAccounts", back_populates="children", remote_side=[id])
-    children = relationship("ChartOfAccounts", back_populates="parent", foreign_keys=[parent_id])
+    # 관계: 계층 구조 (자기참조, async 환경에서 암묵적 로딩 방지)
+    parent = relationship("ChartOfAccounts", back_populates="children", remote_side=[id], lazy="noload")
+    children = relationship("ChartOfAccounts", back_populates="parent", foreign_keys=[parent_id], lazy="noload")
 
     __table_args__ = (
         Index("idx_coa_code", "code"),

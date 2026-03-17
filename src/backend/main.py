@@ -19,15 +19,36 @@ from .database import engine, AsyncSessionLocal
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """앱 시작/종료 시 수행 작업"""
-    # 시작: M5 창고 시드 데이터 (실패해도 앱은 계속 실행)
+    import logging
+    _log = logging.getLogger(__name__)
+
+    # 시작 1: 누락된 DB 마이그레이션 자동 실행
+    try:
+        from sqlalchemy import text
+        async with AsyncSessionLocal() as db:
+            # users.allowed_modules 컬럼 존재 확인 후 없으면 추가
+            check = await db.execute(text(
+                "SELECT column_name FROM information_schema.columns "
+                "WHERE table_name='users' AND column_name='allowed_modules'"
+            ))
+            if check.scalar_one_or_none() is None:
+                await db.execute(text(
+                    "ALTER TABLE users ADD COLUMN allowed_modules JSONB"
+                ))
+                await db.commit()
+                _log.info("DB 마이그레이션: users.allowed_modules 컬럼 추가 완료")
+    except Exception as e:
+        _log.warning(f"DB 마이그레이션 실패 (무시): {e}")
+
+    # 시작 2: M5 창고 시드 데이터 (실패해도 앱은 계속 실행)
     try:
         from .modules.m5_production.seed import seed_warehouses
         async with AsyncSessionLocal() as db:
             await seed_warehouses(db)
             await db.commit()
     except Exception as e:
-        import logging
-        logging.getLogger(__name__).warning(f"시드 데이터 초기화 실패 (무시): {e}")
+        _log.warning(f"시드 데이터 초기화 실패 (무시): {e}")
+
     yield
     # 종료: DB 연결 정리
     await engine.dispose()
