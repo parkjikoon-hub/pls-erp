@@ -105,6 +105,33 @@ async def health_check():
     }
 
 
+@app.get("/api/diag/openpyxl", tags=["시스템"])
+async def diag_openpyxl():
+    """openpyxl 진단 — Excel 생성 기능 점검용 (임시)"""
+    import sys
+    result = {"python": sys.version}
+    try:
+        import openpyxl
+        result["openpyxl_version"] = openpyxl.__version__
+    except Exception as e:
+        result["openpyxl_error"] = str(e)
+        return result
+    try:
+        import io as _io
+        from openpyxl.styles import Font
+        wb = openpyxl.Workbook()
+        ws = wb.active
+        ws.cell(row=1, column=1, value="test")
+        ws.cell(row=1, column=1).font = Font(name="맑은 고딕", size=10)
+        buf = _io.BytesIO()
+        wb.save(buf)
+        result["excel_bytes"] = len(buf.getvalue())
+        result["status"] = "OK"
+    except Exception as e:
+        result["excel_error"] = str(e)
+    return result
+
+
 # ── 모듈 라우터 등록 (개발 순서에 따라 순차 추가) ──
 
 # Phase 1: M1 시스템 아키텍처 & MDM
