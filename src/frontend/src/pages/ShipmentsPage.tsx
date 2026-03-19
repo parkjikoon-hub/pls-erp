@@ -190,7 +190,7 @@ export default function ShipmentsPage() {
                     className="hover:bg-slate-50 transition cursor-pointer"
                     onClick={() => openDetail(sh.id)}
                   >
-                    <td className="px-4 py-3 font-mono text-xs font-medium">{sh.shipment_no}</td>
+                    <td className="px-4 py-3 text-xs font-medium">{sh.shipment_no}</td>
                     <td className="px-4 py-3 text-xs">{sh.order_no || '-'}</td>
                     <td className="px-4 py-3">{sh.customer_name || '-'}</td>
                     <td className="px-4 py-3 text-center">

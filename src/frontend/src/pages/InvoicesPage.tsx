@@ -365,12 +365,12 @@ export default function InvoicesPage() {
             <tbody>
               {data.items.map((inv) => (
                 <tr key={inv.id} className="border-b border-gray-100 hover:bg-amber-50/30 transition">
-                  <td className="px-4 py-3 font-mono text-sm text-gray-700">{inv.invoice_no}</td>
+                  <td className="px-4 py-3 text-sm text-gray-700">{inv.invoice_no}</td>
                   <td className="px-4 py-3 text-gray-700">{inv.issue_date}</td>
                   <td className="px-4 py-3 text-gray-700">{inv.customer_name || '-'}</td>
-                  <td className="px-4 py-3 text-right font-mono text-gray-800">{formatAmount(inv.supply_amount)}</td>
-                  <td className="px-4 py-3 text-right font-mono text-gray-800">{formatAmount(inv.tax_amount)}</td>
-                  <td className="px-4 py-3 text-right font-mono font-medium text-gray-900">{formatAmount(inv.total_amount)}</td>
+                  <td className="px-4 py-3 text-right text-gray-800">{formatAmount(inv.supply_amount)}</td>
+                  <td className="px-4 py-3 text-right text-gray-800">{formatAmount(inv.tax_amount)}</td>
+                  <td className="px-4 py-3 text-right font-medium text-gray-900">{formatAmount(inv.total_amount)}</td>
                   <td className="px-4 py-3 text-center">
                     <span className={`px-2.5 py-1 rounded text-sm font-medium min-w-[3.5rem] text-center ${
                       STATUS_COLORS[inv.status] || 'bg-gray-100'
@@ -519,7 +519,7 @@ export default function InvoicesPage() {
                 type="number" min={0}
                 value={form.supply_amount || ''}
                 onChange={(e) => setForm({ ...form, supply_amount: parseFloat(e.target.value) || 0 })}
-                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm font-mono focus:ring-2 focus:ring-amber-500"
+                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-amber-500"
               />
             </div>
 
@@ -533,13 +533,13 @@ export default function InvoicesPage() {
                 value={displayTax || ''}
                 onChange={(e) => setForm({ ...form, tax_amount: parseFloat(e.target.value) || 0 })}
                 placeholder={`${autoTax.toLocaleString()} (자동)`}
-                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm font-mono focus:ring-2 focus:ring-amber-500"
+                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-amber-500"
               />
             </div>
 
             {/* 합계 표시 */}
             <div className="px-3 py-2 bg-amber-50 rounded-lg text-sm">
-              합계: <strong className="font-mono">{formatAmount(totalAmount)}원</strong>
+              합계: <strong>{formatAmount(totalAmount)}원</strong>
             </div>
 
             {/* 비고 */}

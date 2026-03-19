@@ -272,7 +272,7 @@ export default function JournalFormPage() {
           </h1>
           {!isEdit && nextEntryNo && (
             <p className="text-sm text-gray-500 mt-0.5">
-              예상 전표번호: <span className="font-mono">{nextEntryNo}</span>
+              예상 전표번호: <span>{nextEntryNo}</span>
             </p>
           )}
         </div>
@@ -359,7 +359,7 @@ export default function JournalFormPage() {
                       }}
                       className="w-full text-left px-2 py-1.5 rounded border border-gray-200 hover:border-amber-400 text-sm bg-gray-50"
                     >
-                      <span className="font-mono text-sm text-gray-500 mr-1">{line.account_code}</span>
+                      <span className="text-sm text-gray-500 mr-1">{line.account_code}</span>
                       {line.account_name}
                     </button>
                   ) : (
@@ -391,7 +391,7 @@ export default function JournalFormPage() {
                           onClick={() => selectAccount(idx, acc)}
                           className="w-full text-left px-3 py-2 text-sm hover:bg-amber-50 border-b border-gray-50 last:border-b-0"
                         >
-                          <span className="font-mono text-sm text-gray-500 mr-2">{acc.code}</span>
+                          <span className="text-sm text-gray-500 mr-2">{acc.code}</span>
                           <span>{acc.name}</span>
                           <span className="ml-2 text-sm text-gray-400">
                             ({acc.account_type === 'asset' ? '자산' :
@@ -417,7 +417,7 @@ export default function JournalFormPage() {
                       if (val > 0) updateLine(idx, 'credit_amount', 0);
                     }}
                     placeholder="0"
-                    className="w-full text-right px-2 py-1.5 border border-gray-200 rounded text-sm focus:ring-2 focus:ring-amber-500 focus:border-amber-500 font-mono"
+                    className="w-full text-right px-2 py-1.5 border border-gray-200 rounded text-sm focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
                   />
                 </td>
 
@@ -433,7 +433,7 @@ export default function JournalFormPage() {
                       if (val > 0) updateLine(idx, 'debit_amount', 0);
                     }}
                     placeholder="0"
-                    className="w-full text-right px-2 py-1.5 border border-gray-200 rounded text-sm focus:ring-2 focus:ring-amber-500 focus:border-amber-500 font-mono"
+                    className="w-full text-right px-2 py-1.5 border border-gray-200 rounded text-sm focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
                   />
                 </td>
 
@@ -468,10 +468,10 @@ export default function JournalFormPage() {
         <div className="px-5 py-3 border-t border-gray-200 bg-gray-50 flex items-center justify-between">
           <div className="flex items-center gap-6">
             <span className="text-sm text-gray-600">
-              차변 합계: <strong className="font-mono">{formatAmount(totals.totalDebit)}</strong>
+              차변 합계: <strong>{formatAmount(totals.totalDebit)}</strong>
             </span>
             <span className="text-sm text-gray-600">
-              대변 합계: <strong className="font-mono">{formatAmount(totals.totalCredit)}</strong>
+              대변 합계: <strong>{formatAmount(totals.totalCredit)}</strong>
             </span>
           </div>
           <div className="flex items-center gap-2">

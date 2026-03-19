@@ -279,7 +279,7 @@ export default function ExcelImportModal({ module, moduleName, onClose, onComple
                     key={idx}
                     className="grid grid-cols-[1fr,auto,1fr] gap-0 items-center px-4 py-2 border-t border-(--border-main)"
                   >
-                    <span className="text-sm text-slate-700 font-mono">{m.excel_column}</span>
+                    <span className="text-sm text-slate-700">{m.excel_column}</span>
                     <span className="px-4 text-slate-400">→</span>
                     <select
                       value={m.target_field || ''}

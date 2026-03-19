@@ -358,7 +358,7 @@ export default function DashboardPage() {
                             </span>
                           </td>
                           <td className="px-5 py-2.5 font-medium text-slate-800">{p.product_name}</td>
-                          <td className="px-5 py-2.5 text-right font-mono text-slate-700">
+                          <td className="px-5 py-2.5 text-right text-slate-700">
                             {formatFullAmount(p.total_amount)}
                           </td>
                           <td className="px-5 py-2.5 text-right text-slate-600">

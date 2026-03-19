@@ -8,7 +8,7 @@ pnpm-debug.log*
 lerna-debug.log*
 
 node_modules
-dist
+# dist — Render 배포용으로 git에 포함
 dist-ssr
 *.local
 

@@ -306,7 +306,7 @@ export default function JournalListPage() {
                   key={journal.id}
                   className="border-b border-gray-100 hover:bg-amber-50/30 transition"
                 >
-                  <td className="px-4 py-3 font-mono text-sm text-gray-700">
+                  <td className="px-4 py-3 text-sm text-gray-700">
                     {journal.entry_no}
                   </td>
                   <td className="px-4 py-3 text-gray-700">
@@ -320,10 +320,10 @@ export default function JournalListPage() {
                   <td className="px-4 py-3 text-gray-600 max-w-[200px] truncate">
                     {journal.description || '-'}
                   </td>
-                  <td className="px-4 py-3 text-right font-mono text-gray-800">
+                  <td className="px-4 py-3 text-right text-gray-800">
                     {formatAmount(journal.total_debit)}
                   </td>
-                  <td className="px-4 py-3 text-right font-mono text-gray-800">
+                  <td className="px-4 py-3 text-right text-gray-800">
                     {formatAmount(journal.total_credit)}
                   </td>
                   <td className="px-4 py-3 text-center">

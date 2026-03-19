@@ -144,7 +144,7 @@ export default function WorkOrdersPage() {
     return (
       <div className={`p-3 rounded-lg border ${isOverdue ? 'border-red-300 bg-red-50' : 'border-(--border-main) bg-white'} mb-2`}>
         <div className="flex items-center justify-between mb-1">
-          <span className="text-xs font-mono text-slate-500">{wo.wo_no}</span>
+          <span className="text-xs text-slate-500">{wo.wo_no}</span>
           <span className={`text-xs px-1.5 py-0.5 rounded ${
             wo.order_type === 'make_to_order' ? 'bg-blue-100 text-blue-600' : 'bg-slate-100 text-slate-600'
           }`}>
@@ -270,7 +270,7 @@ export default function WorkOrdersPage() {
                 const isOverdue = new Date(wo.due_date) < new Date() && wo.status !== 'completed';
                 return (
                   <tr key={wo.id} className={`border-t border-[#e8ecf2] ${isOverdue ? 'bg-red-50' : 'hover:bg-(--bg-hover)'}`}>
-                    <td className="px-4 py-2 font-mono text-slate-700">{wo.wo_no}</td>
+                    <td className="px-4 py-2 text-slate-700">{wo.wo_no}</td>
                     <td className="px-4 py-2 text-sm text-blue-600">{wo.order_no || '-'}</td>
                     <td className="px-4 py-2 text-center">
                       <span className={`text-sm px-2.5 py-1 rounded font-medium min-w-[3.5rem] text-center inline-block ${

@@ -273,7 +273,7 @@ export default function AttendancePage() {
                 data.items.map((rec) => (
                   <tr key={rec.id} className="border-t border-(--border-main) hover:bg-(--bg-main)/50 transition-colors">
                     <td className="px-4 py-3 text-xs text-slate-600">{rec.work_date}</td>
-                    <td className="px-4 py-3 font-mono text-xs">{rec.employee_no}</td>
+                    <td className="px-4 py-3 text-xs">{rec.employee_no}</td>
                     <td className="px-4 py-3 font-medium text-slate-700">{rec.employee_name}</td>
                     <td className="px-4 py-3 text-center">
                       <span className={`inline-block px-2.5 py-1 rounded text-sm font-medium min-w-[3.5rem] text-center ${TYPE_COLORS[rec.attendance_type] || 'bg-slate-100'}`}>
@@ -359,7 +359,7 @@ export default function AttendancePage() {
                             }}
                             className="w-full text-left px-3 py-2 text-sm hover:bg-violet-50 border-b border-(--border-main) last:border-0"
                           >
-                            <span className="font-mono text-xs text-slate-500 mr-2">{e.employee_no}</span>
+                            <span className="text-xs text-slate-500 mr-2">{e.employee_no}</span>
                             <span className="font-medium">{e.name}</span>
                             {e.department_name && (
                               <span className="text-xs text-slate-400 ml-2">{e.department_name}</span>

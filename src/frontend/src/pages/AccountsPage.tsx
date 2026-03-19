@@ -327,7 +327,7 @@ export default function AccountsPage() {
                       !a.is_active ? 'opacity-50' : ''
                     }`}
                   >
-                    <td className="px-4 py-3 font-mono text-sm">{a.code}</td>
+                    <td className="px-4 py-3 text-sm">{a.code}</td>
                     <td className="px-4 py-3 font-medium text-slate-700">{a.name}</td>
                     <td className="px-4 py-3">
                       <span

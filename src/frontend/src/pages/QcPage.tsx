@@ -161,7 +161,7 @@ export default function QcPage() {
                 const rs = RESULT_STYLE[qc.result] || { label: qc.result, color: 'text-slate-600', bg: 'bg-slate-100' };
                 return (
                   <tr key={qc.id} className="hover:bg-slate-50 transition">
-                    <td className="px-4 py-3 font-mono text-xs">{qc.wo_no || '-'}</td>
+                    <td className="px-4 py-3 text-xs">{qc.wo_no || '-'}</td>
                     <td className="px-4 py-3">{qc.product_name || '-'}</td>
                     <td className="px-4 py-3 text-right">{qc.inspected_qty.toLocaleString()}</td>
                     <td className="px-4 py-3 text-right text-emerald-600 font-medium">{qc.passed_qty.toLocaleString()}</td>

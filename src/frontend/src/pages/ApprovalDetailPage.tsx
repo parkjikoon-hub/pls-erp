@@ -66,7 +66,7 @@ export default function ApprovalDetailPage() {
       {/* 헤더 */}
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-sm text-slate-400 font-mono">{detail.request_no}</p>
+          <p className="text-sm text-slate-400">{detail.request_no}</p>
           <h1 className="text-2xl font-bold text-slate-800 mt-1">{detail.title}</h1>
         </div>
         <span className={`px-3 py-1 rounded-full text-sm font-medium ${badge.cls}`}>

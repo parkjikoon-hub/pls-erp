@@ -124,7 +124,7 @@ export default function HRReportsPage() {
                           onClick={() => { setSelectedEmp(e); setEmpResults([]); }}
                           className="w-full text-left px-3 py-2 text-sm hover:bg-violet-50 border-b border-(--border-main) last:border-0"
                         >
-                          <span className="font-mono text-xs text-slate-500 mr-2">{e.employee_no}</span>
+                          <span className="text-xs text-slate-500 mr-2">{e.employee_no}</span>
                           <span className="font-medium">{e.name}</span>
                         </button>
                       ))}
@@ -155,15 +155,15 @@ export default function HRReportsPage() {
                 <div>
                   <h3 className="font-semibold text-slate-700 mb-2 pb-1 border-b border-(--border-main)">지급 항목</h3>
                   <div className="space-y-1.5 text-sm">
-                    <div className="flex justify-between"><span>기본급</span><span className="font-mono">{formatMoney(payslip.earnings.base_salary)}</span></div>
-                    {payslip.earnings.overtime_pay > 0 && <div className="flex justify-between"><span>초과근무수당</span><span className="font-mono">{formatMoney(payslip.earnings.overtime_pay)}</span></div>}
-                    {payslip.earnings.bonus > 0 && <div className="flex justify-between"><span>상여금</span><span className="font-mono">{formatMoney(payslip.earnings.bonus)}</span></div>}
-                    <div className="flex justify-between text-blue-600"><span>식대 (비과세)</span><span className="font-mono">{formatMoney(payslip.earnings.meal_allowance)}</span></div>
-                    {payslip.earnings.car_allowance > 0 && <div className="flex justify-between text-blue-600"><span>자가운전보조금</span><span className="font-mono">{formatMoney(payslip.earnings.car_allowance)}</span></div>}
-                    {payslip.earnings.research_allowance > 0 && <div className="flex justify-between text-blue-600"><span>연구활동비</span><span className="font-mono">{formatMoney(payslip.earnings.research_allowance)}</span></div>}
-                    {payslip.earnings.childcare_allowance > 0 && <div className="flex justify-between text-blue-600"><span>육아수당</span><span className="font-mono">{formatMoney(payslip.earnings.childcare_allowance)}</span></div>}
+                    <div className="flex justify-between"><span>기본급</span><span>{formatMoney(payslip.earnings.base_salary)}</span></div>
+                    {payslip.earnings.overtime_pay > 0 && <div className="flex justify-between"><span>초과근무수당</span><span>{formatMoney(payslip.earnings.overtime_pay)}</span></div>}
+                    {payslip.earnings.bonus > 0 && <div className="flex justify-between"><span>상여금</span><span>{formatMoney(payslip.earnings.bonus)}</span></div>}
+                    <div className="flex justify-between text-blue-600"><span>식대 (비과세)</span><span>{formatMoney(payslip.earnings.meal_allowance)}</span></div>
+                    {payslip.earnings.car_allowance > 0 && <div className="flex justify-between text-blue-600"><span>자가운전보조금</span><span>{formatMoney(payslip.earnings.car_allowance)}</span></div>}
+                    {payslip.earnings.research_allowance > 0 && <div className="flex justify-between text-blue-600"><span>연구활동비</span><span>{formatMoney(payslip.earnings.research_allowance)}</span></div>}
+                    {payslip.earnings.childcare_allowance > 0 && <div className="flex justify-between text-blue-600"><span>육아수당</span><span>{formatMoney(payslip.earnings.childcare_allowance)}</span></div>}
                     <div className="flex justify-between font-bold pt-2 border-t border-(--border-main)">
-                      <span>총 지급액</span><span className="font-mono">{formatMoney(payslip.earnings.gross_salary)}</span>
+                      <span>총 지급액</span><span>{formatMoney(payslip.earnings.gross_salary)}</span>
                     </div>
                   </div>
                 </div>
@@ -171,14 +171,14 @@ export default function HRReportsPage() {
                 <div>
                   <h3 className="font-semibold text-slate-700 mb-2 pb-1 border-b border-(--border-main)">공제 항목</h3>
                   <div className="space-y-1.5 text-sm">
-                    <div className="flex justify-between"><span>소득세</span><span className="font-mono text-red-500">{formatMoney(payslip.deductions.income_tax)}</span></div>
-                    <div className="flex justify-between"><span>지방소득세</span><span className="font-mono text-red-500">{formatMoney(payslip.deductions.local_tax)}</span></div>
-                    <div className="flex justify-between"><span>국민연금</span><span className="font-mono text-red-500">{formatMoney(payslip.deductions.national_pension)}</span></div>
-                    <div className="flex justify-between"><span>건강보험</span><span className="font-mono text-red-500">{formatMoney(payslip.deductions.health_insurance)}</span></div>
-                    <div className="flex justify-between"><span>장기요양보험</span><span className="font-mono text-red-500">{formatMoney(payslip.deductions.long_term_care)}</span></div>
-                    <div className="flex justify-between"><span>고용보험</span><span className="font-mono text-red-500">{formatMoney(payslip.deductions.employment_insurance)}</span></div>
+                    <div className="flex justify-between"><span>소득세</span><span className="text-red-500">{formatMoney(payslip.deductions.income_tax)}</span></div>
+                    <div className="flex justify-between"><span>지방소득세</span><span className="text-red-500">{formatMoney(payslip.deductions.local_tax)}</span></div>
+                    <div className="flex justify-between"><span>국민연금</span><span className="text-red-500">{formatMoney(payslip.deductions.national_pension)}</span></div>
+                    <div className="flex justify-between"><span>건강보험</span><span className="text-red-500">{formatMoney(payslip.deductions.health_insurance)}</span></div>
+                    <div className="flex justify-between"><span>장기요양보험</span><span className="text-red-500">{formatMoney(payslip.deductions.long_term_care)}</span></div>
+                    <div className="flex justify-between"><span>고용보험</span><span className="text-red-500">{formatMoney(payslip.deductions.employment_insurance)}</span></div>
                     <div className="flex justify-between font-bold pt-2 border-t border-(--border-main) text-red-600">
-                      <span>총 공제액</span><span className="font-mono">{formatMoney(payslip.deductions.total_deduction)}</span>
+                      <span>총 공제액</span><span>{formatMoney(payslip.deductions.total_deduction)}</span>
                     </div>
                   </div>
                 </div>
@@ -187,7 +187,7 @@ export default function HRReportsPage() {
               <div className="mt-4 p-4 bg-emerald-50 rounded-lg border border-emerald-200">
                 <div className="flex justify-between items-center">
                   <span className="text-lg font-bold text-emerald-800">실수령액</span>
-                  <span className="text-2xl font-bold text-emerald-700 font-mono">{formatMoney(payslip.net_salary)}원</span>
+                  <span className="text-2xl font-bold text-emerald-700">{formatMoney(payslip.net_salary)}원</span>
                 </div>
               </div>
             </div>
@@ -234,9 +234,9 @@ export default function HRReportsPage() {
                 <h3 className="font-bold text-slate-700 mb-3">{year}년 급여 합계</h3>
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between"><span>계산 완료 월수</span><span>{summary.payroll_annual.months_calculated}개월</span></div>
-                  <div className="flex justify-between"><span>총 지급액</span><span className="font-mono font-bold text-blue-600">{formatMoney(summary.payroll_annual.total_gross)}</span></div>
-                  <div className="flex justify-between"><span>총 공제액</span><span className="font-mono text-red-500">{formatMoney(summary.payroll_annual.total_deduction)}</span></div>
-                  <div className="flex justify-between font-bold"><span>총 실수령</span><span className="font-mono text-emerald-600">{formatMoney(summary.payroll_annual.total_net)}</span></div>
+                  <div className="flex justify-between"><span>총 지급액</span><span className="font-bold text-blue-600">{formatMoney(summary.payroll_annual.total_gross)}</span></div>
+                  <div className="flex justify-between"><span>총 공제액</span><span className="text-red-500">{formatMoney(summary.payroll_annual.total_deduction)}</span></div>
+                  <div className="flex justify-between font-bold"><span>총 실수령</span><span className="text-emerald-600">{formatMoney(summary.payroll_annual.total_net)}</span></div>
                 </div>
               </div>
 

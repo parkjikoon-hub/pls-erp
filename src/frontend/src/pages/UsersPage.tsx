@@ -265,7 +265,7 @@ function UsersTab({ isAdmin }: { isAdmin: boolean }) {
                 </td></tr>
               ) : data.items.map((u) => (
                 <tr key={u.id} className="border-t border-(--border-main) hover:bg-(--bg-main)/50 transition-colors">
-                  <td className="px-4 py-3 font-mono text-xs text-slate-600">{u.employee_no}</td>
+                  <td className="px-4 py-3 text-xs text-slate-600">{u.employee_no}</td>
                   <td className="px-4 py-3 font-medium text-slate-800">{u.name}</td>
                   <td className="px-4 py-3 text-slate-600">{u.email}</td>
                   <td className="px-4 py-3 text-slate-600">{getDeptName(u.department_id)}</td>
@@ -518,7 +518,7 @@ function DepartmentsTab({ isAdmin }: { isAdmin: boolean }) {
               <tr><td colSpan={isAdmin ? 5 : 4} className="text-center py-12 text-slate-400">등록된 부서가 없습니다</td></tr>
             ) : departments.map(d => (
               <tr key={d.id} className="border-t border-(--border-main) hover:bg-(--bg-main)/50 transition-colors">
-                <td className="px-4 py-3 font-mono text-xs text-slate-600">{d.code}</td>
+                <td className="px-4 py-3 text-xs text-slate-600">{d.code}</td>
                 <td className="px-4 py-3 font-medium text-slate-800">{d.name}</td>
                 <td className="px-4 py-3 text-center text-slate-600">{d.sort_order}</td>
                 <td className="px-4 py-3 text-center">
@@ -640,7 +640,7 @@ function PositionsTab({ isAdmin }: { isAdmin: boolean }) {
               <tr><td colSpan={isAdmin ? 5 : 4} className="text-center py-12 text-slate-400">등록된 직급이 없습니다</td></tr>
             ) : positions.map(p => (
               <tr key={p.id} className="border-t border-(--border-main) hover:bg-(--bg-main)/50 transition-colors">
-                <td className="px-4 py-3 font-mono text-xs text-slate-600">{p.code}</td>
+                <td className="px-4 py-3 text-xs text-slate-600">{p.code}</td>
                 <td className="px-4 py-3 font-medium text-slate-800">{p.name}</td>
                 <td className="px-4 py-3 text-center text-slate-600">{p.level}</td>
                 <td className="px-4 py-3 text-center">

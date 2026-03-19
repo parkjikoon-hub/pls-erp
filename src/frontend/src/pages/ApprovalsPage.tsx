@@ -106,7 +106,7 @@ export default function ApprovalsPage() {
                     onClick={() => navigate(`/groupware/approvals/${item.id}`)}
                     className="border-t border-(--border-main) hover:bg-slate-50 cursor-pointer transition"
                   >
-                    <td className="py-3 px-4 text-slate-500 font-mono text-sm">{item.request_no}</td>
+                    <td className="py-3 px-4 text-slate-500 text-sm">{item.request_no}</td>
                     <td className="py-3 px-4 font-medium text-slate-800">{item.title}</td>
                     <td className="py-3 px-4 text-slate-500">{DOC_TYPE_LABEL[item.document_type] || item.document_type}</td>
                     <td className="py-3 px-4 text-right text-slate-700">

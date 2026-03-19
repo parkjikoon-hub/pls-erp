@@ -276,10 +276,10 @@ export default function PayrollPage() {
                   const currentOT = overtimeEdits[d.id] ?? d.overtime_hours;
                   return (
                     <tr key={d.id} className="border-t border-(--border-main) hover:bg-(--bg-main)/50 transition-colors">
-                      <td className="px-3 py-2.5 font-mono text-sm">{d.employee_no}</td>
+                      <td className="px-3 py-2.5 text-sm">{d.employee_no}</td>
                       <td className="px-3 py-2.5 font-medium text-slate-700">{d.employee_name}</td>
                       <td className="px-3 py-2.5 text-sm text-slate-500">{d.department_name || '-'}</td>
-                      <td className="px-3 py-2.5 text-right font-mono text-sm">{formatMoney(d.base_salary)}</td>
+                      <td className="px-3 py-2.5 text-right text-sm">{formatMoney(d.base_salary)}</td>
                       {showOvertimeCol && (
                         <td className="px-2 py-1.5 text-center bg-amber-50/50">
                           <input
@@ -296,15 +296,15 @@ export default function PayrollPage() {
                           />
                         </td>
                       )}
-                      <td className="px-3 py-2.5 text-right font-mono text-sm text-amber-600">
+                      <td className="px-3 py-2.5 text-right text-sm text-amber-600">
                         {d.overtime_pay > 0 ? formatMoney(d.overtime_pay) : '-'}
                       </td>
-                      <td className="px-3 py-2.5 text-right font-mono text-sm text-blue-600">{formatMoney(taxFree)}</td>
-                      <td className="px-3 py-2.5 text-right font-mono text-sm font-medium">{formatMoney(d.gross_salary)}</td>
-                      <td className="px-3 py-2.5 text-right font-mono text-sm text-red-500">{formatMoney(insurance)}</td>
-                      <td className="px-3 py-2.5 text-right font-mono text-sm text-red-500">{formatMoney(incomeTax)}</td>
-                      <td className="px-3 py-2.5 text-right font-mono text-sm text-red-600 font-medium">{formatMoney(d.total_deduction)}</td>
-                      <td className="px-3 py-2.5 text-right font-mono text-sm text-emerald-600 font-bold">{formatMoney(d.net_salary)}</td>
+                      <td className="px-3 py-2.5 text-right text-sm text-blue-600">{formatMoney(taxFree)}</td>
+                      <td className="px-3 py-2.5 text-right text-sm font-medium">{formatMoney(d.gross_salary)}</td>
+                      <td className="px-3 py-2.5 text-right text-sm text-red-500">{formatMoney(insurance)}</td>
+                      <td className="px-3 py-2.5 text-right text-sm text-red-500">{formatMoney(incomeTax)}</td>
+                      <td className="px-3 py-2.5 text-right text-sm text-red-600 font-medium">{formatMoney(d.total_deduction)}</td>
+                      <td className="px-3 py-2.5 text-right text-sm text-emerald-600 font-bold">{formatMoney(d.net_salary)}</td>
                     </tr>
                   );
                 })
@@ -314,10 +314,10 @@ export default function PayrollPage() {
               <tfoot>
                 <tr className="border-t-2 border-(--border-light) bg-(--bg-main) font-bold">
                   <td colSpan={showOvertimeCol ? 7 : 6} className="px-3 py-3 text-slate-700">합계 ({data.total_employees}명)</td>
-                  <td className="px-3 py-3 text-right font-mono text-sm">{formatMoney(data.total_gross)}</td>
+                  <td className="px-3 py-3 text-right text-sm">{formatMoney(data.total_gross)}</td>
                   <td colSpan={2} />
-                  <td className="px-3 py-3 text-right font-mono text-sm text-red-600">{formatMoney(data.total_deduction)}</td>
-                  <td className="px-3 py-3 text-right font-mono text-sm text-emerald-600">{formatMoney(data.total_net)}</td>
+                  <td className="px-3 py-3 text-right text-sm text-red-600">{formatMoney(data.total_deduction)}</td>
+                  <td className="px-3 py-3 text-right text-sm text-emerald-600">{formatMoney(data.total_net)}</td>
                 </tr>
               </tfoot>
             )}

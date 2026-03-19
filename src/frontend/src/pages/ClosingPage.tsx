@@ -179,16 +179,16 @@ export default function ClosingPage() {
                     ) : (
                       trialBalance.rows.map((row) => (
                         <tr key={row.account_id} className="border-b border-gray-100 hover:bg-gray-50">
-                          <td className="px-4 py-2.5 font-mono text-sm text-gray-600">{row.account_code}</td>
+                          <td className="px-4 py-2.5 text-sm text-gray-600">{row.account_code}</td>
                           <td className="px-4 py-2.5 text-gray-800">{row.account_name}</td>
                           <td className="px-4 py-2.5">
                             <span className="px-2 py-0.5 rounded text-sm bg-gray-100 text-gray-600">
                               {TYPE_LABELS[row.account_type] || row.account_type}
                             </span>
                           </td>
-                          <td className="px-4 py-2.5 text-right font-mono text-gray-700">{formatAmount(row.total_debit)}</td>
-                          <td className="px-4 py-2.5 text-right font-mono text-gray-700">{formatAmount(row.total_credit)}</td>
-                          <td className={`px-4 py-2.5 text-right font-mono font-medium ${row.balance >= 0 ? 'text-gray-900' : 'text-red-600'}`}>
+                          <td className="px-4 py-2.5 text-right text-gray-700">{formatAmount(row.total_debit)}</td>
+                          <td className="px-4 py-2.5 text-right text-gray-700">{formatAmount(row.total_credit)}</td>
+                          <td className={`px-4 py-2.5 text-right font-medium ${row.balance >= 0 ? 'text-gray-900' : 'text-red-600'}`}>
                             {formatAmount(row.balance)}
                           </td>
                         </tr>
@@ -199,9 +199,9 @@ export default function ClosingPage() {
                     <tfoot>
                       <tr className="bg-amber-50 border-t-2 border-amber-200">
                         <td colSpan={3} className="px-4 py-3 font-bold text-gray-700">합계</td>
-                        <td className="px-4 py-3 text-right font-mono font-bold text-gray-900">{formatAmount(trialBalance.total_debit)}</td>
-                        <td className="px-4 py-3 text-right font-mono font-bold text-gray-900">{formatAmount(trialBalance.total_credit)}</td>
-                        <td className="px-4 py-3 text-right font-mono font-bold text-gray-900">
+                        <td className="px-4 py-3 text-right font-bold text-gray-900">{formatAmount(trialBalance.total_debit)}</td>
+                        <td className="px-4 py-3 text-right font-bold text-gray-900">{formatAmount(trialBalance.total_credit)}</td>
+                        <td className="px-4 py-3 text-right font-bold text-gray-900">
                           {formatAmount(trialBalance.total_debit - trialBalance.total_credit)}
                         </td>
                       </tr>
@@ -224,14 +224,14 @@ export default function ClosingPage() {
                       <tbody>
                         {incomeStatement.revenue_items.map((item) => (
                           <tr key={item.account_id} className="border-b border-gray-50">
-                            <td className="py-2 font-mono text-sm text-gray-500 w-16">{item.account_code}</td>
+                            <td className="py-2 text-sm text-gray-500 w-16">{item.account_code}</td>
                             <td className="py-2 text-gray-700">{item.account_name}</td>
-                            <td className="py-2 text-right font-mono text-emerald-700">{formatAmount(item.amount)}</td>
+                            <td className="py-2 text-right text-emerald-700">{formatAmount(item.amount)}</td>
                           </tr>
                         ))}
                         <tr className="bg-emerald-50 font-bold">
                           <td colSpan={2} className="py-2 text-emerald-800">수익 합계</td>
-                          <td className="py-2 text-right font-mono text-emerald-800">{formatAmount(incomeStatement.total_revenue)}</td>
+                          <td className="py-2 text-right text-emerald-800">{formatAmount(incomeStatement.total_revenue)}</td>
                         </tr>
                       </tbody>
                     </table>
@@ -248,14 +248,14 @@ export default function ClosingPage() {
                       <tbody>
                         {incomeStatement.expense_items.map((item) => (
                           <tr key={item.account_id} className="border-b border-gray-50">
-                            <td className="py-2 font-mono text-sm text-gray-500 w-16">{item.account_code}</td>
+                            <td className="py-2 text-sm text-gray-500 w-16">{item.account_code}</td>
                             <td className="py-2 text-gray-700">{item.account_name}</td>
-                            <td className="py-2 text-right font-mono text-red-600">{formatAmount(item.amount)}</td>
+                            <td className="py-2 text-right text-red-600">{formatAmount(item.amount)}</td>
                           </tr>
                         ))}
                         <tr className="bg-red-50 font-bold">
                           <td colSpan={2} className="py-2 text-red-800">비용 합계</td>
-                          <td className="py-2 text-right font-mono text-red-800">{formatAmount(incomeStatement.total_expense)}</td>
+                          <td className="py-2 text-right text-red-800">{formatAmount(incomeStatement.total_expense)}</td>
                         </tr>
                       </tbody>
                     </table>
@@ -266,7 +266,7 @@ export default function ClosingPage() {
                 <div className={`p-4 rounded-xl ${incomeStatement.net_income >= 0 ? 'bg-emerald-50 border border-emerald-200' : 'bg-red-50 border border-red-200'}`}>
                   <div className="flex items-center justify-between">
                     <span className="text-lg font-bold text-gray-800">당기순이익</span>
-                    <span className={`text-2xl font-bold font-mono ${incomeStatement.net_income >= 0 ? 'text-emerald-700' : 'text-red-600'}`}>
+                    <span className={`text-2xl font-bold ${incomeStatement.net_income >= 0 ? 'text-emerald-700' : 'text-red-600'}`}>
                       {formatAmount(incomeStatement.net_income)}원
                     </span>
                   </div>
@@ -288,14 +288,14 @@ export default function ClosingPage() {
                         <tbody>
                           {balanceSheet.asset_items.map((item) => (
                             <tr key={item.account_id} className="border-b border-gray-50">
-                              <td className="py-2 font-mono text-sm text-gray-500 w-12">{item.account_code}</td>
+                              <td className="py-2 text-sm text-gray-500 w-12">{item.account_code}</td>
                               <td className="py-2 text-gray-700">{item.account_name}</td>
-                              <td className="py-2 text-right font-mono text-gray-800">{formatAmount(item.amount)}</td>
+                              <td className="py-2 text-right text-gray-800">{formatAmount(item.amount)}</td>
                             </tr>
                           ))}
                           <tr className="bg-blue-50 font-bold border-t-2 border-blue-200">
                             <td colSpan={2} className="py-2 text-blue-800">자산 합계</td>
-                            <td className="py-2 text-right font-mono text-blue-800">{formatAmount(balanceSheet.total_assets)}</td>
+                            <td className="py-2 text-right text-blue-800">{formatAmount(balanceSheet.total_assets)}</td>
                           </tr>
                         </tbody>
                       </table>
@@ -314,14 +314,14 @@ export default function ClosingPage() {
                           <tbody>
                             {balanceSheet.liability_items.map((item) => (
                               <tr key={item.account_id} className="border-b border-gray-50">
-                                <td className="py-2 font-mono text-sm text-gray-500 w-12">{item.account_code}</td>
+                                <td className="py-2 text-sm text-gray-500 w-12">{item.account_code}</td>
                                 <td className="py-2 text-gray-700">{item.account_name}</td>
-                                <td className="py-2 text-right font-mono text-gray-800">{formatAmount(item.amount)}</td>
+                                <td className="py-2 text-right text-gray-800">{formatAmount(item.amount)}</td>
                               </tr>
                             ))}
                             <tr className="bg-red-50 font-bold">
                               <td colSpan={2} className="py-2 text-red-800">부채 합계</td>
-                              <td className="py-2 text-right font-mono text-red-800">{formatAmount(balanceSheet.total_liabilities)}</td>
+                              <td className="py-2 text-right text-red-800">{formatAmount(balanceSheet.total_liabilities)}</td>
                             </tr>
                           </tbody>
                         </table>
@@ -338,9 +338,9 @@ export default function ClosingPage() {
                           <tbody>
                             {balanceSheet.equity_items.map((item) => (
                               <tr key={item.account_id} className="border-b border-gray-50">
-                                <td className="py-2 font-mono text-sm text-gray-500 w-12">{item.account_code}</td>
+                                <td className="py-2 text-sm text-gray-500 w-12">{item.account_code}</td>
                                 <td className="py-2 text-gray-700">{item.account_name}</td>
-                                <td className="py-2 text-right font-mono text-gray-800">{formatAmount(item.amount)}</td>
+                                <td className="py-2 text-right text-gray-800">{formatAmount(item.amount)}</td>
                               </tr>
                             ))}
                           </tbody>
@@ -349,11 +349,11 @@ export default function ClosingPage() {
                       {/* 당기순이익 */}
                       <div className="py-2 flex justify-between text-sm border-b border-gray-100">
                         <span className="text-gray-600 italic">당기순이익</span>
-                        <span className="font-mono text-gray-800">{formatAmount(balanceSheet.net_income)}</span>
+                        <span className="text-gray-800">{formatAmount(balanceSheet.net_income)}</span>
                       </div>
                       <div className="bg-purple-50 py-2 flex justify-between font-bold mt-1 rounded px-1">
                         <span className="text-purple-800">자본 + 당기순이익</span>
-                        <span className="font-mono text-purple-800">
+                        <span className="text-purple-800">
                           {formatAmount(balanceSheet.total_equity + balanceSheet.net_income)}
                         </span>
                       </div>
@@ -363,7 +363,7 @@ export default function ClosingPage() {
                     <div className="bg-amber-50 p-3 rounded-xl border border-amber-200">
                       <div className="flex justify-between font-bold text-amber-800">
                         <span>부채 + 자본 합계</span>
-                        <span className="font-mono">
+                        <span>
                           {formatAmount(balanceSheet.total_liabilities + balanceSheet.total_equity + balanceSheet.net_income)}
                         </span>
                       </div>
