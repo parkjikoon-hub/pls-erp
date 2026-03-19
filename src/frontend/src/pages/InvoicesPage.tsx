@@ -12,7 +12,6 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
 } from '@heroicons/react/24/outline';
-import BackButton from '../components/BackButton';
 import {
   fetchInvoices,
   createInvoice,
@@ -251,7 +250,6 @@ export default function InvoicesPage() {
       {/* 헤더 */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <BackButton to="/finance" />
           <div>
             <h1 className="text-2xl font-bold text-gray-900">세금계산서</h1>
             <p className="text-sm text-gray-500 mt-0.5">매출/매입 세금계산서 발행 및 관리</p>
@@ -374,7 +372,7 @@ export default function InvoicesPage() {
                   <td className="px-4 py-3 text-right font-mono text-gray-800">{formatAmount(inv.tax_amount)}</td>
                   <td className="px-4 py-3 text-right font-mono font-medium text-gray-900">{formatAmount(inv.total_amount)}</td>
                   <td className="px-4 py-3 text-center">
-                    <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${
+                    <span className={`px-2.5 py-1 rounded text-sm font-medium min-w-[3.5rem] text-center ${
                       STATUS_COLORS[inv.status] || 'bg-gray-100'
                     }`}>
                       {STATUS_LABELS[inv.status] || inv.status}

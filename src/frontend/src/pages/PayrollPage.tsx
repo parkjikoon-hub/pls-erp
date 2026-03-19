@@ -7,7 +7,6 @@ import {
   CalculatorIcon,
   CheckCircleIcon,
 } from '@heroicons/react/24/outline';
-import BackButton from '../components/BackButton';
 import {
   fetchPayroll,
   calculatePayroll,
@@ -93,7 +92,6 @@ export default function PayrollPage() {
     <div>
       {/* 헤더 */}
       <div className="flex items-center gap-3 mb-4">
-        <BackButton to="/hr" />
         <div>
           <h1 className="text-xl font-bold text-slate-800">급여 관리</h1>
           <p className="text-sm text-slate-500">

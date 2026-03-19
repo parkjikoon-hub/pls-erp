@@ -4,7 +4,7 @@
 import { useState, useEffect } from 'react';
 import { listNotices, getNotice, createNotice, updateNotice, deleteNotice, type NoticeListItem, type NoticeDetail } from '../api/groupware/notices';
 import { useAuthStore } from '../stores/authStore';
-import BackButton from '../components/BackButton';
+
 
 export default function NoticesPage() {
   const { user } = useAuthStore();
@@ -81,10 +81,7 @@ export default function NoticesPage() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <BackButton to="/groupware" />
-          <h1 className="text-2xl font-bold text-slate-800">공지사항</h1>
-        </div>
+        <h1 className="text-2xl font-bold text-slate-800">공지사항</h1>
         {isManager && (
           <button onClick={() => openEdit()}
             className="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition text-sm font-medium"

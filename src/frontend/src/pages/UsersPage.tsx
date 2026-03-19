@@ -13,7 +13,6 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
 } from '@heroicons/react/24/outline';
-import BackButton from '../components/BackButton';
 import {
   fetchDepartments, createDepartment, updateDepartment,
   fetchPositions, createPosition, updatePosition,
@@ -61,7 +60,6 @@ export default function UsersPage() {
     <div>
       {/* 상단 */}
       <div className="flex items-center gap-3 mb-6">
-        <BackButton to="/system" />
         <div>
           <h1 className="text-xl font-bold text-slate-800 flex items-center gap-2">
             <UserGroupIcon className="w-6 h-6 text-purple-500" />

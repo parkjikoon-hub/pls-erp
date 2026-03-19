@@ -14,7 +14,6 @@ import {
   ArrowUpTrayIcon,
   BuildingOffice2Icon,
 } from '@heroicons/react/24/outline';
-import BackButton from '../components/BackButton';
 import {
   fetchCustomers,
   createCustomer,
@@ -220,7 +219,6 @@ export default function CustomersPage() {
     <div>
       {/* 상단: 뒤로가기 + 제목 */}
       <div className="flex items-center gap-3 mb-6">
-        <BackButton to="/system" />
         <div>
           <h1 className="text-xl font-bold text-slate-800 flex items-center gap-2">
             <BuildingOffice2Icon className="w-6 h-6 text-blue-500" />
@@ -335,7 +333,7 @@ export default function CustomersPage() {
                     <td className="px-4 py-3 text-slate-600">{c.business_no || '-'}</td>
                     <td className="px-4 py-3 text-slate-600">{c.ceo_name || '-'}</td>
                     <td className="px-4 py-3">
-                      <span className={`inline-block px-2.5 py-1 rounded text-sm font-medium ${
+                      <span className={`inline-block px-2.5 py-1 rounded text-sm font-medium min-w-[3.5rem] text-center ${
                         c.customer_type === 'customer' ? 'bg-blue-100 text-blue-700' :
                         c.customer_type === 'supplier' ? 'bg-amber-100 text-amber-700' :
                         'bg-emerald-100 text-emerald-700'

@@ -4,7 +4,7 @@
 import { useState, useEffect } from 'react';
 import { listTemplates, createTemplate, deleteTemplate, type Template } from '../api/groupware/approvals';
 import api from '../api/client';
-import BackButton from '../components/BackButton';
+
 
 interface UserOption { id: string; name: string; }
 
@@ -78,10 +78,7 @@ export default function ApprovalTemplatesPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <BackButton to="/groupware" />
-          <h1 className="text-2xl font-bold text-slate-800">결재선 템플릿</h1>
-        </div>
+        <h1 className="text-2xl font-bold text-slate-800">결재선 템플릿</h1>
         <button
           onClick={() => setShowForm(!showForm)}
           className="px-4 py-2 bg-violet-600 text-white rounded-lg hover:bg-violet-700 transition text-sm font-medium"

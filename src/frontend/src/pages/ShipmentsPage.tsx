@@ -9,7 +9,7 @@ import {
   type Shipment,
 } from '../api/production/shipments';
 import api from '../api/client';
-import BackButton from '../components/BackButton';
+
 
 /* 상태 라벨/색상 */
 const STATUS_MAP: Record<string, { label: string; color: string; bg: string }> = {
@@ -121,10 +121,6 @@ export default function ShipmentsPage() {
 
   return (
     <div className="space-y-6">
-      {/* 뒤로가기 */}
-      <div className="mb-4">
-        <BackButton to="/production" label="생산/SCM" />
-      </div>
       {/* ── 헤더 ── */}
       <div className="flex items-center justify-between">
         <div>
@@ -197,7 +193,7 @@ export default function ShipmentsPage() {
                     <td className="px-4 py-3 text-xs">{sh.order_no || '-'}</td>
                     <td className="px-4 py-3">{sh.customer_name || '-'}</td>
                     <td className="px-4 py-3 text-center">
-                      <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${st.bg} ${st.color}`}>
+                      <span className={`px-2.5 py-1 rounded text-sm font-medium min-w-[3.5rem] text-center inline-block ${st.bg} ${st.color}`}>
                         {st.label}
                       </span>
                     </td>
@@ -259,7 +255,7 @@ export default function ShipmentsPage() {
               <h2 className="text-lg font-bold text-slate-800">
                 출하지시서 {detail.shipment_no}
               </h2>
-              <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+              <span className={`px-2.5 py-1 rounded text-sm font-medium min-w-[3.5rem] text-center inline-block ${
                 STATUS_MAP[detail.status]?.bg} ${STATUS_MAP[detail.status]?.color}`}>
                 {STATUS_MAP[detail.status]?.label}
               </span>

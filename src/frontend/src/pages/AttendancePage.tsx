@@ -8,7 +8,6 @@ import {
   TrashIcon,
   XMarkIcon,
 } from '@heroicons/react/24/outline';
-import BackButton from '../components/BackButton';
 import {
   fetchAttendance,
   createAttendance,
@@ -185,7 +184,6 @@ export default function AttendancePage() {
     <div>
       {/* 페이지 헤더 */}
       <div className="flex items-center gap-3 mb-4">
-        <BackButton to="/hr" />
         <div>
           <h1 className="text-xl font-bold text-slate-800">근태/휴가 관리</h1>
           <p className="text-sm text-slate-500">
@@ -278,7 +276,7 @@ export default function AttendancePage() {
                     <td className="px-4 py-3 font-mono text-xs">{rec.employee_no}</td>
                     <td className="px-4 py-3 font-medium text-slate-700">{rec.employee_name}</td>
                     <td className="px-4 py-3 text-center">
-                      <span className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${TYPE_COLORS[rec.attendance_type] || 'bg-slate-100'}`}>
+                      <span className={`inline-block px-2.5 py-1 rounded text-sm font-medium min-w-[3.5rem] text-center ${TYPE_COLORS[rec.attendance_type] || 'bg-slate-100'}`}>
                         {TYPE_LABELS[rec.attendance_type] || rec.attendance_type}
                       </span>
                     </td>

@@ -15,7 +15,6 @@ import {
   WrenchScrewdriverIcon,
   CpuChipIcon,
 } from '@heroicons/react/24/outline';
-import BackButton from '../components/BackButton';
 import {
   fetchProducts,
   fetchCategories,
@@ -340,7 +339,6 @@ export default function ProductsPage() {
     <div>
       {/* 상단: 뒤로가기 + 제목 */}
       <div className="flex items-center gap-3 mb-6">
-        <BackButton to="/system" />
         <div>
           <h1 className="text-xl font-bold text-slate-800 flex items-center gap-2">
             <CubeIcon className="w-6 h-6 text-emerald-500" />
@@ -516,7 +514,7 @@ export default function ProductsPage() {
                     <td className="px-4 py-3 text-sm font-medium text-slate-800">{p.name}</td>
                     <td className="px-4 py-3 text-sm text-slate-600">{getCategoryName(p.category_id)}</td>
                     <td className="px-4 py-3">
-                      <span className={`inline-block px-2.5 py-1 rounded text-sm font-medium ${
+                      <span className={`inline-block px-2.5 py-1 rounded text-sm font-medium min-w-[3.5rem] text-center ${
                         p.product_type === 'product' ? 'bg-emerald-100 text-emerald-700' :
                         p.product_type === 'material' ? 'bg-amber-100 text-amber-700' :
                         'bg-purple-100 text-purple-700'

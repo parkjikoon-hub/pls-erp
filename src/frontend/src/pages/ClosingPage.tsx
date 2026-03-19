@@ -3,7 +3,6 @@
  * 탭 4개: 시산표, 손익계산서, 재무상태표, 기간 마감
  */
 import { useState, useEffect, useCallback } from 'react';
-import BackButton from '../components/BackButton';
 import {
   fetchTrialBalance,
   fetchIncomeStatement,
@@ -120,7 +119,6 @@ export default function ClosingPage() {
 
       {/* 헤더 */}
       <div className="flex items-center gap-3">
-        <BackButton to="/finance" />
         <div>
           <h1 className="text-2xl font-bold text-gray-900">결산 / 재무제표</h1>
           <p className="text-sm text-gray-500 mt-0.5">시산표, 손익계산서, 재무상태표, 기간 마감</p>

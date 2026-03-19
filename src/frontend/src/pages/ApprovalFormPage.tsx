@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createApproval, listTemplates, type Template } from '../api/groupware/approvals';
 import api from '../api/client';
-import BackButton from '../components/BackButton';
+
 
 interface StepRow {
   step_type: string;
@@ -154,10 +154,7 @@ export default function ApprovalFormPage() {
 
   return (
     <div className="max-w-3xl mx-auto space-y-6">
-      <div className="flex items-center gap-3">
-        <BackButton to="/groupware/approvals" />
-        <h1 className="text-2xl font-bold text-slate-800">새 기안 작성</h1>
-      </div>
+      <h1 className="text-2xl font-bold text-slate-800">새 기안 작성</h1>
 
       {/* 기본 정보 */}
       <div className="bg-white rounded-xl border border-(--border-main) p-5 space-y-4">

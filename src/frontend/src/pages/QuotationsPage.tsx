@@ -18,7 +18,7 @@ import {
 import { fetchCustomerPrices, type CustomerPrice } from '../api/sales/priceLists';
 import { checkQuotationMaterials, type QuotationCheckResult } from '../api/production/inventory';
 import api from '../api/client';
-import BackButton from '../components/BackButton';
+
 
 /* ── 상태 라벨/색상 매핑 ── */
 const STATUS_MAP: Record<string, { label: string; color: string }> = {
@@ -279,10 +279,6 @@ export default function QuotationsPage() {
 
   return (
     <div>
-      {/* 뒤로가기 */}
-      <div className="mb-4">
-        <BackButton to="/sales" label="영업수주" />
-      </div>
       {/* 페이지 헤더 */}
       <div className="flex items-center justify-between mb-4">
         <div>
@@ -358,7 +354,7 @@ export default function QuotationsPage() {
                       {q.grand_total.toLocaleString()}
                     </td>
                     <td className="px-4 py-2 text-center">
-                      <span className={`px-2 py-0.5 rounded text-xs font-medium ${st.color}`}>
+                      <span className={`px-2.5 py-1 rounded text-sm font-medium min-w-[3.5rem] text-center inline-block ${st.color}`}>
                         {st.label}
                       </span>
                     </td>
@@ -614,7 +610,7 @@ export default function QuotationsPage() {
                         <span className="font-medium text-slate-700">
                           [{item.product_code}] {item.product_name} ({item.requested_qty}개 요청)
                         </span>
-                        <span className={`text-xs px-2 py-0.5 rounded ${
+                        <span className={`text-sm px-2.5 py-1 rounded font-medium min-w-[3.5rem] text-center inline-block ${
                           !item.need_production ? 'bg-emerald-100 text-emerald-700'
                           : item.materials.some((m) => m.is_shortage) ? 'bg-red-100 text-red-700'
                           : 'bg-amber-100 text-amber-700'

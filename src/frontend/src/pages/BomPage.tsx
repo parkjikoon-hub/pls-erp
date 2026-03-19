@@ -9,7 +9,7 @@ import {
   type Bom, type BomLine, type BomFormData, type BomTreeNode, type MaterialRequirement,
 } from '../api/production/bom';
 import api from '../api/client';
-import BackButton from '../components/BackButton';
+
 
 /* ── 빈 라인 ── */
 const emptyLine = (): BomLine => ({
@@ -208,10 +208,6 @@ export default function BomPage() {
 
   return (
     <div>
-      {/* 뒤로가기 */}
-      <div className="mb-4">
-        <BackButton to="/production" label="생산/SCM" />
-      </div>
       {/* 페이지 헤더 */}
       <div className="flex items-center justify-between mb-4">
         <div>
@@ -255,7 +251,7 @@ export default function BomPage() {
                   <td className="px-4 py-2 text-center">v{b.version}</td>
                   <td className="px-4 py-2 text-center">{b.line_count}개</td>
                   <td className="px-4 py-2 text-center">
-                    <span className={`text-xs px-2 py-0.5 rounded ${
+                    <span className={`text-sm px-2.5 py-1 rounded font-medium min-w-[3.5rem] text-center inline-block ${
                       b.is_active ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-200 text-slate-500'
                     }`}>
                       {b.is_active ? '활성' : '비활성'}

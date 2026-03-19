@@ -9,7 +9,7 @@ import {
   type WorkOrder, type WorkOrderFormData, type FromOrderResult,
 } from '../api/production/workOrders';
 import api from '../api/client';
-import BackButton from '../components/BackButton';
+
 
 /* 상태 라벨/색상 */
 const STATUS_MAP: Record<string, { label: string; color: string; bg: string }> = {
@@ -192,10 +192,6 @@ export default function WorkOrdersPage() {
 
   return (
     <div>
-      {/* 뒤로가기 */}
-      <div className="mb-4">
-        <BackButton to="/production" label="생산/SCM" />
-      </div>
       {/* 헤더 */}
       <div className="flex items-center justify-between mb-4">
         <div>
@@ -275,7 +271,7 @@ export default function WorkOrdersPage() {
                   <tr key={wo.id} className={`border-t border-[#e8ecf2] ${isOverdue ? 'bg-red-50' : 'hover:bg-(--bg-hover)'}`}>
                     <td className="px-4 py-2 font-mono text-slate-700">{wo.wo_no}</td>
                     <td className="px-4 py-2 text-center">
-                      <span className={`text-sm px-2 py-0.5 rounded font-medium ${
+                      <span className={`text-sm px-2.5 py-1 rounded font-medium min-w-[3.5rem] text-center inline-block ${
                         wo.order_type === 'make_to_order' ? 'bg-blue-100 text-blue-600' : 'bg-slate-100 text-slate-600'
                       }`}>
                         {wo.order_type === 'make_to_order' ? '수주' : '계획'}
@@ -293,7 +289,7 @@ export default function WorkOrdersPage() {
                       </div>
                     </td>
                     <td className="px-4 py-2 text-center">
-                      <span className={`text-sm px-2 py-0.5 rounded font-medium ${st.bg} ${st.color}`}>{st.label}</span>
+                      <span className={`text-sm px-2.5 py-1 rounded font-medium min-w-[3.5rem] text-center inline-block ${st.bg} ${st.color}`}>{st.label}</span>
                     </td>
                     <td className={`px-4 py-2 ${isOverdue ? 'text-red-600 font-semibold' : 'text-slate-600'}`}>{wo.due_date}</td>
                     <td className="px-4 py-2 text-center">

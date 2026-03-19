@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getApproval, approveRequest, rejectRequest, type ApprovalDetail } from '../api/groupware/approvals';
 import { useAuthStore } from '../stores/authStore';
-import BackButton from '../components/BackButton';
+
 
 const STATUS_BADGE: Record<string, { text: string; cls: string }> = {
   draft:    { text: '임시저장', cls: 'bg-slate-100 text-slate-600' },
@@ -65,12 +65,9 @@ export default function ApprovalDetailPage() {
     <div className="max-w-3xl mx-auto space-y-6">
       {/* 헤더 */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <BackButton to="/groupware/approvals" />
-          <div>
-            <p className="text-xs text-slate-400 font-mono">{detail.request_no}</p>
-            <h1 className="text-2xl font-bold text-slate-800 mt-1">{detail.title}</h1>
-          </div>
+        <div>
+          <p className="text-xs text-slate-400 font-mono">{detail.request_no}</p>
+          <h1 className="text-2xl font-bold text-slate-800 mt-1">{detail.title}</h1>
         </div>
         <span className={`px-3 py-1 rounded-full text-sm font-medium ${badge.cls}`}>
           {badge.text}

@@ -17,7 +17,6 @@ import {
   ArrowUpTrayIcon,
   DocumentCheckIcon,
 } from '@heroicons/react/24/outline';
-import BackButton from '../components/BackButton';
 import {
   fetchJournals,
   deleteJournal,
@@ -196,7 +195,6 @@ export default function JournalListPage() {
       {/* 헤더 */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <BackButton to="/finance" />
           <div>
             <h1 className="text-2xl font-bold text-gray-900">전표 관리</h1>
             <p className="text-sm text-gray-500 mt-0.5">

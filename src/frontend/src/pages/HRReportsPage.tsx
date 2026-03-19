@@ -2,7 +2,6 @@
  * M3 인사/급여 — 급여명세서 + 인사 보고서 페이지
  */
 import { useState, useEffect } from 'react';
-import BackButton from '../components/BackButton';
 import { searchEmployees, type EmployeeSearchResult } from '../api/hr/employees';
 import { fetchPayslip, fetchHRSummary, type Payslip, type HRSummary } from '../api/hr/reports';
 import { XMarkIcon } from '@heroicons/react/24/outline';
@@ -69,7 +68,6 @@ export default function HRReportsPage() {
   return (
     <div>
       <div className="flex items-center gap-3 mb-4">
-        <BackButton to="/hr" />
         <div>
           <h1 className="text-xl font-bold text-slate-800">급여명세서 / 보고서</h1>
           <p className="text-sm text-slate-500">개인 급여명세서 조회 및 인사 통계 보고서</p>

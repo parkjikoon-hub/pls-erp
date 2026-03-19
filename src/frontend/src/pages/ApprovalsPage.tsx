@@ -4,7 +4,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { myRequests, myApprovals, myReferences, type ApprovalListItem } from '../api/groupware/approvals';
-import BackButton from '../components/BackButton';
+
 
 const TABS = [
   { key: 'requests', label: '내 기안' },
@@ -53,10 +53,7 @@ export default function ApprovalsPage() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <BackButton to="/groupware" />
-          <h1 className="text-2xl font-bold text-slate-800">전자결재</h1>
-        </div>
+        <h1 className="text-2xl font-bold text-slate-800">전자결재</h1>
         <button
           onClick={() => navigate('/groupware/approvals/new')}
           className="px-4 py-2 bg-cyan-600 text-white rounded-lg hover:bg-cyan-700 transition text-sm font-medium"
@@ -119,7 +116,7 @@ export default function ApprovalsPage() {
                       {item.current_step ?? '-'}/{item.total_steps ?? '-'}
                     </td>
                     <td className="py-3 px-4 text-center">
-                      <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${badge.cls}`}>
+                      <span className={`px-2.5 py-1 rounded text-sm font-medium min-w-[3.5rem] text-center ${badge.cls}`}>
                         {badge.text}
                       </span>
                     </td>

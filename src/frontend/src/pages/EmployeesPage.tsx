@@ -12,7 +12,6 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
 } from '@heroicons/react/24/outline';
-import BackButton from '../components/BackButton';
 import {
   fetchEmployees,
   createEmployee,
@@ -197,7 +196,6 @@ export default function EmployeesPage() {
     <div>
       {/* 페이지 헤더 */}
       <div className="flex items-center gap-3 mb-4">
-        <BackButton to="/hr" />
         <div>
           <h1 className="text-xl font-bold text-slate-800">사원 관리</h1>
           <p className="text-sm text-slate-500">
@@ -290,7 +288,7 @@ export default function EmployeesPage() {
                     <td className="px-4 py-3 text-slate-600">{emp.position_name || '-'}</td>
                     <td className="px-4 py-3 text-center">
                       <span
-                        className={`inline-block px-2.5 py-1 rounded text-sm font-medium ${
+                        className={`inline-block px-2.5 py-1 rounded text-sm font-medium min-w-[3.5rem] text-center ${
                           TYPE_COLORS[emp.employee_type] || 'bg-slate-100 text-slate-600'
                         }`}
                       >

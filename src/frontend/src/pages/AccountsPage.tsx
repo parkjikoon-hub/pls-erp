@@ -12,7 +12,6 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
 } from '@heroicons/react/24/outline';
-import BackButton from '../components/BackButton';
 import {
   fetchAccounts,
   createAccount,
@@ -213,7 +212,6 @@ export default function AccountsPage() {
     <div>
       {/* 페이지 헤더 */}
       <div className="flex items-center gap-3 mb-4">
-        <BackButton to="/finance" />
         <div>
           <h1 className="text-xl font-bold text-slate-800">계정과목 관리</h1>
           <p className="text-sm text-slate-500">

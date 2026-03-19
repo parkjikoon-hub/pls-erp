@@ -9,7 +9,7 @@ import {
   type Warehouse, type InventoryItem, type ShortageItem,
 } from '../api/production/inventory';
 import api from '../api/client';
-import BackButton from '../components/BackButton';
+
 
 /* 구역 라벨 */
 const ZONE_LABELS: Record<string, string> = {
@@ -129,10 +129,6 @@ export default function InventoryPage() {
 
   return (
     <div>
-      {/* 뒤로가기 */}
-      <div className="mb-4">
-        <BackButton to="/production" label="생산/SCM" />
-      </div>
       {/* 헤더 */}
       <div className="flex items-center justify-between mb-4">
         <div>
@@ -234,7 +230,7 @@ export default function InventoryPage() {
                         </td>
                         <td className="px-4 py-2 text-center">
                           {isShortage && (
-                            <span className="text-sm bg-red-100 text-red-700 px-2.5 py-1 rounded font-medium">부족</span>
+                            <span className="text-sm bg-red-100 text-red-700 px-2.5 py-1 rounded font-medium min-w-[3.5rem] text-center inline-block">부족</span>
                           )}
                         </td>
                       </tr>
@@ -272,7 +268,7 @@ export default function InventoryPage() {
                       {tx.created_at ? new Date(tx.created_at).toLocaleString('ko') : '-'}
                     </td>
                     <td className="px-4 py-2 text-center">
-                      <span className="text-sm px-2.5 py-1 rounded bg-slate-100 text-slate-600 font-medium">
+                      <span className="text-sm px-2.5 py-1 rounded bg-slate-100 text-slate-600 font-medium min-w-[3.5rem] text-center inline-block">
                         {TX_LABELS[tx.transaction_type] || tx.transaction_type}
                       </span>
                     </td>

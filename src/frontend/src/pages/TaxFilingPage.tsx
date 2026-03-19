@@ -7,7 +7,6 @@ import {
   ArrowDownTrayIcon,
   DocumentArrowDownIcon,
 } from '@heroicons/react/24/outline';
-import BackButton from '../components/BackButton';
 import { useAuthStore } from '../stores/authStore';
 import api from '../api/client';
 
@@ -54,7 +53,6 @@ export default function TaxFilingPage() {
   return (
     <div>
       <div className="flex items-center gap-3 mb-4">
-        <BackButton to="/hr" />
         <div>
           <h1 className="text-xl font-bold text-slate-800">국세청 신고파일 생성</h1>
           <p className="text-sm text-slate-500">

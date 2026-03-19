@@ -15,7 +15,6 @@ import {
   Cog6ToothIcon,
   EyeIcon,
 } from '@heroicons/react/24/outline';
-import BackButton from '../components/BackButton';
 import {
   fetchFormConfigs,
   createFormConfig,
@@ -246,7 +245,6 @@ export default function FormBuilderPage() {
     <div>
       {/* 헤더 */}
       <div className="flex items-center gap-3 mb-4">
-        <BackButton to="/system" />
         <div>
           <h1 className="text-xl font-bold text-slate-800">동적 폼 빌더</h1>
           <p className="text-sm text-slate-500">모듈별 커스텀 입력 필드를 구성합니다</p>

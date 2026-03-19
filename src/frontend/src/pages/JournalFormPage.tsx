@@ -11,7 +11,6 @@ import {
   CheckCircleIcon,
   ExclamationTriangleIcon,
 } from '@heroicons/react/24/outline';
-import BackButton from '../components/BackButton';
 import {
   fetchJournal,
   createJournal,
@@ -267,7 +266,6 @@ export default function JournalFormPage() {
 
       {/* 헤더 */}
       <div className="flex items-center gap-3">
-        <BackButton to="/finance/journals" />
         <div>
           <h1 className="text-2xl font-bold text-gray-900">
             {isEdit ? '전표 수정' : '전표 등록'}
