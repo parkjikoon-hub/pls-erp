@@ -33,6 +33,8 @@ export interface InvoiceListItem {
   total_amount: number;
   status: string;
   created_at: string | null;
+  has_file?: boolean;
+  file_original_name?: string | null;
 }
 
 export interface InvoiceFormData {
@@ -105,4 +107,25 @@ export async function confirmInvoice(id: string) {
 export async function fetchInvoiceSummary(params: { start_date?: string; end_date?: string } = {}) {
   const res = await api.get('/finance/invoices/summary', { params });
   return res.data.data as InvoiceSummary[];
+}
+
+export async function uploadInvoiceFile(id: string, file: File) {
+  const formData = new FormData();
+  formData.append('file', file);
+  const res = await api.post(`/finance/invoices/${id}/upload`, formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+  return res.data;
+}
+
+export async function downloadInvoiceFile(id: string) {
+  const res = await api.get(`/finance/invoices/${id}/file`, {
+    responseType: 'blob',
+  });
+  return res;
+}
+
+export async function deleteInvoiceFile(id: string) {
+  const res = await api.delete(`/finance/invoices/${id}/file`);
+  return res.data;
 }

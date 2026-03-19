@@ -2,10 +2,14 @@
 M4 재무/회계 — 세금계산서(Tax Invoice) API 라우터
 """
 import uuid
+import os
+from pathlib import Path
 from datetime import date
 from typing import Optional
-from fastapi import APIRouter, Depends, Query, Request
+from fastapi import APIRouter, Depends, Query, Request, UploadFile, File
+from fastapi.responses import FileResponse as FastFileResponse
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
 
 from ....database import get_db
 from ....auth.dependencies import get_current_user, require_role
@@ -41,7 +45,7 @@ def _invoice_to_response(inv) -> dict:
 
 def _invoice_to_list_item(inv) -> dict:
     """세금계산서 ORM → ListItem dict"""
-    return InvoiceListItem(
+    d = InvoiceListItem(
         id=str(inv.id),
         invoice_no=inv.invoice_no,
         invoice_type=inv.invoice_type,
@@ -53,6 +57,10 @@ def _invoice_to_list_item(inv) -> dict:
         status=inv.status,
         created_at=inv.created_at,
     ).model_dump(mode="json")
+    # 첨부파일 정보 추가
+    d["file_original_name"] = getattr(inv, "file_original_name", None)
+    d["has_file"] = bool(getattr(inv, "file_path", None))
+    return d
 
 
 # ── 합계 (path param 라우트보다 위에) ──
@@ -184,3 +192,95 @@ async def confirm_invoice(
         },
         message=f"세금계산서 {invoice.invoice_no}이(가) 확정되었습니다 (자동 전표 생성)",
     )
+
+
+# ── 파일 첨부 (매입 세금계산서) ──
+
+UPLOAD_DIR = Path(__file__).resolve().parents[4] / "uploads" / "invoices"
+
+
+@router.post("/{invoice_id}/upload", summary="세금계산서 파일 첨부")
+async def upload_invoice_file(
+    invoice_id: uuid.UUID,
+    file: UploadFile = File(...),
+    db: AsyncSession = Depends(get_db),
+    current_user=Depends(require_role("admin", "manager")),
+):
+    """매입 세금계산서에 PDF/이미지 파일을 첨부합니다"""
+    from ..models import TaxInvoice
+    result = await db.execute(select(TaxInvoice).where(TaxInvoice.id == invoice_id))
+    invoice = result.scalar_one_or_none()
+    if not invoice:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=404, detail="세금계산서를 찾을 수 없습니다")
+
+    # 파일 저장
+    UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+    ext = Path(file.filename or "file").suffix or ".pdf"
+    saved_name = f"{invoice_id}{ext}"
+    save_path = UPLOAD_DIR / saved_name
+
+    content = await file.read()
+    save_path.write_bytes(content)
+
+    # DB 업데이트
+    invoice.file_path = str(save_path)
+    invoice.file_original_name = file.filename
+    await db.commit()
+
+    return success_response(
+        data={"file_name": file.filename},
+        message="파일이 첨부되었습니다",
+    )
+
+
+@router.get("/{invoice_id}/file", summary="세금계산서 첨부파일 다운로드")
+async def download_invoice_file(
+    invoice_id: uuid.UUID,
+    db: AsyncSession = Depends(get_db),
+    current_user=Depends(get_current_user),
+):
+    """세금계산서 첨부파일을 다운로드합니다"""
+    from ..models import TaxInvoice
+    from fastapi import HTTPException
+    result = await db.execute(select(TaxInvoice).where(TaxInvoice.id == invoice_id))
+    invoice = result.scalar_one_or_none()
+    if not invoice or not invoice.file_path:
+        raise HTTPException(status_code=404, detail="첨부파일이 없습니다")
+
+    file_path = Path(invoice.file_path)
+    if not file_path.exists():
+        raise HTTPException(status_code=404, detail="파일이 서버에서 삭제되었습니다")
+
+    from urllib.parse import quote
+    encoded = quote(invoice.file_original_name or "file.pdf")
+    return FastFileResponse(
+        path=str(file_path),
+        filename=invoice.file_original_name or "file.pdf",
+        headers={"Content-Disposition": f"attachment; filename*=UTF-8''{encoded}"},
+    )
+
+
+@router.delete("/{invoice_id}/file", summary="세금계산서 첨부파일 삭제")
+async def delete_invoice_file(
+    invoice_id: uuid.UUID,
+    db: AsyncSession = Depends(get_db),
+    current_user=Depends(require_role("admin", "manager")),
+):
+    """세금계산서 첨부파일을 삭제합니다"""
+    from ..models import TaxInvoice
+    from fastapi import HTTPException
+    result = await db.execute(select(TaxInvoice).where(TaxInvoice.id == invoice_id))
+    invoice = result.scalar_one_or_none()
+    if not invoice:
+        raise HTTPException(status_code=404, detail="세금계산서를 찾을 수 없습니다")
+
+    if invoice.file_path:
+        file_path = Path(invoice.file_path)
+        if file_path.exists():
+            file_path.unlink()
+        invoice.file_path = None
+        invoice.file_original_name = None
+        await db.commit()
+
+    return success_response(message="첨부파일이 삭제되었습니다")

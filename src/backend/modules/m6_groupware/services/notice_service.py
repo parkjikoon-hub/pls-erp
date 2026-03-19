@@ -66,12 +66,13 @@ async def get_notice(db: AsyncSession, notice_id: uuid.UUID):
 
 
 async def create_notice(db: AsyncSession, data, current_user, ip: str | None = None):
-    """공지사항 작성"""
+    """공지사항 작성 (고정/중요 표시는 admin만)"""
+    is_admin = getattr(current_user, 'role', '') == 'admin'
     notice = Notice(
         title=data.title,
         content=data.content,
-        is_pinned=data.is_pinned,
-        is_important=data.is_important,
+        is_pinned=data.is_pinned if is_admin else False,
+        is_important=data.is_important if is_admin else False,
         author_id=current_user.id,
     )
     db.add(notice)
@@ -105,19 +106,26 @@ async def create_notice(db: AsyncSession, data, current_user, ip: str | None = N
 
 
 async def update_notice(db: AsyncSession, notice_id: uuid.UUID, data, current_user, ip: str | None = None):
-    """공지사항 수정"""
+    """공지사항 수정 (manager는 본인 글만, 고정/중요는 admin만)"""
     notice = await db.get(Notice, notice_id)
     if not notice or notice.is_deleted:
         raise HTTPException(404, "공지사항을 찾을 수 없습니다")
+
+    is_admin = getattr(current_user, 'role', '') == 'admin'
+    # manager는 본인 작성 글만 수정 가능
+    if not is_admin and notice.author_id != current_user.id:
+        raise HTTPException(403, "본인이 작성한 공지만 수정할 수 있습니다")
 
     if data.title is not None:
         notice.title = data.title
     if data.content is not None:
         notice.content = data.content
-    if data.is_pinned is not None:
-        notice.is_pinned = data.is_pinned
-    if data.is_important is not None:
-        notice.is_important = data.is_important
+    # 고정/중요 표시는 admin만 가능
+    if is_admin:
+        if data.is_pinned is not None:
+            notice.is_pinned = data.is_pinned
+        if data.is_important is not None:
+            notice.is_important = data.is_important
 
     await db.commit()
     await log_action(
@@ -130,10 +138,14 @@ async def update_notice(db: AsyncSession, notice_id: uuid.UUID, data, current_us
 
 
 async def delete_notice(db: AsyncSession, notice_id: uuid.UUID, current_user, ip: str | None = None):
-    """공지사항 삭제 (소프트 삭제)"""
+    """공지사항 삭제 (소프트 삭제, manager는 본인 글만)"""
     notice = await db.get(Notice, notice_id)
     if not notice or notice.is_deleted:
         raise HTTPException(404, "공지사항을 찾을 수 없습니다")
+
+    is_admin = getattr(current_user, 'role', '') == 'admin'
+    if not is_admin and notice.author_id != current_user.id:
+        raise HTTPException(403, "본인이 작성한 공지만 삭제할 수 있습니다")
 
     notice.is_deleted = True
     await db.commit()

@@ -19,11 +19,19 @@ import {
   cancelInvoice,
   confirmInvoice,
   fetchInvoiceSummary,
+  uploadInvoiceFile,
+  downloadInvoiceFile,
+  deleteInvoiceFile,
   type InvoiceListItem,
   type InvoiceFormData,
   type InvoiceSummary,
   type PaginatedResult,
 } from '../api/finance/invoices';
+import {
+  PaperClipIcon,
+  ArrowDownTrayIcon,
+  TrashIcon,
+} from '@heroicons/react/24/outline';
 import {
   fetchCustomers,
   type Customer,
@@ -359,6 +367,7 @@ export default function InvoicesPage() {
                 <th className="px-4 py-3 text-right font-semibold text-gray-600">부가세</th>
                 <th className="px-4 py-3 text-right font-semibold text-gray-600">합계</th>
                 <th className="px-4 py-3 text-center font-semibold text-gray-600">상태</th>
+                {tab === 'receive' && <th className="px-4 py-3 text-center font-semibold text-gray-600">첨부</th>}
                 <th className="px-4 py-3 text-center font-semibold text-gray-600">작업</th>
               </tr>
             </thead>
@@ -378,6 +387,70 @@ export default function InvoicesPage() {
                       {STATUS_LABELS[inv.status] || inv.status}
                     </span>
                   </td>
+                  {tab === 'receive' && (
+                    <td className="px-4 py-3 text-center">
+                      {inv.has_file ? (
+                        <div className="flex items-center justify-center gap-1">
+                          <button
+                            onClick={async () => {
+                              try {
+                                const res = await downloadInvoiceFile(inv.id);
+                                const blob = new Blob([res.data]);
+                                const url = window.URL.createObjectURL(blob);
+                                const link = document.createElement('a');
+                                link.href = url;
+                                link.download = inv.file_original_name || 'file';
+                                document.body.appendChild(link);
+                                link.click();
+                                document.body.removeChild(link);
+                                window.URL.revokeObjectURL(url);
+                              } catch { showToast('error', '다운로드 실패'); }
+                            }}
+                            className="p-1 rounded hover:bg-blue-100 text-blue-500"
+                            title={inv.file_original_name || '다운로드'}
+                          >
+                            <ArrowDownTrayIcon className="w-4 h-4" />
+                          </button>
+                          {inv.status === 'draft' && isManager && (
+                            <button
+                              onClick={async () => {
+                                try {
+                                  await deleteInvoiceFile(inv.id);
+                                  showToast('success', '첨부파일 삭제됨');
+                                  loadData();
+                                } catch { showToast('error', '삭제 실패'); }
+                              }}
+                              className="p-1 rounded hover:bg-red-100 text-red-400"
+                              title="파일 삭제"
+                            >
+                              <TrashIcon className="w-4 h-4" />
+                            </button>
+                          )}
+                        </div>
+                      ) : inv.status === 'draft' && isManager ? (
+                        <label className="cursor-pointer p-1 rounded hover:bg-amber-100 text-gray-400 hover:text-amber-600 inline-block" title="파일 첨부">
+                          <PaperClipIcon className="w-4 h-4" />
+                          <input
+                            type="file"
+                            accept=".pdf,.jpg,.jpeg,.png"
+                            className="hidden"
+                            onChange={async (e) => {
+                              const file = e.target.files?.[0];
+                              if (!file) return;
+                              try {
+                                await uploadInvoiceFile(inv.id, file);
+                                showToast('success', '파일 첨부 완료');
+                                loadData();
+                              } catch { showToast('error', '업로드 실패'); }
+                              e.target.value = '';
+                            }}
+                          />
+                        </label>
+                      ) : (
+                        <span className="text-gray-300">—</span>
+                      )}
+                    </td>
+                  )}
                   <td className="px-4 py-3">
                     <div className="flex items-center justify-center gap-1">
                       {inv.status === 'draft' && isManager && (

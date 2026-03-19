@@ -49,6 +49,9 @@ async def lifespan(app: FastAPI):
             ("payroll_details", "overtime_hours", "NUMERIC(5,1) DEFAULT 0"),
             # M3 인사급여: 개별 승인 상태
             ("payroll_details", "detail_status", "VARCHAR(20) DEFAULT 'pending'"),
+            # M4 재무: 세금계산서 첨부파일
+            ("tax_invoices", "file_path", "VARCHAR(500)"),
+            ("tax_invoices", "file_original_name", "VARCHAR(255)"),
         ]
         async with engine.begin() as conn:
             for table, col, col_type in alter_columns:

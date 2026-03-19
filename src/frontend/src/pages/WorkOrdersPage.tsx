@@ -48,6 +48,11 @@ export default function WorkOrdersPage() {
   const [progressWo, setProgressWo] = useState<WorkOrder | null>(null);
   const [progressQty, setProgressQty] = useState(0);
 
+  /* 수주 상세 팝업 */
+  const [showOrderDetail, setShowOrderDetail] = useState(false);
+  const [orderDetail, setOrderDetail] = useState<any>(null);
+  const [orderDetailLoading, setOrderDetailLoading] = useState(false);
+
   /* 품목/사용자 목록 */
   const [products, setProducts] = useState<{ id: string; name: string; code: string }[]>([]);
 
@@ -75,6 +80,21 @@ export default function WorkOrdersPage() {
       );
     });
   }, []);
+
+  /* ── 수주 상세 팝업 ── */
+  const openOrderDetail = async (orderId: string) => {
+    setOrderDetailLoading(true);
+    setShowOrderDetail(true);
+    try {
+      const res = await api.get(`/sales/orders/${orderId}`);
+      setOrderDetail(res.data?.data || null);
+    } catch (e) {
+      console.error(e);
+      setOrderDetail(null);
+    } finally {
+      setOrderDetailLoading(false);
+    }
+  };
 
   /* ── 상태 변경 ── */
   const handleStatusChange = async (woId: string, newStatus: string) => {
@@ -152,7 +172,15 @@ export default function WorkOrdersPage() {
           </span>
         </div>
         <div className="font-medium text-sm text-slate-800 mb-1">{wo.product_name}</div>
-        {wo.order_no && (
+        {wo.order_no && wo.order_id && (
+          <button
+            onClick={() => openOrderDetail(wo.order_id!)}
+            className="text-xs text-blue-500 hover:text-blue-700 hover:underline mb-1 text-left"
+          >
+            수주: {wo.order_no}
+          </button>
+        )}
+        {wo.order_no && !wo.order_id && (
           <div className="text-xs text-slate-400 mb-1">수주: {wo.order_no}</div>
         )}
         <div className="flex items-center gap-2 mb-2">
@@ -271,7 +299,18 @@ export default function WorkOrdersPage() {
                 return (
                   <tr key={wo.id} className={`border-t border-[#e8ecf2] ${isOverdue ? 'bg-red-50' : 'hover:bg-(--bg-hover)'}`}>
                     <td className="px-4 py-2 text-slate-700">{wo.wo_no}</td>
-                    <td className="px-4 py-2 text-sm text-blue-600">{wo.order_no || '-'}</td>
+                    <td className="px-4 py-2 text-sm">
+                      {wo.order_no && wo.order_id ? (
+                        <button
+                          onClick={() => openOrderDetail(wo.order_id!)}
+                          className="text-blue-600 hover:text-blue-800 hover:underline"
+                        >
+                          {wo.order_no}
+                        </button>
+                      ) : (
+                        <span className="text-slate-400">{wo.order_no || '-'}</span>
+                      )}
+                    </td>
                     <td className="px-4 py-2 text-center">
                       <span className={`text-sm px-2.5 py-1 rounded font-medium min-w-[3.5rem] text-center inline-block ${
                         wo.order_type === 'make_to_order' ? 'bg-blue-100 text-blue-600' : 'bg-slate-100 text-slate-600'
@@ -447,6 +486,115 @@ export default function WorkOrdersPage() {
                   <button onClick={() => setShowOrderModal(false)} className="px-4 py-2 border border-(--border-main) rounded-lg text-sm">닫기</button>
                 </div>
               </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* ── 수주 상세 팝업 ── */}
+      {showOrderDetail && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="bg-white rounded-xl w-full max-w-3xl max-h-[85vh] overflow-y-auto p-6 shadow-xl">
+            {orderDetailLoading ? (
+              <div className="text-center py-12 text-slate-400">불러오는 중...</div>
+            ) : !orderDetail ? (
+              <div className="text-center py-12 text-slate-400">수주 정보를 불러올 수 없습니다</div>
+            ) : (
+              <>
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-lg font-bold text-slate-800">
+                    수주 상세 — {orderDetail.order_no}
+                  </h2>
+                  <button
+                    onClick={() => setShowOrderDetail(false)}
+                    className="text-slate-400 hover:text-slate-600 text-xl leading-none"
+                  >
+                    ×
+                  </button>
+                </div>
+
+                {/* 수주 요약 정보 */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
+                  <div className="bg-slate-50 rounded-lg p-3">
+                    <div className="text-xs text-slate-500 mb-1">거래처</div>
+                    <div className="font-medium text-sm text-slate-800">{orderDetail.customer_name || '-'}</div>
+                  </div>
+                  <div className="bg-slate-50 rounded-lg p-3">
+                    <div className="text-xs text-slate-500 mb-1">수주일</div>
+                    <div className="font-medium text-sm text-slate-800">{orderDetail.order_date}</div>
+                  </div>
+                  <div className="bg-slate-50 rounded-lg p-3">
+                    <div className="text-xs text-slate-500 mb-1">납기일</div>
+                    <div className="font-medium text-sm text-slate-800">{orderDetail.delivery_date || '-'}</div>
+                  </div>
+                  <div className="bg-slate-50 rounded-lg p-3">
+                    <div className="text-xs text-slate-500 mb-1">합계금액</div>
+                    <div className="font-medium text-sm text-slate-800">{(orderDetail.grand_total || 0).toLocaleString()}원</div>
+                  </div>
+                </div>
+
+                {/* 담당자 / 비고 */}
+                {(orderDetail.sales_rep_name || orderDetail.notes) && (
+                  <div className="grid grid-cols-2 gap-3 mb-5">
+                    {orderDetail.sales_rep_name && (
+                      <div className="bg-slate-50 rounded-lg p-3">
+                        <div className="text-xs text-slate-500 mb-1">영업담당</div>
+                        <div className="text-sm text-slate-800">{orderDetail.sales_rep_name}</div>
+                      </div>
+                    )}
+                    {orderDetail.notes && (
+                      <div className="bg-slate-50 rounded-lg p-3 col-span-2">
+                        <div className="text-xs text-slate-500 mb-1">비고 / 특이사항</div>
+                        <div className="text-sm text-slate-800 whitespace-pre-wrap">{orderDetail.notes}</div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* 품목 라인 테이블 */}
+                <div className="border border-(--border-main) rounded-lg overflow-hidden">
+                  <table className="w-full text-sm">
+                    <thead className="bg-(--bg-card) text-slate-600">
+                      <tr>
+                        <th className="px-3 py-2 text-center w-10">#</th>
+                        <th className="px-3 py-2 text-left">품목명</th>
+                        <th className="px-3 py-2 text-left">규격</th>
+                        <th className="px-3 py-2 text-right">수량</th>
+                        <th className="px-3 py-2 text-right">단가</th>
+                        <th className="px-3 py-2 text-right">금액</th>
+                        <th className="px-3 py-2 text-left">납기</th>
+                        <th className="px-3 py-2 text-left">비고</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {(orderDetail.lines || []).map((line: any, idx: number) => (
+                        <tr key={line.id || idx} className="border-t border-[#e8ecf2]">
+                          <td className="px-3 py-2 text-center text-slate-400">{line.line_no || idx + 1}</td>
+                          <td className="px-3 py-2 text-slate-800 font-medium">{line.product_name}</td>
+                          <td className="px-3 py-2 text-slate-600">{line.specification || '-'}</td>
+                          <td className="px-3 py-2 text-right text-slate-700">{line.quantity?.toLocaleString()}</td>
+                          <td className="px-3 py-2 text-right text-slate-600">{line.unit_price?.toLocaleString()}</td>
+                          <td className="px-3 py-2 text-right font-semibold text-slate-800">{(line.amount || 0).toLocaleString()}</td>
+                          <td className="px-3 py-2 text-slate-600">{line.delivery_date || '-'}</td>
+                          <td className="px-3 py-2 text-slate-500">{line.remark || '-'}</td>
+                        </tr>
+                      ))}
+                      {(orderDetail.lines || []).length === 0 && (
+                        <tr><td colSpan={8} className="px-3 py-4 text-center text-slate-400">품목 정보 없음</td></tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+
+                <div className="flex justify-end mt-4">
+                  <button
+                    onClick={() => setShowOrderDetail(false)}
+                    className="px-4 py-2 bg-red-600 text-white rounded-lg text-sm hover:bg-red-700"
+                  >
+                    닫기
+                  </button>
+                </div>
+              </>
             )}
           </div>
         </div>

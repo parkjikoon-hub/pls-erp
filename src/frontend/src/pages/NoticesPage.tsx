@@ -8,7 +8,9 @@ import { useAuthStore } from '../stores/authStore';
 
 export default function NoticesPage() {
   const { user } = useAuthStore();
+  const isAdmin = user?.role === 'admin';
   const isManager = user?.role === 'admin' || user?.role === 'manager';
+  const canEditNotice = (authorId?: string) => isAdmin || (isManager && authorId === user?.id);
   const [notices, setNotices] = useState<NoticeListItem[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
@@ -162,7 +164,7 @@ export default function NoticesPage() {
               <div className="border-t border-(--border-main) pt-4 text-sm text-slate-700 whitespace-pre-wrap">
                 {detail.content}
               </div>
-              {isManager && (
+              {canEditNotice(detail.author_id) && (
                 <div className="flex gap-2 justify-end border-t border-(--border-main) pt-3">
                   <button onClick={() => openEdit(detail)} className="px-3 py-1.5 text-sm text-blue-600 hover:bg-blue-50 rounded-lg">수정</button>
                   <button onClick={() => handleDelete(detail.id)} className="px-3 py-1.5 text-sm text-red-600 hover:bg-red-50 rounded-lg">삭제</button>
@@ -185,16 +187,21 @@ export default function NoticesPage() {
                 className="w-full border border-(--border-main) rounded-lg px-3 py-2 text-sm" placeholder="제목" />
               <textarea value={formContent} onChange={e => setFormContent(e.target.value)}
                 rows={8} className="w-full border border-(--border-main) rounded-lg px-3 py-2 text-sm resize-none" placeholder="내용" />
-              <div className="flex gap-4">
-                <label className="flex items-center gap-1.5 text-sm text-slate-600">
-                  <input type="checkbox" checked={formPinned} onChange={e => setFormPinned(e.target.checked)} className="rounded" />
-                  상단 고정
-                </label>
-                <label className="flex items-center gap-1.5 text-sm text-slate-600">
-                  <input type="checkbox" checked={formImportant} onChange={e => setFormImportant(e.target.checked)} className="rounded" />
-                  중요 공지
-                </label>
-              </div>
+              {isAdmin && (
+                <div className="flex gap-4">
+                  <label className="flex items-center gap-1.5 text-sm text-slate-600">
+                    <input type="checkbox" checked={formPinned} onChange={e => setFormPinned(e.target.checked)} className="rounded" />
+                    상단 고정
+                  </label>
+                  <label className="flex items-center gap-1.5 text-sm text-slate-600">
+                    <input type="checkbox" checked={formImportant} onChange={e => setFormImportant(e.target.checked)} className="rounded" />
+                    중요 공지
+                  </label>
+                </div>
+              )}
+              {!isAdmin && (
+                <p className="text-xs text-slate-400">고정/중요 표시는 관리자만 설정할 수 있습니다</p>
+              )}
               <div className="flex gap-3 justify-end">
                 <button onClick={() => setShowForm(false)} className="px-4 py-2 border border-(--border-main) text-slate-600 rounded-lg text-sm">취소</button>
                 <button onClick={handleSave} className="px-6 py-2 bg-cyan-600 text-white rounded-lg hover:bg-cyan-700 text-sm font-medium">저장</button>

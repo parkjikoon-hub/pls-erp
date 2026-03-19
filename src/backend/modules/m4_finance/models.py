@@ -249,6 +249,12 @@ class TaxInvoice(Base):
     description: Mapped[str | None] = mapped_column(
         Text, comment="비고"
     )
+    file_path: Mapped[str | None] = mapped_column(
+        String(500), comment="첨부파일 저장 경로"
+    )
+    file_original_name: Mapped[str | None] = mapped_column(
+        String(255), comment="첨부파일 원본 파일명"
+    )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
     )

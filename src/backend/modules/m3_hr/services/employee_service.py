@@ -230,6 +230,22 @@ async def create_employee(db: AsyncSession, data: EmployeeCreate, current_user, 
     await db.commit()
     await db.refresh(emp)
 
+    # 연결된 사용자 계정에 인사(M3)/그룹웨어(M6) 모듈 접근 권한 자동 부여
+    if emp.user_id:
+        try:
+            linked_user = await db.get(User, emp.user_id)
+            if linked_user:
+                current_modules = linked_user.allowed_modules
+                if current_modules is not None:
+                    # allowed_modules가 리스트인 경우에만 추가 (None은 전체 접근)
+                    needed = {"M3", "M6"}
+                    existing = set(current_modules)
+                    if not needed.issubset(existing):
+                        linked_user.allowed_modules = list(existing | needed)
+                        await db.commit()
+        except Exception:
+            pass  # 권한 부여 실패해도 직원 등록은 성공
+
     # 관계 로드 후 반환
     return await get_employee(db, str(emp.id))
 
