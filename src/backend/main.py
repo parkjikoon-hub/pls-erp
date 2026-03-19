@@ -132,6 +132,29 @@ async def diag_openpyxl():
     return result
 
 
+@app.get("/api/diag/excel-test", tags=["시스템"])
+async def diag_excel_download():
+    """Excel 다운로드 테스트 (진단용)"""
+    import io as _io
+    import traceback
+    from fastapi.responses import StreamingResponse, JSONResponse
+    try:
+        from .modules.m2_sales.services import price_list_service
+        from .database import AsyncSessionLocal
+        async with AsyncSessionLocal() as db:
+            content = await price_list_service.download_template(db, False)
+        return StreamingResponse(
+            _io.BytesIO(content),
+            media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            headers={"Content-Disposition": "attachment; filename=test.xlsx"},
+        )
+    except Exception as e:
+        return JSONResponse(
+            status_code=500,
+            content={"error": str(e), "traceback": traceback.format_exc()},
+        )
+
+
 # ── 모듈 라우터 등록 (개발 순서에 따라 순차 추가) ──
 
 # Phase 1: M1 시스템 아키텍처 & MDM
