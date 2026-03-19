@@ -109,7 +109,14 @@ async def download_quotation_excel(
     current_user=Depends(get_current_user),
 ):
     """견적서를 한국 표준 양식 Excel로 다운로드합니다"""
-    content = await quotation_service.generate_quotation_excel(db, quotation_id)
+    import logging
+    _log = logging.getLogger(__name__)
+    try:
+        content = await quotation_service.generate_quotation_excel(db, quotation_id)
+    except Exception as e:
+        _log.error(f"견적서 Excel 생성 실패: {e}", exc_info=True)
+        from fastapi import HTTPException
+        raise HTTPException(status_code=500, detail=f"Excel 생성 실패: {str(e)}")
     filename = f"견적서_{quotation_id}.xlsx"
     return StreamingResponse(
         io.BytesIO(content),

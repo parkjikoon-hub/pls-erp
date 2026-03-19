@@ -126,7 +126,14 @@ async def download_statement_excel(
     current_user=Depends(get_current_user),
 ):
     """수주 데이터를 거래명세서 양식 Excel로 다운로드합니다"""
-    content = await order_service.generate_statement_excel(db, order_id)
+    import logging
+    _log = logging.getLogger(__name__)
+    try:
+        content = await order_service.generate_statement_excel(db, order_id)
+    except Exception as e:
+        _log.error(f"거래명세서 Excel 생성 실패: {e}", exc_info=True)
+        from fastapi import HTTPException
+        raise HTTPException(status_code=500, detail=f"Excel 생성 실패: {str(e)}")
     filename = f"거래명세서_{order_id}.xlsx"
     return StreamingResponse(
         io.BytesIO(content),

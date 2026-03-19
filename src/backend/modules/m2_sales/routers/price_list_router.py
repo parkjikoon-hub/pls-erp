@@ -175,7 +175,14 @@ async def download_template(
     current_user=Depends(get_current_user),
 ):
     """판매가 엑셀 템플릿 다운로드 (빈 양식 또는 현재 데이터 포함)"""
-    content = await price_list_service.download_template(db, include_data)
+    import logging
+    _log = logging.getLogger(__name__)
+    try:
+        content = await price_list_service.download_template(db, include_data)
+    except Exception as e:
+        _log.error(f"판매가 템플릿 Excel 생성 실패: {e}", exc_info=True)
+        from fastapi import HTTPException
+        raise HTTPException(status_code=500, detail=f"Excel 생성 실패: {str(e)}")
     filename = "판매가_템플릿.xlsx" if not include_data else "판매가_현재데이터.xlsx"
     return StreamingResponse(
         io.BytesIO(content),
