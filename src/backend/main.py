@@ -83,6 +83,30 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+
+# ── 글로벌 예외 핸들러 (디버깅용) ──
+import traceback as _tb
+from starlette.requests import Request as StarletteRequest
+from starlette.responses import JSONResponse as StarletteJSON
+
+
+@app.exception_handler(Exception)
+async def global_exception_handler(request: StarletteRequest, exc: Exception):
+    """모든 미처리 예외를 JSON으로 반환 (디버깅용)"""
+    import logging
+    _log = logging.getLogger("global_error")
+    tb_str = _tb.format_exception(type(exc), exc, exc.__traceback__)
+    _log.error(f"Unhandled: {request.url} → {exc}\n{''.join(tb_str)}")
+    return StarletteJSON(
+        status_code=500,
+        content={
+            "detail": str(exc),
+            "type": type(exc).__name__,
+            "path": str(request.url),
+            "traceback": ''.join(tb_str)[-2000:],
+        },
+    )
+
 # CORS 설정 (프론트엔드에서 API 호출 허용, 여러 도메인 지원)
 _origins = [o.strip() for o in settings.FRONTEND_URL.split(",") if o.strip()]
 app.add_middleware(
