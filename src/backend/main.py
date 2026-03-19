@@ -84,7 +84,7 @@ app = FastAPI(
 )
 
 
-# ── 글로벌 예외 핸들러 (디버깅용) ──
+# ── 글로벌 예외 핸들러 ──
 import traceback as _tb
 from starlette.requests import Request as StarletteRequest
 from starlette.responses import JSONResponse as StarletteJSON
@@ -92,20 +92,15 @@ from starlette.responses import JSONResponse as StarletteJSON
 
 @app.exception_handler(Exception)
 async def global_exception_handler(request: StarletteRequest, exc: Exception):
-    """모든 미처리 예외를 JSON으로 반환 (디버깅용)"""
+    """미처리 예외를 JSON으로 반환"""
     import logging
     _log = logging.getLogger("global_error")
-    tb_str = _tb.format_exception(type(exc), exc, exc.__traceback__)
-    _log.error(f"Unhandled: {request.url} → {exc}\n{''.join(tb_str)}")
-    return StarletteJSON(
-        status_code=500,
-        content={
-            "detail": str(exc),
-            "type": type(exc).__name__,
-            "path": str(request.url),
-            "traceback": ''.join(tb_str)[-2000:],
-        },
-    )
+    _log.error(f"Unhandled: {request.url} → {exc}", exc_info=True)
+    content = {"detail": str(exc), "type": type(exc).__name__}
+    if settings.DEBUG:
+        tb_str = _tb.format_exception(type(exc), exc, exc.__traceback__)
+        content["traceback"] = ''.join(tb_str)[-2000:]
+    return StarletteJSON(status_code=500, content=content)
 
 # CORS 설정 (프론트엔드에서 API 호출 허용, 여러 도메인 지원)
 _origins = [o.strip() for o in settings.FRONTEND_URL.split(",") if o.strip()]
@@ -127,56 +122,6 @@ async def health_check():
         "app": settings.APP_NAME,
         "version": settings.APP_VERSION,
     }
-
-
-@app.get("/api/diag/openpyxl", tags=["시스템"])
-async def diag_openpyxl():
-    """openpyxl 진단 — Excel 생성 기능 점검용 (임시)"""
-    import sys
-    result = {"python": sys.version}
-    try:
-        import openpyxl
-        result["openpyxl_version"] = openpyxl.__version__
-    except Exception as e:
-        result["openpyxl_error"] = str(e)
-        return result
-    try:
-        import io as _io
-        from openpyxl.styles import Font
-        wb = openpyxl.Workbook()
-        ws = wb.active
-        ws.cell(row=1, column=1, value="test")
-        ws.cell(row=1, column=1).font = Font(name="맑은 고딕", size=10)
-        buf = _io.BytesIO()
-        wb.save(buf)
-        result["excel_bytes"] = len(buf.getvalue())
-        result["status"] = "OK"
-    except Exception as e:
-        result["excel_error"] = str(e)
-    return result
-
-
-@app.get("/api/diag/excel-test", tags=["시스템"])
-async def diag_excel_download():
-    """Excel 다운로드 테스트 (진단용)"""
-    import io as _io
-    import traceback
-    from fastapi.responses import StreamingResponse, JSONResponse
-    try:
-        from .modules.m2_sales.services import price_list_service
-        from .database import AsyncSessionLocal
-        async with AsyncSessionLocal() as db:
-            content = await price_list_service.download_template(db, False)
-        return StreamingResponse(
-            _io.BytesIO(content),
-            media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            headers={"Content-Disposition": "attachment; filename=test.xlsx"},
-        )
-    except Exception as e:
-        return JSONResponse(
-            status_code=500,
-            content={"error": str(e), "traceback": traceback.format_exc()},
-        )
 
 
 # ── 모듈 라우터 등록 (개발 순서에 따라 순차 추가) ──

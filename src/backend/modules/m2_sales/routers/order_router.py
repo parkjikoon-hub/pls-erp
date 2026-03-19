@@ -134,9 +134,11 @@ async def download_statement_excel(
         _log.error(f"거래명세서 Excel 생성 실패: {e}", exc_info=True)
         from fastapi import HTTPException
         raise HTTPException(status_code=500, detail=f"Excel 생성 실패: {str(e)}")
+    from urllib.parse import quote
     filename = f"거래명세서_{order_id}.xlsx"
+    encoded = quote(filename)
     return StreamingResponse(
         io.BytesIO(content),
         media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        headers={"Content-Disposition": f"attachment; filename*=UTF-8''{filename}"},
+        headers={"Content-Disposition": f"attachment; filename*=UTF-8''{encoded}"},
     )

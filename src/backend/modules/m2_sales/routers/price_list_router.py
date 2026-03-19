@@ -183,9 +183,11 @@ async def download_template(
         _log.error(f"판매가 템플릿 Excel 생성 실패: {e}", exc_info=True)
         from fastapi import HTTPException
         raise HTTPException(status_code=500, detail=f"Excel 생성 실패: {str(e)}")
+    from urllib.parse import quote
     filename = "판매가_템플릿.xlsx" if not include_data else "판매가_현재데이터.xlsx"
+    encoded = quote(filename)
     return StreamingResponse(
         io.BytesIO(content),
         media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        headers={"Content-Disposition": f"attachment; filename*=UTF-8''{filename}"},
+        headers={"Content-Disposition": f"attachment; filename*=UTF-8''{encoded}"},
     )

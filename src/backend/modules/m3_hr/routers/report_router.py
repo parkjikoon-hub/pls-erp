@@ -55,11 +55,13 @@ async def download_tax_filing(
     bom = "\ufeff"
     content = bom + csv_content
 
+    from urllib.parse import quote
     filename = f"원천세신고_{year}년{month:02d}월.csv"
+    encoded = quote(filename)
     return StreamingResponse(
         io.BytesIO(content.encode("utf-8-sig")),
         media_type="text/csv; charset=utf-8-sig",
         headers={
-            "Content-Disposition": f"attachment; filename*=UTF-8''{filename}"
+            "Content-Disposition": f"attachment; filename*=UTF-8''{encoded}"
         },
     )
