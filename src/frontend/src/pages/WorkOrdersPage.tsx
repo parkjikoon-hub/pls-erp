@@ -253,6 +253,7 @@ export default function WorkOrdersPage() {
             <thead className="bg-(--bg-card) text-slate-600">
               <tr>
                 <th className="px-4 py-2 text-left">지시번호</th>
+                <th className="px-4 py-2 text-left">수주번호</th>
                 <th className="px-4 py-2 text-center">유형</th>
                 <th className="px-4 py-2 text-left">품목</th>
                 <th className="px-4 py-2 text-right">계획</th>
@@ -270,6 +271,7 @@ export default function WorkOrdersPage() {
                 return (
                   <tr key={wo.id} className={`border-t border-[#e8ecf2] ${isOverdue ? 'bg-red-50' : 'hover:bg-(--bg-hover)'}`}>
                     <td className="px-4 py-2 font-mono text-slate-700">{wo.wo_no}</td>
+                    <td className="px-4 py-2 text-sm text-blue-600">{wo.order_no || '-'}</td>
                     <td className="px-4 py-2 text-center">
                       <span className={`text-sm px-2.5 py-1 rounded font-medium min-w-[3.5rem] text-center inline-block ${
                         wo.order_type === 'make_to_order' ? 'bg-blue-100 text-blue-600' : 'bg-slate-100 text-slate-600'

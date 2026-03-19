@@ -173,13 +173,14 @@ export default function ShipmentsPage() {
               <th className="text-left px-4 py-3 font-semibold">송장번호</th>
               <th className="text-left px-4 py-3 font-semibold">거래명세서</th>
               <th className="text-left px-4 py-3 font-semibold">출하일</th>
+              <th className="text-center px-4 py-3 font-semibold">진행</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-[#e8ecf2]">
             {loading ? (
-              <tr><td colSpan={10} className="text-center py-12 text-slate-400">로딩 중...</td></tr>
+              <tr><td colSpan={11} className="text-center py-12 text-slate-400">로딩 중...</td></tr>
             ) : items.length === 0 ? (
-              <tr><td colSpan={10} className="text-center py-12 text-slate-400">출하 내역이 없습니다</td></tr>
+              <tr><td colSpan={11} className="text-center py-12 text-slate-400">출하 내역이 없습니다</td></tr>
             ) : (
               items.map(sh => {
                 const st = STATUS_MAP[sh.status] || { label: sh.status, color: 'text-slate-600', bg: 'bg-slate-100' };
@@ -217,6 +218,18 @@ export default function ShipmentsPage() {
                     </td>
                     <td className="px-4 py-3 text-xs text-slate-500">
                       {sh.shipment_date || '-'}
+                    </td>
+                    <td className="px-4 py-3 text-center">
+                      {NEXT_STATUS[sh.status] ? (
+                        <button
+                          onClick={(e) => { e.stopPropagation(); handleStatusChange(sh.id, NEXT_STATUS[sh.status]); }}
+                          className="px-3 py-1.5 text-xs font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition whitespace-nowrap"
+                        >
+                          {NEXT_LABEL[sh.status]}
+                        </button>
+                      ) : (
+                        <span className="text-xs text-emerald-600 font-medium">완료</span>
+                      )}
                     </td>
                   </tr>
                 );
