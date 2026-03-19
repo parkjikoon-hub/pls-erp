@@ -81,7 +81,7 @@ export default function ApprovalTemplatesPage() {
         <h1 className="text-2xl font-bold text-slate-800">결재선 템플릿</h1>
         <button
           onClick={() => setShowForm(!showForm)}
-          className="px-4 py-2 bg-violet-600 text-white rounded-lg hover:bg-violet-700 transition text-sm font-medium"
+          className="px-4 py-2 bg-cyan-600 text-white rounded-lg hover:bg-cyan-700 transition text-sm font-medium"
         >
           {showForm ? '취소' : '+ 새 템플릿'}
         </button>
@@ -114,7 +114,7 @@ export default function ApprovalTemplatesPage() {
               {lines.map((ln, idx) => (
                 <div key={idx} className="flex items-center gap-2 p-2 bg-slate-50 rounded-lg">
                   <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
-                    ln.line_type === 'approval' ? 'bg-violet-100 text-violet-700' : 'bg-slate-200 text-slate-600'
+                    ln.line_type === 'approval' ? 'bg-cyan-100 text-cyan-700' : 'bg-slate-200 text-slate-600'
                   }`}>
                     {ln.line_type === 'approval' ? `결재 ${ln.step_order}` : `참조 ${ln.step_order}`}
                   </span>
@@ -133,11 +133,11 @@ export default function ApprovalTemplatesPage() {
             </div>
           )}
           <div className="flex gap-2">
-            <button onClick={() => addLine('approval')} className="px-3 py-1.5 bg-violet-50 text-violet-700 rounded-lg text-sm hover:bg-violet-100">+ 결재자</button>
+            <button onClick={() => addLine('approval')} className="px-3 py-1.5 bg-cyan-50 text-cyan-700 rounded-lg text-sm hover:bg-cyan-100">+ 결재자</button>
             <button onClick={() => addLine('reference')} className="px-3 py-1.5 bg-slate-100 text-slate-600 rounded-lg text-sm hover:bg-slate-200">+ 참조자</button>
           </div>
           <div className="flex justify-end">
-            <button onClick={handleCreate} className="px-6 py-2 bg-violet-600 text-white rounded-lg hover:bg-violet-700 text-sm font-medium">저장</button>
+            <button onClick={handleCreate} className="px-6 py-2 bg-cyan-600 text-white rounded-lg hover:bg-cyan-700 text-sm font-medium">저장</button>
           </div>
         </div>
       )}
@@ -159,7 +159,7 @@ export default function ApprovalTemplatesPage() {
               <div className="mt-3 flex flex-wrap gap-1.5">
                 {tpl.lines.map((ln, i) => (
                   <span key={i} className={`text-xs px-2 py-0.5 rounded-full ${
-                    ln.line_type === 'approval' ? 'bg-violet-100 text-violet-700' : 'bg-slate-200 text-slate-500'
+                    ln.line_type === 'approval' ? 'bg-cyan-100 text-cyan-700' : 'bg-slate-200 text-slate-500'
                   }`}>
                     {ln.line_type === 'approval' ? '결재' : '참조'} {ln.step_order}: {ln.approver_name || '미지정'}
                     {ln.role_label && ` (${ln.role_label})`}

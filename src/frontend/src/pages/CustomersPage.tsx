@@ -1,6 +1,6 @@
 /**
  * 거래처 관리 페이지 — 목록 조회, 등록, 수정, 삭제(비활성화)
- * 시안 C 기반 디자인 (슬레이트 블루그레이 + 에메랄드 액센트)
+ * 시안 C 기반 디자인 (슬레이트 블루그레이 + 블루 액센트)
  */
 import { useState, useEffect, useCallback } from 'react';
 import {
@@ -239,7 +239,7 @@ export default function CustomersPage() {
               placeholder="거래처명, 코드, 사업자번호 검색..."
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
-              className="w-full pl-9 pr-3 py-2 text-sm rounded-lg border border-(--border-main) bg-white focus:outline-none focus:border-emerald-500 transition-colors"
+              className="w-full pl-9 pr-3 py-2 text-sm rounded-lg border border-(--border-main) bg-white focus:outline-none focus:border-blue-500 transition-colors"
             />
           </div>
 
@@ -247,7 +247,7 @@ export default function CustomersPage() {
           <select
             value={typeFilter}
             onChange={(e) => { setTypeFilter(e.target.value); setPage(1); }}
-            className="px-3 py-2 text-sm rounded-lg border border-(--border-main) bg-white focus:outline-none focus:border-emerald-500"
+            className="px-3 py-2 text-sm rounded-lg border border-(--border-main) bg-white focus:outline-none focus:border-blue-500"
           >
             <option value="">전체 유형</option>
             <option value="customer">매출처</option>
@@ -259,7 +259,7 @@ export default function CustomersPage() {
           <select
             value={activeFilter}
             onChange={(e) => { setActiveFilter(e.target.value); setPage(1); }}
-            className="px-3 py-2 text-sm rounded-lg border border-(--border-main) bg-white focus:outline-none focus:border-emerald-500"
+            className="px-3 py-2 text-sm rounded-lg border border-(--border-main) bg-white focus:outline-none focus:border-blue-500"
           >
             <option value="">전체 상태</option>
             <option value="true">활성</option>
@@ -278,7 +278,7 @@ export default function CustomersPage() {
               </button>
               <button
                 onClick={openCreateModal}
-                className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-emerald-500 to-emerald-600 rounded-lg hover:from-emerald-600 hover:to-emerald-700 transition-colors"
+                className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg hover:from-blue-600 hover:to-blue-700 transition-colors"
               >
                 <PlusIcon className="w-4 h-4" />
                 거래처 등록
@@ -400,7 +400,7 @@ export default function CustomersPage() {
                     onClick={() => setPage(pageNum)}
                     className={`w-8 h-8 rounded-lg text-sm font-medium transition-colors ${
                       pageNum === page
-                        ? 'bg-emerald-500 text-white'
+                        ? 'bg-blue-500 text-white'
                         : 'hover:bg-(--bg-main) text-slate-600'
                     }`}
                   >
@@ -487,7 +487,7 @@ export default function CustomersPage() {
                     <select
                       value={form.customer_type}
                       onChange={(e) => handleChange('customer_type', e.target.value)}
-                      className="w-full px-3 py-2 text-sm rounded-lg border border-(--border-main) bg-white focus:outline-none focus:border-emerald-500"
+                      className="w-full px-3 py-2 text-sm rounded-lg border border-(--border-main) bg-white focus:outline-none focus:border-blue-500"
                     >
                       <option value="both">겸용 (매출+매입)</option>
                       <option value="customer">매출처</option>
@@ -522,7 +522,7 @@ export default function CustomersPage() {
                       value={form.credit_limit}
                       onChange={(e) => handleChange('credit_limit', Number(e.target.value))}
                       min={0}
-                      className="w-full px-3 py-2 text-sm rounded-lg border border-(--border-main) bg-white focus:outline-none focus:border-emerald-500"
+                      className="w-full px-3 py-2 text-sm rounded-lg border border-(--border-main) bg-white focus:outline-none focus:border-blue-500"
                     />
                   </div>
                   <div>
@@ -533,7 +533,7 @@ export default function CustomersPage() {
                       onChange={(e) => handleChange('payment_terms', Number(e.target.value))}
                       min={0}
                       max={365}
-                      className="w-full px-3 py-2 text-sm rounded-lg border border-(--border-main) bg-white focus:outline-none focus:border-emerald-500"
+                      className="w-full px-3 py-2 text-sm rounded-lg border border-(--border-main) bg-white focus:outline-none focus:border-blue-500"
                     />
                   </div>
                 </div>
@@ -561,7 +561,7 @@ export default function CustomersPage() {
               <button
                 onClick={handleSave}
                 disabled={saving}
-                className="px-6 py-2 text-sm font-medium text-white bg-gradient-to-r from-emerald-500 to-emerald-600 rounded-lg hover:from-emerald-600 hover:to-emerald-700 disabled:opacity-50 transition-colors"
+                className="px-6 py-2 text-sm font-medium text-white bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg hover:from-blue-600 hover:to-blue-700 disabled:opacity-50 transition-colors"
               >
                 {saving ? '저장 중...' : editingId ? '수정' : '등록'}
               </button>
@@ -637,7 +637,7 @@ function FormField({
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         disabled={disabled}
-        className="w-full px-3 py-2 text-sm rounded-lg border border-(--border-main) bg-white focus:outline-none focus:border-emerald-500 disabled:bg-slate-100 disabled:text-slate-400 transition-colors"
+        className="w-full px-3 py-2 text-sm rounded-lg border border-(--border-main) bg-white focus:outline-none focus:border-blue-500 disabled:bg-slate-100 disabled:text-slate-400 transition-colors"
       />
     </div>
   );

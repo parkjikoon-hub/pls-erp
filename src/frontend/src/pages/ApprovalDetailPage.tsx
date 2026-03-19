@@ -219,7 +219,7 @@ export default function ApprovalDetailPage() {
             <button
               onClick={() => handleAction('approve')}
               disabled={acting}
-              className="px-6 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition text-sm font-medium disabled:opacity-50"
+              className="px-6 py-2 bg-cyan-600 text-white rounded-lg hover:bg-cyan-700 transition text-sm font-medium disabled:opacity-50"
             >
               승인
             </button>

@@ -276,7 +276,7 @@ export default function SalesOrdersPage() {
           </button>
           <button
             onClick={openCreate}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium"
+            className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 text-sm font-medium"
           >
             + 수주 등록
           </button>
@@ -403,7 +403,7 @@ export default function SalesOrdersPage() {
               key={p}
               onClick={() => setPage(p)}
               className={`px-3 py-1 rounded text-sm ${
-                p === page ? 'bg-blue-600 text-white' : 'bg-white border border-(--border-main) text-slate-600 hover:bg-(--bg-card)'
+                p === page ? 'bg-emerald-600 text-white' : 'bg-white border border-(--border-main) text-slate-600 hover:bg-(--bg-card)'
               }`}
             >{p}</button>
           ))}
@@ -536,7 +536,7 @@ export default function SalesOrdersPage() {
             <div className="flex justify-end gap-6 text-sm mb-6 border-t border-[#e8ecf2] pt-3">
               <div>공급가: <span className="font-semibold">{formTotal.toLocaleString()}</span></div>
               <div>부가세: <span className="font-semibold">{formTax.toLocaleString()}</span></div>
-              <div>합계: <span className="font-bold text-blue-600">{(formTotal + formTax).toLocaleString()}</span></div>
+              <div>합계: <span className="font-bold text-emerald-600">{(formTotal + formTax).toLocaleString()}</span></div>
             </div>
 
             <div className="flex justify-end gap-2">
@@ -544,7 +544,7 @@ export default function SalesOrdersPage() {
               <button
                 onClick={handleSave}
                 disabled={!form.customer_id || form.lines.every((l) => !l.product_name)}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50"
+                className="px-4 py-2 bg-emerald-600 text-white rounded-lg text-sm font-medium hover:bg-emerald-700 disabled:opacity-50"
               >저장</button>
             </div>
           </div>
@@ -586,7 +586,7 @@ export default function SalesOrdersPage() {
               <button
                 onClick={handleStatusChange}
                 disabled={!newStatus}
-                className="px-4 py-2 bg-amber-600 text-white rounded-lg text-sm font-medium hover:bg-amber-700 disabled:opacity-50"
+                className="px-4 py-2 bg-emerald-600 text-white rounded-lg text-sm font-medium hover:bg-emerald-700 disabled:opacity-50"
               >변경</button>
             </div>
           </div>
@@ -633,7 +633,7 @@ export default function SalesOrdersPage() {
             <div className="flex justify-end">
               <button
                 onClick={() => setWoResult(null)}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700"
+                className="px-4 py-2 bg-emerald-600 text-white rounded-lg text-sm font-medium hover:bg-emerald-700"
               >확인</button>
             </div>
           </div>

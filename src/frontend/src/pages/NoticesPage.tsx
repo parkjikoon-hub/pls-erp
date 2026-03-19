@@ -84,7 +84,7 @@ export default function NoticesPage() {
         <h1 className="text-2xl font-bold text-slate-800">공지사항</h1>
         {isManager && (
           <button onClick={() => openEdit()}
-            className="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition text-sm font-medium"
+            className="px-4 py-2 bg-cyan-600 text-white rounded-lg hover:bg-cyan-700 transition text-sm font-medium"
           >
             + 공지 작성
           </button>
@@ -197,7 +197,7 @@ export default function NoticesPage() {
               </div>
               <div className="flex gap-3 justify-end">
                 <button onClick={() => setShowForm(false)} className="px-4 py-2 border border-(--border-main) text-slate-600 rounded-lg text-sm">취소</button>
-                <button onClick={handleSave} className="px-6 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 text-sm font-medium">저장</button>
+                <button onClick={handleSave} className="px-6 py-2 bg-cyan-600 text-white rounded-lg hover:bg-cyan-700 text-sm font-medium">저장</button>
               </div>
             </div>
           </div>

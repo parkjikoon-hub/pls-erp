@@ -199,7 +199,7 @@ export default function PriceListPage() {
           </button>
           <button
             onClick={() => { setShowUploadModal(true); setUploadFile(null); setUploadResult(null); }}
-            style={{ padding: '8px 14px', fontSize: 13, borderRadius: 8, border: 'none', background: '#2563eb', color: '#fff', cursor: 'pointer' }}
+            style={{ padding: '8px 14px', fontSize: 13, borderRadius: 8, border: 'none', background: '#10b981', color: '#fff', cursor: 'pointer' }}
           >
             엑셀 업로드
           </button>
@@ -473,7 +473,7 @@ export default function PriceListPage() {
               <button
                 onClick={handleUpload}
                 disabled={!uploadFile || uploading}
-                style={{ ...btnStyle('#2563eb'), padding: '8px 20px', opacity: (!uploadFile || uploading) ? 0.5 : 1 }}
+                style={{ ...btnStyle('#10b981'), padding: '8px 20px', opacity: (!uploadFile || uploading) ? 0.5 : 1 }}
               >
                 {uploading ? '업로드 중...' : '업로드'}
               </button>

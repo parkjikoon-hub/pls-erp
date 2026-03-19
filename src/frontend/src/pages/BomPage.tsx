@@ -218,7 +218,7 @@ export default function BomPage() {
         </div>
         <button
           onClick={openCreate}
-          className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 text-sm font-medium"
+          className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 text-sm font-medium"
         >
           + BOM 등록
         </button>
@@ -297,7 +297,7 @@ export default function BomPage() {
               key={p}
               onClick={() => setPage(p)}
               className={`px-3 py-1 rounded text-sm ${
-                p === page ? 'bg-emerald-600 text-white' : 'bg-white border border-(--border-main) text-slate-600 hover:bg-slate-50'
+                p === page ? 'bg-red-600 text-white' : 'bg-white border border-(--border-main) text-slate-600 hover:bg-slate-50'
               }`}
             >
               {p}
@@ -348,7 +348,7 @@ export default function BomPage() {
             <div className="mb-4">
               <div className="flex items-center justify-between mb-2">
                 <label className="text-sm font-medium text-slate-700">구성 부품 목록</label>
-                <button onClick={addLine} className="text-xs text-emerald-600 hover:text-emerald-700">
+                <button onClick={addLine} className="text-xs text-red-600 hover:text-red-700">
                   + 부품 추가
                 </button>
               </div>
@@ -435,7 +435,7 @@ export default function BomPage() {
               </button>
               <button
                 onClick={handleSave}
-                className="px-4 py-2 bg-emerald-600 text-white rounded-lg text-sm hover:bg-emerald-700"
+                className="px-4 py-2 bg-red-600 text-white rounded-lg text-sm hover:bg-red-700"
               >
                 {editId ? '수정' : '등록'}
               </button>

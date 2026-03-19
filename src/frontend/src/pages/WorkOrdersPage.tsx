@@ -209,13 +209,13 @@ export default function WorkOrdersPage() {
           </button>
           <button
             onClick={openOrderModal}
-            className="px-3 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700"
+            className="px-3 py-2 bg-red-600 text-white rounded-lg text-sm hover:bg-red-700"
           >
             수주 → 작업지시서
           </button>
           <button
             onClick={() => { setForm({ product_id: '', planned_qty: 1, due_date: new Date().toISOString().slice(0, 10) }); setShowCreate(true); }}
-            className="px-3 py-2 bg-emerald-600 text-white rounded-lg text-sm hover:bg-emerald-700"
+            className="px-3 py-2 bg-red-600 text-white rounded-lg text-sm hover:bg-red-700"
           >
             + 계획생산
           </button>
@@ -358,7 +358,7 @@ export default function WorkOrdersPage() {
             </div>
             <div className="flex justify-end gap-2 mt-4">
               <button onClick={() => setShowCreate(false)} className="px-4 py-2 border border-(--border-main) rounded-lg text-sm">취소</button>
-              <button onClick={handleCreate} className="px-4 py-2 bg-emerald-600 text-white rounded-lg text-sm hover:bg-emerald-700">생성</button>
+              <button onClick={handleCreate} className="px-4 py-2 bg-red-600 text-white rounded-lg text-sm hover:bg-red-700">생성</button>
             </div>
           </div>
         </div>
@@ -403,7 +403,7 @@ export default function WorkOrdersPage() {
                   </div>
                 )}
                 <div className="flex justify-end">
-                  <button onClick={() => setShowOrderModal(false)} className="px-4 py-2 bg-emerald-600 text-white rounded-lg text-sm">확인</button>
+                  <button onClick={() => setShowOrderModal(false)} className="px-4 py-2 bg-red-600 text-white rounded-lg text-sm">확인</button>
                 </div>
               </div>
             ) : (
@@ -469,7 +469,7 @@ export default function WorkOrdersPage() {
             </div>
             <div className="flex justify-end gap-2">
               <button onClick={() => setShowProgress(false)} className="px-4 py-2 border border-(--border-main) rounded-lg text-sm">취소</button>
-              <button onClick={handleProgress} className="px-4 py-2 bg-emerald-600 text-white rounded-lg text-sm hover:bg-emerald-700">보고</button>
+              <button onClick={handleProgress} className="px-4 py-2 bg-red-600 text-white rounded-lg text-sm hover:bg-red-700">보고</button>
             </div>
           </div>
         </div>

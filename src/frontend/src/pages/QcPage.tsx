@@ -107,7 +107,7 @@ export default function QcPage() {
         </div>
         <button
           onClick={openCreate}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium"
+          className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition font-medium"
         >
           + QC 검사 등록
         </button>
@@ -126,7 +126,7 @@ export default function QcPage() {
             onClick={() => setResultFilter(f.value)}
             className={`px-3 py-1.5 rounded-lg text-sm font-medium transition ${
               resultFilter === f.value
-                ? 'bg-blue-600 text-white'
+                ? 'bg-red-600 text-white'
                 : 'bg-white text-slate-600 border border-(--border-main) hover:bg-slate-50'
             }`}
           >
@@ -303,7 +303,7 @@ export default function QcPage() {
               </button>
               <button
                 onClick={handleCreate}
-                className="px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium"
+                className="px-4 py-2 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium"
               >
                 검사 등록
               </button>

@@ -341,7 +341,7 @@ export default function ProductsPage() {
       <div className="flex items-center gap-3 mb-6">
         <div>
           <h1 className="text-xl font-bold text-slate-800 flex items-center gap-2">
-            <CubeIcon className="w-6 h-6 text-emerald-500" />
+            <CubeIcon className="w-6 h-6 text-blue-500" />
             품목 관리
           </h1>
           <p className="text-sm text-slate-500">제품 / 자재 / 반제품을 등록하고 관리합니다</p>
@@ -401,7 +401,7 @@ export default function ProductsPage() {
               placeholder="품목명, 코드 검색..."
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
-              className="w-full pl-9 pr-3 py-2 text-sm rounded-lg border border-(--border-main) bg-white focus:outline-none focus:border-emerald-500 transition-colors"
+              className="w-full pl-9 pr-3 py-2 text-sm rounded-lg border border-(--border-main) bg-white focus:outline-none focus:border-blue-500 transition-colors"
             />
           </div>
 
@@ -409,7 +409,7 @@ export default function ProductsPage() {
           <select
             value={categoryFilter}
             onChange={(e) => { setCategoryFilter(e.target.value); setPage(1); }}
-            className="px-3 py-2 text-sm rounded-lg border border-(--border-main) bg-white focus:outline-none focus:border-emerald-500"
+            className="px-3 py-2 text-sm rounded-lg border border-(--border-main) bg-white focus:outline-none focus:border-blue-500"
           >
             <option value="">전체 카테고리</option>
             {categories.map((cat) => (
@@ -421,7 +421,7 @@ export default function ProductsPage() {
           <select
             value={activeFilter}
             onChange={(e) => { setActiveFilter(e.target.value); setPage(1); }}
-            className="px-3 py-2 text-sm rounded-lg border border-(--border-main) bg-white focus:outline-none focus:border-emerald-500"
+            className="px-3 py-2 text-sm rounded-lg border border-(--border-main) bg-white focus:outline-none focus:border-blue-500"
           >
             <option value="">전체 상태</option>
             <option value="true">활성</option>
@@ -451,7 +451,7 @@ export default function ProductsPage() {
               </button>
               <button
                 onClick={openCreateModal}
-                className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-emerald-500 to-emerald-600 rounded-lg hover:from-emerald-600 hover:to-emerald-700 transition-colors"
+                className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg hover:from-blue-600 hover:to-blue-700 transition-colors"
               >
                 <PlusIcon className="w-4 h-4" />
                 품목 등록
@@ -582,7 +582,7 @@ export default function ProductsPage() {
                     onClick={() => setPage(pageNum)}
                     className={`w-8 h-8 rounded-lg text-sm font-medium transition-colors ${
                       pageNum === page
-                        ? 'bg-emerald-500 text-white'
+                        ? 'bg-blue-500 text-white'
                         : 'hover:bg-(--bg-main) text-slate-600'
                     }`}
                   >
@@ -649,7 +649,7 @@ export default function ProductsPage() {
                       <select
                         value={form.category_id || ''}
                         onChange={(e) => handleChange('category_id', e.target.value || null)}
-                        className="flex-1 px-3 py-2 text-sm rounded-lg border border-(--border-main) bg-white focus:outline-none focus:border-emerald-500"
+                        className="flex-1 px-3 py-2 text-sm rounded-lg border border-(--border-main) bg-white focus:outline-none focus:border-blue-500"
                       >
                         <option value="">미분류</option>
                         {categories.map((cat) => (
@@ -675,7 +675,7 @@ export default function ProductsPage() {
                     <select
                       value={form.product_type}
                       onChange={(e) => handleChange('product_type', e.target.value)}
-                      className="w-full px-3 py-2 text-sm rounded-lg border border-(--border-main) bg-white focus:outline-none focus:border-emerald-500"
+                      className="w-full px-3 py-2 text-sm rounded-lg border border-(--border-main) bg-white focus:outline-none focus:border-blue-500"
                     >
                       <option value="product">완제품</option>
                       <option value="material">원자재</option>
@@ -697,7 +697,7 @@ export default function ProductsPage() {
                     <select
                       value={form.inventory_method}
                       onChange={(e) => handleChange('inventory_method', e.target.value)}
-                      className="w-full px-3 py-2 text-sm rounded-lg border border-(--border-main) bg-white focus:outline-none focus:border-emerald-500"
+                      className="w-full px-3 py-2 text-sm rounded-lg border border-(--border-main) bg-white focus:outline-none focus:border-blue-500"
                     >
                       <option value="fifo">선입선출 (FIFO)</option>
                       <option value="avg">이동평균</option>
@@ -752,7 +752,7 @@ export default function ProductsPage() {
               <button
                 onClick={handleSave}
                 disabled={saving}
-                className="px-6 py-2 text-sm font-medium text-white bg-gradient-to-r from-emerald-500 to-emerald-600 rounded-lg hover:from-emerald-600 hover:to-emerald-700 disabled:opacity-50 transition-colors"
+                className="px-6 py-2 text-sm font-medium text-white bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg hover:from-blue-600 hover:to-blue-700 disabled:opacity-50 transition-colors"
               >
                 {saving ? '저장 중...' : editingId ? '수정' : '등록'}
               </button>
@@ -790,7 +790,7 @@ export default function ProductsPage() {
               <button
                 onClick={handleSaveCategory}
                 disabled={savingCategory}
-                className="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-emerald-500 to-emerald-600 rounded-lg hover:from-emerald-600 hover:to-emerald-700 disabled:opacity-50 transition-colors"
+                className="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg hover:from-blue-600 hover:to-blue-700 disabled:opacity-50 transition-colors"
               >
                 {savingCategory ? '저장 중...' : '추가'}
               </button>
@@ -866,7 +866,7 @@ function FormField({
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         disabled={disabled}
-        className="w-full px-3 py-2 text-sm rounded-lg border border-(--border-main) bg-white focus:outline-none focus:border-emerald-500 disabled:bg-slate-100 disabled:text-slate-400 transition-colors"
+        className="w-full px-3 py-2 text-sm rounded-lg border border-(--border-main) bg-white focus:outline-none focus:border-blue-500 disabled:bg-slate-100 disabled:text-slate-400 transition-colors"
       />
     </div>
   );
@@ -899,7 +899,7 @@ function NumberField({
         min={min}
         max={max}
         step={step}
-        className="w-full px-3 py-2 text-sm rounded-lg border border-(--border-main) bg-white focus:outline-none focus:border-emerald-500 transition-colors"
+        className="w-full px-3 py-2 text-sm rounded-lg border border-(--border-main) bg-white focus:outline-none focus:border-blue-500 transition-colors"
       />
     </div>
   );

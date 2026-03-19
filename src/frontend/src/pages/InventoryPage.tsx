@@ -138,9 +138,9 @@ export default function InventoryPage() {
           </p>
         </div>
         <div className="flex gap-2">
-          <button onClick={() => openModal('receive')} className="px-3 py-2 bg-emerald-600 text-white rounded-lg text-sm hover:bg-emerald-700">입고</button>
-          <button onClick={() => openModal('issue')} className="px-3 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700">출고</button>
-          <button onClick={() => openModal('transfer')} className="px-3 py-2 bg-purple-600 text-white rounded-lg text-sm hover:bg-purple-700">이관</button>
+          <button onClick={() => openModal('receive')} className="px-3 py-2 bg-red-600 text-white rounded-lg text-sm hover:bg-red-700">입고</button>
+          <button onClick={() => openModal('issue')} className="px-3 py-2 bg-red-600 text-white rounded-lg text-sm hover:bg-red-700">출고</button>
+          <button onClick={() => openModal('transfer')} className="px-3 py-2 bg-red-600 text-white rounded-lg text-sm hover:bg-red-700">이관</button>
           <button onClick={() => openModal('adjust')} className="px-3 py-2 bg-slate-600 text-white rounded-lg text-sm hover:bg-slate-700">조정</button>
         </div>
       </div>
@@ -171,7 +171,7 @@ export default function InventoryPage() {
             key={t}
             onClick={() => setTab(t)}
             className={`px-4 py-2 text-sm font-medium border-b-2 transition ${
-              tab === t ? 'border-emerald-600 text-emerald-700' : 'border-transparent text-slate-500 hover:text-slate-700'
+              tab === t ? 'border-red-600 text-red-700' : 'border-transparent text-slate-500 hover:text-slate-700'
             }`}
           >
             {t === 'inventory' ? '재고 현황' : t === 'transactions' ? '이동 이력' : '부족 알림'}
@@ -441,7 +441,7 @@ export default function InventoryPage() {
               </button>
               <button
                 onClick={handleModalSave}
-                className="px-4 py-2 bg-emerald-600 text-white rounded-lg text-sm hover:bg-emerald-700"
+                className="px-4 py-2 bg-red-600 text-white rounded-lg text-sm hover:bg-red-700"
               >
                 확인
               </button>

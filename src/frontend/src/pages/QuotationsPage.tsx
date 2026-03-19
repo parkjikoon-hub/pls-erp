@@ -580,7 +580,7 @@ export default function QuotationsPage() {
               <button
                 onClick={handleStockCheck}
                 disabled={stockCheckLoading || form.lines.every((l) => !l.product_id)}
-                className="px-3 py-1.5 bg-indigo-600 text-white rounded-lg text-xs font-medium hover:bg-indigo-700 disabled:opacity-50"
+                className="px-3 py-1.5 bg-emerald-600 text-white rounded-lg text-xs font-medium hover:bg-emerald-700 disabled:opacity-50"
               >
                 {stockCheckLoading ? '확인 중...' : '재고/원자재 사전 확인'}
               </button>
@@ -691,7 +691,7 @@ export default function QuotationsPage() {
               <button
                 onClick={handleConvert}
                 disabled={convertLoading || !convertModal.orderDate}
-                className="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700 disabled:opacity-50"
+                className="px-4 py-2 bg-emerald-600 text-white rounded-lg text-sm font-medium hover:bg-emerald-700 disabled:opacity-50"
               >{convertLoading ? '처리 중...' : '수주 전환'}</button>
             </div>
           </div>
@@ -755,7 +755,7 @@ export default function QuotationsPage() {
             <div className="flex justify-end mt-4">
               <button
                 onClick={() => setConvertResult(null)}
-                className="px-4 py-2 bg-slate-600 text-white rounded-lg text-sm font-medium hover:bg-slate-700"
+                className="px-4 py-2 bg-emerald-600 text-white rounded-lg text-sm font-medium hover:bg-emerald-700"
               >확인</button>
             </div>
           </div>

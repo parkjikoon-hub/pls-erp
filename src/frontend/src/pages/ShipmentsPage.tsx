@@ -129,7 +129,7 @@ export default function ShipmentsPage() {
         </div>
         <button
           onClick={openOrderModal}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium"
+          className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition font-medium"
         >
           + 수주→출하 생성
         </button>
@@ -149,7 +149,7 @@ export default function ShipmentsPage() {
             onClick={() => { setStatusFilter(f.value); setPage(1); }}
             className={`px-3 py-1.5 rounded-lg text-sm font-medium transition ${
               statusFilter === f.value
-                ? 'bg-blue-600 text-white'
+                ? 'bg-red-600 text-white'
                 : 'bg-white text-slate-600 border border-(--border-main) hover:bg-slate-50'
             }`}
           >
@@ -317,7 +317,7 @@ export default function ShipmentsPage() {
               {NEXT_STATUS[detail.status] && (
                 <button
                   onClick={() => handleStatusChange(detail.id, NEXT_STATUS[detail.status])}
-                  className="px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium"
+                  className="px-4 py-2 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium"
                 >
                   {NEXT_LABEL[detail.status]}
                 </button>
