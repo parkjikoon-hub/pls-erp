@@ -63,6 +63,11 @@ export default function QuotationsPage() {
   /* 라인별 가격 출처 표시 */
   const [linePriceSources, setLinePriceSources] = useState<Record<number, string>>({});
 
+  /* 거래처 견적요청서 업로드 */
+  const [rfqUploading, setRfqUploading] = useState(false);
+  const [rfqFileName, setRfqFileName] = useState('');
+  const [rfqMessage, setRfqMessage] = useState('');
+
   /* 재고 사전 체크 결과 */
   const [stockCheckResult, setStockCheckResult] = useState<QuotationCheckResult | null>(null);
   const [stockCheckLoading, setStockCheckLoading] = useState(false);
@@ -159,6 +164,8 @@ export default function QuotationsPage() {
       lines: [emptyLine()],
     });
     setLinePriceSources({});
+    setRfqFileName('');
+    setRfqMessage('');
     if (cid) loadCustomerPrices(cid);
     setShowModal(true);
   };
@@ -267,6 +274,55 @@ export default function QuotationsPage() {
       alert(e?.response?.data?.detail || '재고 체크 실패');
     } finally {
       setStockCheckLoading(false);
+    }
+  };
+
+  /* ── 견적요청서(RFQ) 파일 업로드 → OCR → 품목 자동 채움 ── */
+  const handleRfqUpload = async (file: File) => {
+    setRfqUploading(true);
+    setRfqFileName(file.name);
+    setRfqMessage('');
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      const res = await api.post('/sales/quotations/rfq-upload', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      const result = res.data?.data;
+      if (result?.success && result.items?.length > 0) {
+        /* 추출된 품목을 견적서 라인에 자동 채우기 */
+        const newLines: QuotationLine[] = result.items.map((item: any) => {
+          /* 품목 카탈로그에서 이름 매칭 */
+          const matched = products.find(
+            (p) => p.name === item.product_name || p.name.includes(item.product_name) || item.product_name.includes(p.name)
+          );
+          return {
+            product_id: matched?.id || '',
+            product_name: item.product_name,
+            quantity: item.quantity || 1,
+            unit_price: matched?.standard_price || 0,
+            discount_rate: 0,
+          };
+        });
+        setForm((prev) => ({ ...prev, lines: newLines }));
+        /* 거래처명으로 거래처 매칭 시도 */
+        if (result.customer_name) {
+          const matchedCustomer = customers.find(
+            (c) => c.name.includes(result.customer_name) || result.customer_name.includes(c.name)
+          );
+          if (matchedCustomer) {
+            setForm((prev) => ({ ...prev, customer_id: matchedCustomer.id }));
+            loadCustomerPrices(matchedCustomer.id);
+          }
+        }
+        setRfqMessage(`${result.items.length}개 품목 추출 완료`);
+      } else {
+        setRfqMessage(result?.message || '품목을 추출할 수 없습니다.');
+      }
+    } catch (e: any) {
+      setRfqMessage(e?.response?.data?.detail || '업로드 실패');
+    } finally {
+      setRfqUploading(false);
     }
   };
 
@@ -431,6 +487,46 @@ export default function QuotationsPage() {
             <h2 className="text-lg font-bold text-slate-800 mb-4">
               {editId ? '견적서 수정' : '견적서 작성'}
             </h2>
+
+            {/* 거래처 견적요청서 업로드 */}
+            {!editId && (
+              <div className="mb-4 p-4 border-2 border-dashed border-slate-300 rounded-xl bg-slate-50 hover:border-emerald-400 transition-colors">
+                <div className="flex items-center gap-3">
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-slate-700 mb-1">거래처 견적요청서 / 구매요청서 업로드</p>
+                    <p className="text-xs text-slate-500">PDF, 이미지 파일을 업로드하면 AI가 품목을 자동으로 추출합니다</p>
+                  </div>
+                  <label className={`px-4 py-2 rounded-lg text-sm font-medium cursor-pointer transition ${
+                    rfqUploading
+                      ? 'bg-slate-200 text-slate-400 cursor-wait'
+                      : 'bg-emerald-600 text-white hover:bg-emerald-700'
+                  }`}>
+                    {rfqUploading ? '분석 중...' : '파일 선택'}
+                    <input
+                      type="file"
+                      accept=".pdf,.png,.jpg,.jpeg,.webp"
+                      className="hidden"
+                      disabled={rfqUploading}
+                      onChange={(e) => {
+                        const f = e.target.files?.[0];
+                        if (f) handleRfqUpload(f);
+                        e.target.value = '';
+                      }}
+                    />
+                  </label>
+                </div>
+                {(rfqFileName || rfqMessage) && (
+                  <div className="mt-2 flex items-center gap-2 text-sm">
+                    {rfqFileName && <span className="text-slate-500">{rfqFileName}</span>}
+                    {rfqMessage && (
+                      <span className={rfqMessage.includes('완료') ? 'text-emerald-600 font-medium' : 'text-amber-600'}>
+                        {rfqMessage}
+                      </span>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* 헤더 정보 */}
             <div className="grid grid-cols-2 gap-4 mb-4">

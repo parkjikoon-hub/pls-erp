@@ -150,3 +150,88 @@ async def extract_order_from_pdf(file_bytes: bytes, filename: str) -> dict:
             "raw_text": "",
             "message": f"OCR 처리 중 오류가 발생했습니다: {str(e)}",
         }
+
+
+async def extract_quotation_request(file_bytes: bytes, filename: str) -> dict:
+    """
+    거래처 견적요청서/구매요청서 PDF/이미지에서 품목 목록을 추출합니다.
+    추출된 품목명과 수량으로 견적서 라인을 자동 채울 수 있습니다.
+    """
+    if not settings.GEMINI_API_KEY:
+        return {
+            "success": False,
+            "items": [],
+            "message": "Gemini API 키가 설정되지 않았습니다.",
+        }
+
+    try:
+        import google.generativeai as genai
+
+        genai.configure(api_key=settings.GEMINI_API_KEY)
+        model = genai.GenerativeModel("gemini-1.5-flash")
+
+        ext = filename.lower().rsplit(".", 1)[-1] if "." in filename else ""
+        mime_map = {
+            "pdf": "application/pdf",
+            "png": "image/png",
+            "jpg": "image/jpeg",
+            "jpeg": "image/jpeg",
+            "webp": "image/webp",
+        }
+        mime_type = mime_map.get(ext, "application/pdf")
+
+        prompt = """이 문서는 견적요청서 또는 구매요청서(RFQ)입니다.
+문서에서 요청 품목 목록을 추출해주세요.
+
+각 품목마다:
+- product_name: 품목명/제품명
+- specification: 규격/사양 (없으면 빈 문자열)
+- quantity: 요청 수량 (숫자, 없으면 0)
+- remark: 비고/특이사항 (없으면 빈 문자열)
+
+반드시 아래 JSON 형식으로만 응답하세요:
+{
+  "customer_name": "요청 거래처명 (있으면)",
+  "items": [
+    {"product_name": "품목명", "specification": "규격", "quantity": 100, "remark": ""}
+  ],
+  "notes": "전체 비고사항"
+}
+
+주의: 수량은 반드시 숫자로 변환하세요. 한국어/영문 문서 모두 처리 가능합니다.
+"""
+
+        response = await model.generate_content_async([
+            prompt,
+            {"mime_type": mime_type, "data": file_bytes},
+        ])
+
+        text = response.text.strip()
+        if "```" in text:
+            text = re.sub(r"```(?:json)?\s*", "", text).replace("```", "").strip()
+
+        data = json.loads(text)
+        items = data.get("items", [])
+        for item in items:
+            item["quantity"] = float(item.get("quantity", 0))
+
+        return {
+            "success": True,
+            "items": items,
+            "customer_name": data.get("customer_name", ""),
+            "notes": data.get("notes", ""),
+            "message": f"견적요청서에서 {len(items)}개 품목을 추출했습니다.",
+        }
+
+    except json.JSONDecodeError:
+        return {
+            "success": False,
+            "items": [],
+            "message": "AI 응답을 파싱할 수 없습니다. 다시 시도해주세요.",
+        }
+    except Exception as e:
+        return {
+            "success": False,
+            "items": [],
+            "message": f"OCR 처리 중 오류: {str(e)}",
+        }

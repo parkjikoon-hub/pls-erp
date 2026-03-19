@@ -4,7 +4,7 @@ M2 영업/수주 — 견적서 API 라우터
 import io
 import uuid
 from typing import Optional
-from fastapi import APIRouter, Depends, Query, Request
+from fastapi import APIRouter, Depends, Query, Request, UploadFile, File
 from fastapi.responses import StreamingResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -125,3 +125,34 @@ async def download_quotation_excel(
         media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         headers={"Content-Disposition": f"attachment; filename*=UTF-8''{encoded}"},
     )
+
+
+@router.post("/rfq-upload", summary="견적요청서 OCR 업로드")
+async def upload_rfq(
+    file: UploadFile = File(..., description="거래처 견적요청서/구매요청서 PDF 또는 이미지"),
+    current_user=Depends(get_current_user),
+):
+    """
+    거래처 견적요청서(RFQ) 파일을 업로드하면 AI가 품목을 추출합니다.
+    추출된 품목으로 견적서 라인을 자동 채웁니다.
+    """
+    ALLOWED = {"pdf", "png", "jpg", "jpeg", "webp"}
+    ext = file.filename.rsplit(".", 1)[-1].lower() if file.filename and "." in file.filename else ""
+    if ext not in ALLOWED:
+        return success_response({
+            "success": False,
+            "items": [],
+            "message": f"지원 형식: {', '.join(ALLOWED)}",
+        })
+
+    file_bytes = await file.read()
+    if len(file_bytes) > 10 * 1024 * 1024:
+        return success_response({
+            "success": False,
+            "items": [],
+            "message": "파일 크기가 10MB를 초과했습니다.",
+        })
+
+    from ..services.ocr_service import extract_quotation_request
+    result = await extract_quotation_request(file_bytes, file.filename or "document.pdf")
+    return success_response(result)
