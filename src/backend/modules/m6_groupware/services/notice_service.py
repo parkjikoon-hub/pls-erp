@@ -10,6 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from ..models import Notice
 from ...m1_system.models import User
 from ....audit.service import log_action
+from ...m7_notifications.services.notification_service import create_notification
 
 
 def _build_response(notice, author_name=None, include_content=False):
@@ -79,6 +80,27 @@ async def create_notice(db: AsyncSession, data, current_user, ip: str | None = N
         db=db, table_name="notices", record_id=notice.id,
         action="CREATE", changed_by=current_user.id, ip_address=ip,
     )
+
+    # 전체 사용자에게 알림 발송
+    try:
+        all_users = (await db.execute(
+            select(User.id).where(User.is_active == True)
+        )).scalars().all()
+        prefix = "[중요] " if data.is_important else ""
+        for uid in all_users:
+            if uid != current_user.id:
+                await create_notification(
+                    db, uid,
+                    notification_type="groupware",
+                    title=f"{prefix}새 공지: {data.title}",
+                    message=f"{current_user.name}님이 공지사항을 등록했습니다.",
+                    reference_type="notice",
+                    reference_id=notice.id,
+                    link="/groupware/notices",
+                )
+    except Exception:
+        pass  # 알림 실패해도 공지 등록은 성공 처리
+
     return _build_response(notice, current_user.name, include_content=True)
 
 

@@ -17,8 +17,12 @@ import {
   ArrowTrendingUpIcon,
   XMarkIcon,
 } from '@heroicons/react/24/solid';
+import {
+  MegaphoneIcon,
+} from '@heroicons/react/24/outline';
 import { useAuthStore } from '../stores/authStore';
 import api from '../api/client';
+import { listNotices, type NoticeListItem } from '../api/groupware/notices';
 
 /* ───── 타입 ───── */
 interface SummaryCards {
@@ -87,6 +91,9 @@ export default function DashboardPage() {
   const [loadingProducts, setLoadingProducts] = useState(false);
   const [activeBarIndex, setActiveBarIndex] = useState<number | null>(null);
 
+  /* 공지사항 */
+  const [notices, setNotices] = useState<NoticeListItem[]>([]);
+
   /* 요약 카드 데이터 로드 */
   const loadSummary = useCallback(async () => {
     try {
@@ -122,8 +129,17 @@ export default function DashboardPage() {
     }
   }, [selectedYear]);
 
+  /* 공지사항 데이터 로드 */
+  const loadNotices = useCallback(async () => {
+    try {
+      const res = await listNotices({ page: 1, size: 5 });
+      setNotices(res?.items || []);
+    } catch { /* ignore */ }
+  }, []);
+
   useEffect(() => { loadSummary(); }, [loadSummary]);
   useEffect(() => { loadMonthly(); }, [loadMonthly]);
+  useEffect(() => { loadNotices(); }, [loadNotices]);
 
   /* 차트 바 클릭 시 제품 상세 패널 열기 */
   const handleBarClick = (data: any) => {
@@ -256,6 +272,38 @@ export default function DashboardPage() {
         <div className="text-xs text-slate-400 mt-3 text-center">
           막대를 클릭하면 해당 월의 제품별 매출을 확인할 수 있습니다
         </div>
+      </div>
+
+      {/* ── 공지사항 위젯 ── */}
+      <div className="bg-(--bg-card) rounded-xl border border-(--border-main) overflow-hidden">
+        <div className="flex items-center justify-between px-5 py-3 border-b border-(--border-main) bg-(--bg-main)">
+          <div className="flex items-center gap-2">
+            <MegaphoneIcon className="w-4 h-4 text-amber-500" />
+            <h3 className="text-sm font-bold text-slate-700">공지사항</h3>
+          </div>
+          <a href="/groupware/notices" className="text-xs text-blue-600 hover:underline">전체보기</a>
+        </div>
+        {notices.length === 0 ? (
+          <div className="px-5 py-6 text-center text-sm text-slate-400">등록된 공지사항이 없습니다</div>
+        ) : (
+          <div className="divide-y divide-(--border-main)">
+            {notices.map((n) => (
+              <div key={n.id} className="flex items-center gap-3 px-5 py-3 hover:bg-(--bg-main)/50 transition-colors">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    {n.is_pinned && <span className="text-[10px] px-1.5 py-0.5 bg-amber-100 text-amber-700 rounded font-medium">고정</span>}
+                    {n.is_important && <span className="text-[10px] px-1.5 py-0.5 bg-red-100 text-red-600 rounded font-medium">중요</span>}
+                    <span className="text-sm text-slate-800 truncate">{n.title}</span>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3 text-xs text-slate-400 shrink-0">
+                  <span>{n.author_name || '-'}</span>
+                  <span>{n.created_at?.slice(0, 10) || '-'}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* ── 제품별 매출 상세 패널 (월 클릭 시 표시) ── */}
