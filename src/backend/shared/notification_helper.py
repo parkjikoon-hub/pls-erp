@@ -147,3 +147,28 @@ async def notify_safety_stock_alert(
             reference_id=product_id,
             link="/production/inventory",
         )
+
+
+# ── 견적서 사전 체크 — 원자재 부족 알림 ──
+
+async def notify_quotation_material_check(
+    db: AsyncSession,
+    quote_no: str,
+    shortage_materials: list[str],
+):
+    """견적서 재고 사전 체크에서 원자재 부족 발견 시 관리자/매니저에게 알림"""
+    if not shortage_materials:
+        return
+
+    admin_ids = await _get_admin_user_ids(db)
+    count = len(shortage_materials)
+    names = ", ".join(shortage_materials[:5])
+    title = f"견적서 {quote_no} 원자재 사전 체크 — 구매 필요"
+    message = f"견적서 {quote_no} 사전 체크 결과, 원자재 {count}건이 부족합니다: {names}"
+
+    for uid in admin_ids:
+        await _safe_notify(
+            db, uid, "sales", title, message,
+            reference_type="quotation",
+            link="/sales/quotations",
+        )

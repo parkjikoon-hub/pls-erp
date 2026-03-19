@@ -1,10 +1,12 @@
 """
 M2 영업/수주 — 수주 API 라우터
 """
+import io
 import uuid
 from datetime import date
 from typing import Optional
 from fastapi import APIRouter, Depends, Query, Request
+from fastapi.responses import StreamingResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ....database import get_db
@@ -115,3 +117,19 @@ async def delete_order(
     ip = request.client.host if request.client else None
     result = await order_service.delete_order(db, order_id, current_user, ip)
     return success_response(data=result, message=result["message"])
+
+
+@router.get("/{order_id}/download-statement", summary="거래명세서 Excel 다운로드")
+async def download_statement_excel(
+    order_id: uuid.UUID,
+    db: AsyncSession = Depends(get_db),
+    current_user=Depends(get_current_user),
+):
+    """수주 데이터를 거래명세서 양식 Excel로 다운로드합니다"""
+    content = await order_service.generate_statement_excel(db, order_id)
+    filename = f"거래명세서_{order_id}.xlsx"
+    return StreamingResponse(
+        io.BytesIO(content),
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": f"attachment; filename*=UTF-8''{filename}"},
+    )

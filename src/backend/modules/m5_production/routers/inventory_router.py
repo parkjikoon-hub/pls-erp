@@ -158,3 +158,33 @@ async def check_order_materials(
     """수주서 기준으로 BOM을 전개하여 필요한 원자재와 부족분을 계산합니다"""
     data = await inventory_service.check_order_materials(db, order_id)
     return success_response(data=data)
+
+
+# ── 견적서 단계 재고/원자재 사전 체크 ──
+
+from pydantic import BaseModel, Field
+from typing import List
+
+class QuotationCheckLine(BaseModel):
+    """견적서 품목 라인"""
+    product_id: str = Field(..., description="품목 UUID")
+    quantity: float = Field(..., gt=0, description="요청 수량")
+
+class QuotationCheckRequest(BaseModel):
+    """견적서 재고 사전 체크 요청"""
+    lines: List[QuotationCheckLine] = Field(..., min_length=1)
+
+@router.post("/inventory/quotation-check", summary="견적서 재고/원자재 사전 체크")
+async def check_quotation_materials(
+    body: QuotationCheckRequest,
+    db: AsyncSession = Depends(get_db),
+    current_user=Depends(get_current_user),
+):
+    """
+    견적서 품목 기준 재고/원자재 사전 체크
+    - 완제품 재고 확인 → 부족분 BOM 전개 → 원자재 재고 확인
+    - 결과: 즉시 출하 가능 / 생산 필요(원자재 확보) / 원자재 구매 필요
+    """
+    lines = [{"product_id": l.product_id, "quantity": l.quantity} for l in body.lines]
+    data = await inventory_service.check_quotation_materials(db, lines)
+    return success_response(data=data)

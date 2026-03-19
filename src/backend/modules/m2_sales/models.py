@@ -249,3 +249,47 @@ class SalesOrderLine(Base):
     # 관계
     sales_order: Mapped["SalesOrder"] = relationship(back_populates="lines")
     product = relationship("Product", foreign_keys=[product_id])
+
+
+# ── 거래처별 판매가 ──────────────────────────────────────
+
+class CustomerPriceList(Base):
+    """거래처별 품목 특별 단가 — 기본가(products.standard_price)보다 우선 적용"""
+    __tablename__ = "customer_price_lists"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4,
+    )
+    customer_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("customers.id"), nullable=False, comment="거래처",
+    )
+    product_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("products.id"), nullable=False, comment="품목",
+    )
+    unit_price: Mapped[float] = mapped_column(
+        Numeric(15, 2), nullable=False, comment="특별 단가",
+    )
+    valid_from: Mapped[date | None] = mapped_column(Date, comment="유효 시작일")
+    valid_until: Mapped[date | None] = mapped_column(Date, comment="유효 종료일")
+    notes: Mapped[str | None] = mapped_column(String(500), comment="비고")
+
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(),
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now(),
+    )
+    created_by: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("users.id"), comment="작성자",
+    )
+
+    # 관계
+    customer = relationship("Customer", foreign_keys=[customer_id])
+    product = relationship("Product", foreign_keys=[product_id])
+
+    __table_args__ = (
+        UniqueConstraint("customer_id", "product_id", "valid_from", name="uq_customer_product_valid"),
+        Index("idx_price_customer", "customer_id"),
+        Index("idx_price_product", "product_id"),
+    )

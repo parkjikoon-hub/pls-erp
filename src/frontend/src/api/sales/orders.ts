@@ -114,3 +114,16 @@ export async function deleteOrder(id: string) {
   const { data } = await api.delete(`/sales/orders/${id}`);
   return data;
 }
+
+/** 거래명세서 Excel 다운로드 */
+export async function downloadStatementExcel(id: string) {
+  const response = await api.get(`/sales/orders/${id}/download-statement`, {
+    responseType: 'blob',
+  });
+  const url = window.URL.createObjectURL(new Blob([response.data]));
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `거래명세서_${id}.xlsx`;
+  a.click();
+  window.URL.revokeObjectURL(url);
+}

@@ -1,9 +1,11 @@
 """
 M2 영업/수주 — 견적서 API 라우터
 """
+import io
 import uuid
 from typing import Optional
 from fastapi import APIRouter, Depends, Query, Request
+from fastapi.responses import StreamingResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ....database import get_db
@@ -98,3 +100,19 @@ async def update_quotation_status(
         db, quotation_id, new_status, current_user, ip,
     )
     return success_response(data=result, message=f"견적서 상태가 '{new_status}'(으)로 변경되었습니다")
+
+
+@router.get("/{quotation_id}/download-excel", summary="견적서 Excel 다운로드")
+async def download_quotation_excel(
+    quotation_id: uuid.UUID,
+    db: AsyncSession = Depends(get_db),
+    current_user=Depends(get_current_user),
+):
+    """견적서를 한국 표준 양식 Excel로 다운로드합니다"""
+    content = await quotation_service.generate_quotation_excel(db, quotation_id)
+    filename = f"견적서_{quotation_id}.xlsx"
+    return StreamingResponse(
+        io.BytesIO(content),
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": f"attachment; filename*=UTF-8''{filename}"},
+    )

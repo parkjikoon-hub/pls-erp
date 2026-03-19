@@ -202,6 +202,30 @@ class Product(Base):
     category = relationship("ProductCategory", back_populates="products")
 
 
+# ── 회사 정보 (양식 출력 등에 사용) ──
+class CompanyInfo(Base):
+    """회사 기본 정보 (사업자등록증 기준, 1건만 존재)"""
+    __tablename__ = "company_info"
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    company_name: Mapped[str] = mapped_column(String(200), nullable=False, comment="회사명")
+    business_no: Mapped[str | None] = mapped_column(String(20), comment="사업자등록번호")
+    corp_no: Mapped[str | None] = mapped_column(String(20), comment="법인등록번호")
+    ceo_name: Mapped[str | None] = mapped_column(String(100), comment="대표자명")
+    address: Mapped[str | None] = mapped_column(Text, comment="주소")
+    business_type: Mapped[str | None] = mapped_column(String(100), comment="업태")
+    business_item: Mapped[str | None] = mapped_column(String(100), comment="종목")
+    phone: Mapped[str | None] = mapped_column(String(30), comment="전화번호")
+    fax: Mapped[str | None] = mapped_column(String(30), comment="팩스")
+    email: Mapped[str | None] = mapped_column(String(255), comment="이메일")
+    bank_name: Mapped[str | None] = mapped_column(String(50), comment="은행명")
+    bank_account: Mapped[str | None] = mapped_column(String(50), comment="계좌번호")
+    bank_holder: Mapped[str | None] = mapped_column(String(50), comment="예금주")
+    logo_path: Mapped[str | None] = mapped_column(String(500), comment="로고 이미지 경로")
+    stamp_path: Mapped[str | None] = mapped_column(String(500), comment="직인 이미지 경로")
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
+
 # ── 동적 폼 빌더 설정 (M1-F01) ──
 class FormConfig(Base):
     """동적 폼 필드 구성 (모듈별 커스텀 폼)"""

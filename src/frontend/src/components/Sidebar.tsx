@@ -1,129 +1,210 @@
 /**
- * 사이드바 — 아이콘 박스 + 텍스트 박스 분리 디자인
- * 각 모듈별 컬러 아이콘이 독립된 사각 박스 안에 표시됩니다.
- * 사용자의 allowed_modules에 따라 접근 가능한 모듈만 표시합니다.
+ * 사이드바 — 138px 고정 너비, 아이콘(56px 원형) + 라벨(13px) 세로 배치
+ * 목업 redesign-A2-v2 기준으로 구현
  */
-import { NavLink } from 'react-router-dom';
-import {
-  Cog6ToothIcon,
-  CurrencyDollarIcon,
-  UserGroupIcon,
-  ShoppingCartIcon,
-  WrenchScrewdriverIcon,
-  ChatBubbleLeftRightIcon,
-  BellIcon,
-  HomeIcon,
-  ChevronDoubleLeftIcon,
-  ChevronDoubleRightIcon,
-} from '@heroicons/react/24/solid';
-import { useSidebarStore } from '../stores/sidebarStore';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../stores/authStore';
+import { MODULES, getActiveModule } from '../config/moduleConfig';
 
-/* 모듈별 네비게이션 항목 — moduleKey로 권한 필터링 */
-const navItems = [
-  { path: '/', label: '대시보드', icon: HomeIcon, bg: 'from-emerald-400 to-emerald-600', color: '#10b981', moduleKey: null },
-  { path: '/system', label: '시스템관리', icon: Cog6ToothIcon, bg: 'from-blue-400 to-blue-600', color: '#3b82f6', moduleKey: 'system' },
-  { path: '/sales', label: '영업관리', icon: ShoppingCartIcon, bg: 'from-emerald-400 to-emerald-600', color: '#10b981', moduleKey: 'sales' },
-  { path: '/production', label: '생산관리', icon: WrenchScrewdriverIcon, bg: 'from-red-400 to-red-600', color: '#ef4444', moduleKey: 'production' },
-  { path: '/finance', label: '재무회계', icon: CurrencyDollarIcon, bg: 'from-amber-400 to-amber-600', color: '#f59e0b', moduleKey: 'finance' },
-  { path: '/hr', label: '인사급여', icon: UserGroupIcon, bg: 'from-purple-400 to-purple-600', color: '#8b5cf6', moduleKey: 'hr' },
-  { path: '/groupware', label: '그룹웨어', icon: ChatBubbleLeftRightIcon, bg: 'from-cyan-400 to-cyan-600', color: '#06b6d4', moduleKey: 'groupware' },
-  { path: '/notifications', label: '알림센터', icon: BellIcon, bg: 'from-orange-400 to-orange-600', color: '#f97316', moduleKey: 'notifications' },
-];
+/** 모듈별 SVG 아이콘 — 목업과 동일한 stroke 기반 아이콘 */
+const ICONS: Record<string, React.ReactNode> = {
+  dashboard: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
+      <rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/>
+    </svg>
+  ),
+  settings: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="3"/>
+      <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+    </svg>
+  ),
+  trending: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/>
+    </svg>
+  ),
+  factory: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M2 20h20"/><path d="M5 20V8l5 4V8l5 4V4h3a2 2 0 0 1 2 2v14"/>
+      <path d="M8 16h.01"/><path d="M12 16h.01"/><path d="M16 16h.01"/>
+    </svg>
+  ),
+  wallet: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/>
+      <path d="M18 12a2 2 0 0 0 0 4h4v-4z"/>
+    </svg>
+  ),
+  people: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+      <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+    </svg>
+  ),
+  mail: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="2" y="4" width="20" height="16" rx="2"/>
+      <path d="M22 7l-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
+    </svg>
+  ),
+  bell: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+      <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+    </svg>
+  ),
+};
+
+/** 색상을 밝게 만드는 헬퍼 */
+function lightenColor(hex: string, percent: number): string {
+  const num = parseInt(hex.replace('#', ''), 16);
+  const r = Math.min(255, (num >> 16) + Math.round(255 * percent / 100));
+  const g = Math.min(255, ((num >> 8) & 0x00FF) + Math.round(255 * percent / 100));
+  const b = Math.min(255, (num & 0x0000FF) + Math.round(255 * percent / 100));
+  return `#${(r << 16 | g << 8 | b).toString(16).padStart(6, '0')}`;
+}
 
 export default function Sidebar() {
-  const { isCollapsed, toggle } = useSidebarStore();
+  const location = useLocation();
+  const navigate = useNavigate();
   const { hasModuleAccess } = useAuthStore();
+  const activeModule = getActiveModule(location.pathname);
 
   /* 접근 가능한 모듈만 필터링 (대시보드는 항상 표시) */
-  const visibleItems = navItems.filter(
-    (item) => item.moduleKey === null || hasModuleAccess(item.moduleKey)
+  const visibleModules = MODULES.filter(
+    (m) => m.moduleKey === null || hasModuleAccess(m.moduleKey)
   );
+
+  const handleClick = (mod: typeof MODULES[0]) => {
+    if (mod.id === 'dashboard') {
+      navigate('/');
+    } else if (mod.tabs.length > 0) {
+      /* 탭이 있는 모듈: 첫 번째 세부 페이지로 이동 */
+      navigate(mod.tabs[0].path);
+    } else {
+      /* 탭이 없는 모듈 (알림센터 등): 모듈 경로로 이동 */
+      navigate('/' + mod.id);
+    }
+  };
 
   return (
     <aside
-      className={`flex flex-col h-screen bg-[#0f172a] text-slate-400 transition-all duration-300 ${
-        isCollapsed ? 'w-[68px]' : 'w-[230px]'
-      }`}
+      style={{
+        width: 138,
+        minWidth: 138,
+        background: `linear-gradient(180deg, var(--sidebar-bg-start), var(--sidebar-bg-end))`,
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        padding: '20px 0 14px',
+        gap: 2,
+        zIndex: 100,
+        overflowY: 'auto',
+        overflowX: 'hidden',
+        height: '100vh',
+      }}
+      className="sidebar-scrollbar"
     >
-      {/* 로고 영역 */}
-      <div className="flex items-center gap-2.5 px-3.5 h-14 border-b border-slate-700/50">
-        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center text-white text-sm font-bold flex-shrink-0 shadow-lg shadow-emerald-500/20">
-          P
-        </div>
-        {!isCollapsed && (
-          <span className="text-slate-200 font-bold text-[15px] whitespace-nowrap tracking-tight">
-            PLS <span className="text-emerald-400">ERP</span>
-          </span>
-        )}
+      {/* 로고 */}
+      <div style={{ fontSize: 26, fontWeight: 700, color: '#ffffff', letterSpacing: '0.5px', marginBottom: 6 }}>
+        PLS-ERP
       </div>
+      {/* 로고 아래 구분선 */}
+      <div style={{
+        width: 48,
+        height: 2,
+        borderRadius: 1,
+        background: activeModule?.color || '#10b981',
+        marginBottom: 20,
+        transition: 'background 0.3s',
+      }} />
 
-      {/* 네비게이션 */}
-      <nav className="flex-1 py-3 px-2 overflow-y-auto space-y-1">
-        {visibleItems.map((item) => {
-          const Icon = item.icon;
-          return (
-            <NavLink
-              key={item.path}
-              to={item.path}
-              end={item.path === '/'}
-              className={({ isActive }) =>
-                `flex items-center gap-2.5 px-2 py-2 rounded-xl transition-all duration-200 group ${
-                  isActive
-                    ? 'bg-slate-700/70 shadow-sm'
-                    : 'hover:bg-slate-800/60'
-                }`
-              }
+      {/* 네비게이션 항목 */}
+      {visibleModules.map((mod) => {
+        const isActive = activeModule?.id === mod.id;
+        const icon = ICONS[mod.iconName];
+
+        return (
+          <div
+            key={mod.id}
+            onClick={() => handleClick(mod)}
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: 6,
+              padding: '10px 0',
+              width: 118,
+              cursor: 'pointer',
+              borderRadius: 14,
+              transition: 'all 0.2s',
+              position: 'relative',
+            }}
+            className={`sidebar-item-hover ${isActive ? 'sidebar-item-active' : ''}`}
+          >
+            {/* 아이콘 원형 배경 */}
+            <div
+              style={{
+                width: 56,
+                height: 56,
+                borderRadius: '50%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                transition: 'all 0.2s',
+                background: isActive
+                  ? `linear-gradient(135deg, ${mod.color}, ${lightenColor(mod.color, 30)})`
+                  : 'rgba(255,255,255,0.12)',
+                boxShadow: isActive ? `0 4px 12px ${mod.color}44` : 'none',
+              }}
             >
-              {({ isActive }) => (
-                <>
-                  {/* 아이콘 박스 — 독립된 사각형 */}
-                  <div
-                    className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 transition-all duration-200 ${
-                      isActive
-                        ? `bg-gradient-to-br ${item.bg} shadow-md`
-                        : 'bg-slate-800/80 group-hover:bg-slate-700/80'
-                    }`}
-                    style={isActive ? undefined : { boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.3)' }}
-                  >
-                    <Icon
-                      className={`w-[18px] h-[18px] transition-colors duration-200 ${
-                        isActive ? 'text-white' : 'text-slate-400 group-hover:text-slate-200'
-                      }`}
-                      style={isActive ? undefined : { color: item.color }}
-                    />
-                  </div>
+              <div style={{
+                width: 30,
+                height: 30,
+                color: isActive ? '#fff' : 'rgba(255,255,255,0.75)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}>
+                {icon}
+              </div>
+            </div>
 
-                  {/* 텍스트 박스 — 아이콘과 분리된 영역 */}
-                  {!isCollapsed && (
-                    <div
-                      className={`flex-1 px-2.5 py-1.5 rounded-lg transition-all duration-200 ${
-                        isActive
-                          ? 'bg-slate-600/40 text-slate-100'
-                          : 'bg-transparent text-slate-400 group-hover:bg-slate-700/40 group-hover:text-slate-200'
-                      }`}
-                    >
-                      <span className="text-[14px] font-semibold whitespace-nowrap">{item.label}</span>
-                    </div>
-                  )}
-                </>
-              )}
-            </NavLink>
-          );
-        })}
-      </nav>
+            {/* 라벨 */}
+            <span style={{
+              fontSize: 13,
+              fontWeight: 600,
+              color: isActive ? '#ffffff' : 'var(--sidebar-text)',
+              textAlign: 'center',
+              transition: 'color 0.2s',
+              lineHeight: 1.3,
+            }}>
+              {mod.name}
+            </span>
 
-      {/* 접기/펼치기 버튼 */}
-      <button
-        onClick={toggle}
-        className="flex items-center justify-center h-11 border-t border-slate-700/50 hover:bg-slate-800 transition-colors"
-      >
-        {isCollapsed ? (
-          <ChevronDoubleRightIcon className="w-4 h-4" />
-        ) : (
-          <ChevronDoubleLeftIcon className="w-4 h-4" />
-        )}
-      </button>
+            {/* 활성 표시 점 */}
+            {isActive && (
+              <div style={{
+                position: 'absolute',
+                bottom: 0,
+                width: 6,
+                height: 6,
+                borderRadius: '50%',
+                background: mod.color,
+              }} />
+            )}
+          </div>
+        );
+      })}
+
+      {/* 사이드바 호버 및 스크롤바 숨김 CSS */}
+      <style>{`
+        .sidebar-scrollbar::-webkit-scrollbar { width: 0; }
+        .sidebar-item-hover:hover { background: rgba(255,255,255,0.06); }
+        .sidebar-item-hover:hover span { color: var(--sidebar-text-hover) !important; }
+      `}</style>
     </aside>
   );
 }

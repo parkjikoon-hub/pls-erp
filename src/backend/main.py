@@ -39,7 +39,28 @@ async def lifespan(app: FastAPI):
     except Exception as e:
         _log.warning(f"DB 테이블 동기화 실패 (무시): {e}")
 
-    # 시작 2: M5 창고 시드 데이터 (실패해도 앱은 계속 실행)
+    # 시작 2: 회사 정보 시드 데이터 (최초 1회)
+    try:
+        from .modules.m1_system.models import CompanyInfo
+        from sqlalchemy import select as sa_select
+        async with AsyncSessionLocal() as db:
+            existing = await db.execute(sa_select(CompanyInfo).limit(1))
+            if existing.scalar_one_or_none() is None:
+                db.add(CompanyInfo(
+                    company_name="(주)피엘에스",
+                    business_no="704-88-01943",
+                    corp_no="195411-0039707",
+                    ceo_name="위봉길, 강현철",
+                    address="경상남도 진주시 사봉면 산업단지로43번길 39",
+                    business_type="제조업",
+                    business_item="소방기구, 배관",
+                ))
+                await db.commit()
+                _log.info("회사 정보 시드 데이터 생성 완료")
+    except Exception as e:
+        _log.warning(f"회사 정보 시드 데이터 생성 실패 (무시): {e}")
+
+    # 시작 3: M5 창고 시드 데이터 (실패해도 앱은 계속 실행)
     try:
         from .modules.m5_production.seed import seed_warehouses
         async with AsyncSessionLocal() as db:

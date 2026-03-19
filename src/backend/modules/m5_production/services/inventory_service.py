@@ -542,3 +542,136 @@ async def check_order_materials(db: AsyncSession, order_id: uuid.UUID):
         "materials": results,
         "has_shortage": any(r["is_shortage"] for r in results),
     }
+
+
+# ── 견적서 단계 재고/원자재 사전 체크 ──
+
+async def check_quotation_materials(
+    db: AsyncSession,
+    lines: list[dict],
+):
+    """
+    견적서 품목 기준 재고/원자재 사전 체크
+    - lines: [{ product_id: str, quantity: float }, ...]
+
+    응답 구조:
+    {
+      items: [{ product_id, product_name, requested_qty, finished_stock,
+                finished_shortage, need_production, materials: [...] }],
+      summary: { ready_to_ship, can_produce, need_purchase, shortage_materials }
+    }
+    """
+    from .bom_service import _build_tree, _flatten_tree
+
+    # 완제품 창고(finished) 조회
+    fin_wh = await db.execute(
+        select(Warehouse).where(Warehouse.zone_type == "finished", Warehouse.is_active.is_(True))
+    )
+    fin_wh_ids = [w.id for w in fin_wh.scalars().all()]
+
+    # 원자재 창고(raw) 조회
+    raw_wh = await db.execute(
+        select(Warehouse).where(Warehouse.zone_type == "raw", Warehouse.is_active.is_(True))
+    )
+    raw_wh_ids = [w.id for w in raw_wh.scalars().all()]
+
+    items_result = []
+    all_shortage_materials = []
+
+    for line in lines:
+        pid_str = line.get("product_id")
+        qty = float(line.get("quantity", 0))
+        if not pid_str or qty <= 0:
+            continue
+
+        pid = uuid.UUID(pid_str)
+
+        # 품목 정보 조회
+        prod = await db.get(Product, pid)
+        product_name = prod.name if prod else "알 수 없음"
+        product_code = prod.code if prod else ""
+
+        # 완제품 재고 합산
+        finished_stock = 0.0
+        if fin_wh_ids:
+            inv_result = await db.execute(
+                select(func.coalesce(func.sum(Inventory.quantity), 0))
+                .where(
+                    Inventory.product_id == pid,
+                    Inventory.warehouse_id.in_(fin_wh_ids),
+                    Inventory.status == "available",
+                )
+            )
+            finished_stock = float(inv_result.scalar() or 0)
+
+        finished_shortage = max(0, qty - finished_stock)
+        need_production = finished_shortage > 0
+
+        # BOM 전개 → 원자재 소요량 (부족분 기준)
+        materials = []
+        if need_production:
+            total_requirements: dict = {}
+            children = await _build_tree(db, pid, finished_shortage)
+            root_node = {
+                "product_id": pid_str,
+                "children": children,
+            }
+            _flatten_tree(root_node, total_requirements)
+
+            # 각 원자재 재고 확인
+            for mat_pid_str, req in total_requirements.items():
+                mat_pid = uuid.UUID(mat_pid_str)
+                current_stock = 0.0
+                if raw_wh_ids:
+                    mat_inv = await db.execute(
+                        select(func.coalesce(func.sum(Inventory.quantity), 0))
+                        .where(
+                            Inventory.product_id == mat_pid,
+                            Inventory.warehouse_id.in_(raw_wh_ids),
+                            Inventory.status == "available",
+                        )
+                    )
+                    current_stock = float(mat_inv.scalar() or 0)
+
+                required_qty = req["total_quantity"]
+                shortage_qty = max(0, required_qty - current_stock)
+                is_shortage = shortage_qty > 0
+
+                if is_shortage:
+                    all_shortage_materials.append(req.get("product_name", ""))
+
+                materials.append({
+                    "material_id": mat_pid_str,
+                    "material_name": req.get("product_name", ""),
+                    "material_code": req.get("product_code", ""),
+                    "required_qty": round(required_qty, 4),
+                    "current_stock": current_stock,
+                    "shortage_qty": round(shortage_qty, 4),
+                    "is_shortage": is_shortage,
+                })
+
+        items_result.append({
+            "product_id": pid_str,
+            "product_name": product_name,
+            "product_code": product_code,
+            "requested_qty": qty,
+            "finished_stock": finished_stock,
+            "finished_shortage": round(finished_shortage, 4),
+            "need_production": need_production,
+            "materials": materials,
+        })
+
+    # 종합 판정
+    all_ready = all(not item["need_production"] for item in items_result)
+    has_any_shortage = len(all_shortage_materials) > 0
+    can_produce = not all_ready and not has_any_shortage
+
+    return {
+        "items": items_result,
+        "summary": {
+            "ready_to_ship": all_ready,
+            "can_produce": can_produce,
+            "need_purchase": has_any_shortage,
+            "shortage_materials": list(set(all_shortage_materials)),
+        },
+    }

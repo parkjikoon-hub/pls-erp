@@ -102,3 +102,26 @@ export async function updateQuotationStatus(id: string, newStatus: string) {
   });
   return data;
 }
+
+/** 견적서 Excel 다운로드 */
+export async function downloadQuotationExcel(id: string) {
+  const response = await api.get(`/sales/quotations/${id}/download-excel`, {
+    responseType: 'blob',
+  });
+  const url = window.URL.createObjectURL(new Blob([response.data]));
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `견적서_${id}.xlsx`;
+  a.click();
+  window.URL.revokeObjectURL(url);
+}
+
+/** 견적서 → 수주 전환 */
+export async function convertToOrder(quotationId: string, orderDate: string) {
+  const { data } = await api.post(
+    `/sales/orders/from-quotation/${quotationId}`,
+    null,
+    { params: { order_date: orderDate } },
+  );
+  return data;
+}

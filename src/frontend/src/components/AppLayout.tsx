@@ -1,11 +1,12 @@
 /**
- * 앱 메인 레이아웃 — 사이드바 + 헤더 + 콘텐츠 영역
- * 로그인 후 표시되는 전체 화면 구조입니다.
+ * 앱 메인 레이아웃 — 사이드바(138px) + 헤더(56px) + 탭바(50px) + 콘텐츠
+ * 목업 redesign-A2-v2 기준 4영역 레이아웃
  */
 import { Outlet } from 'react-router-dom';
 import { useEffect } from 'react';
 import Sidebar from './Sidebar';
 import Header from './Header';
+import TabBar from './TabBar';
 import ChatWidget from './ChatWidget';
 import { useAuthStore } from '../stores/authStore';
 
@@ -17,16 +18,17 @@ export default function AppLayout() {
   }, [fetchUser]);
 
   return (
-    <div className="flex h-screen overflow-hidden">
-      {/* 좌측: 다크 사이드바 */}
+    <div style={{ display: 'flex', height: '100vh', overflow: 'hidden' }}>
+      {/* 좌측: 사이드바 (138px 고정) */}
       <Sidebar />
 
-      {/* 우측: 헤더 + 콘텐츠 */}
-      <div className="flex flex-col flex-1 overflow-hidden">
+      {/* 우측: 헤더 + 탭바 + 콘텐츠 */}
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minWidth: 0 }}>
         <Header />
+        <TabBar />
 
-        {/* 콘텐츠 영역 — 슬레이트 블루그레이 배경 */}
-        <main className="flex-1 overflow-y-auto p-6 bg-(--bg-main)">
+        {/* 콘텐츠 영역 */}
+        <main style={{ flex: 1, overflowY: 'auto', padding: 24, background: 'var(--bg-base)' }}>
           <Outlet />
         </main>
       </div>

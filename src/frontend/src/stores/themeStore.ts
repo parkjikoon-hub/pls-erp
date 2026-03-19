@@ -16,9 +16,10 @@ const getInitialDark = (): boolean => {
   return false; // 기본값: 라이트모드
 };
 
-/* <html> 태그에 dark 클래스 적용/제거 */
+/* html + body 태그에 dark 클래스 적용/제거 */
 const applyTheme = (isDark: boolean) => {
   document.documentElement.classList.toggle('dark', isDark);
+  document.body.classList.toggle('dark', isDark);
   localStorage.setItem('pls-theme', isDark ? 'dark' : 'light');
 };
 

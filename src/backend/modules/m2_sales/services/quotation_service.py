@@ -355,3 +355,190 @@ async def update_quotation_status(
     )
 
     return {"id": str(q.id), "status": new_status}
+
+
+async def generate_quotation_excel(db: AsyncSession, quotation_id: uuid.UUID) -> bytes:
+    """견적서 Excel 양식 생성 (한국 표준 양식)"""
+    import io
+    import openpyxl
+    from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+    from openpyxl.utils import get_column_letter
+
+    # ── 데이터 조회 ──
+    result = await db.execute(
+        select(Quotation)
+        .options(
+            selectinload(Quotation.lines).selectinload(QuotationLine.product),
+            selectinload(Quotation.customer),
+            selectinload(Quotation.sales_rep),
+        )
+        .where(Quotation.id == quotation_id, Quotation.is_active.is_(True))
+    )
+    q = result.scalar_one_or_none()
+    if not q:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "견적서를 찾을 수 없습니다")
+
+    # 회사 정보 조회
+    from ...m1_system.models import CompanyInfo
+    ci_result = await db.execute(select(CompanyInfo).limit(1))
+    ci = ci_result.scalar_one_or_none()
+
+    # ── 워크북 생성 ──
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "견적서"
+
+    # 스타일 정의
+    thin = Side(style="thin")
+    border_all = Border(left=thin, right=thin, top=thin, bottom=thin)
+    title_font = Font(name="맑은 고딕", size=20, bold=True)
+    header_font = Font(name="맑은 고딕", size=10, bold=True)
+    normal_font = Font(name="맑은 고딕", size=10)
+    small_font = Font(name="맑은 고딕", size=9)
+    center = Alignment(horizontal="center", vertical="center")
+    left_al = Alignment(horizontal="left", vertical="center")
+    right_al = Alignment(horizontal="right", vertical="center")
+    header_fill = PatternFill(start_color="D9E2F3", fill_type="solid")
+
+    # 열 너비 설정 (A~G: No, 품명, 규격, 수량, 단가, 금액, 비고)
+    col_widths = [6, 28, 14, 10, 14, 16, 14]
+    for i, w in enumerate(col_widths, 1):
+        ws.column_dimensions[get_column_letter(i)].width = w
+
+    row = 1
+
+    # ── 제목 ──
+    ws.merge_cells(start_row=row, start_column=1, end_row=row, end_column=7)
+    cell = ws.cell(row=row, column=1, value="견   적   서")
+    cell.font = title_font
+    cell.alignment = center
+    row += 2
+
+    # ── 회사 정보 (좌측) + 수신처 (우측) ──
+    company_name = ci.company_name if ci else "(주)피엘에스"
+    business_no = ci.business_no if ci else ""
+    ceo_name = ci.ceo_name if ci else ""
+    address = ci.address if ci else ""
+    biz_type = ci.business_type if ci else ""
+    biz_item = ci.business_item if ci else ""
+    phone = ci.phone if ci else ""
+    fax = ci.fax if ci else ""
+
+    # 공급자 정보
+    info_data = [
+        ("공급자", company_name),
+        ("사업자번호", business_no),
+        ("대 표 자", ceo_name),
+        ("주    소", address),
+        ("업태 / 종목", f"{biz_type} / {biz_item}"),
+        ("TEL / FAX", f"{phone or ''} / {fax or ''}"),
+    ]
+    for label, value in info_data:
+        ws.cell(row=row, column=1, value=label).font = header_font
+        ws.cell(row=row, column=1).alignment = right_al
+        ws.merge_cells(start_row=row, start_column=2, end_row=row, end_column=4)
+        ws.cell(row=row, column=2, value=value).font = normal_font
+        ws.cell(row=row, column=2).alignment = left_al
+        row += 1
+
+    row += 1
+
+    # ── 수신처 + 견적 정보 ──
+    customer_name = q.customer.name if q.customer else ""
+    ws.merge_cells(start_row=row, start_column=1, end_row=row, end_column=4)
+    ws.cell(row=row, column=1, value=f"수  신 : {customer_name} 귀하").font = Font(name="맑은 고딕", size=12, bold=True)
+    row += 1
+
+    qt_info = [
+        ("견적번호", q.quote_no),
+        ("견적일자", str(q.quote_date)),
+        ("유효기간", str(q.valid_until) if q.valid_until else "-"),
+        ("합계금액", f"₩{q.grand_total:,.0f} (부가세 포함)"),
+    ]
+    for label, value in qt_info:
+        ws.cell(row=row, column=1, value=label).font = header_font
+        ws.cell(row=row, column=1).alignment = right_al
+        ws.merge_cells(start_row=row, start_column=2, end_row=row, end_column=4)
+        ws.cell(row=row, column=2, value=value).font = normal_font
+        row += 1
+
+    row += 1
+
+    # ── 품목 테이블 헤더 ──
+    headers = ["No", "품명", "규격", "수량", "단가", "금액", "비고"]
+    for col_idx, h in enumerate(headers, 1):
+        cell = ws.cell(row=row, column=col_idx, value=h)
+        cell.font = header_font
+        cell.alignment = center
+        cell.fill = header_fill
+        cell.border = border_all
+    row += 1
+
+    # ── 품목 라인 ──
+    for ln in q.lines:
+        ws.cell(row=row, column=1, value=ln.line_no).font = normal_font
+        ws.cell(row=row, column=1).alignment = center
+        ws.cell(row=row, column=2, value=ln.product_name).font = normal_font
+        ws.cell(row=row, column=3, value=ln.specification or "").font = normal_font
+        ws.cell(row=row, column=4, value=float(ln.quantity)).font = normal_font
+        ws.cell(row=row, column=4).alignment = right_al
+        ws.cell(row=row, column=4).number_format = '#,##0'
+        ws.cell(row=row, column=5, value=float(ln.unit_price)).font = normal_font
+        ws.cell(row=row, column=5).alignment = right_al
+        ws.cell(row=row, column=5).number_format = '#,##0'
+        ws.cell(row=row, column=6, value=float(ln.amount)).font = normal_font
+        ws.cell(row=row, column=6).alignment = right_al
+        ws.cell(row=row, column=6).number_format = '#,##0'
+        ws.cell(row=row, column=7, value=ln.remark or "").font = small_font
+        for col_idx in range(1, 8):
+            ws.cell(row=row, column=col_idx).border = border_all
+        row += 1
+
+    # 빈 줄 채우기 (최소 10줄)
+    lines_count = len(q.lines)
+    for _ in range(max(0, 10 - lines_count)):
+        for col_idx in range(1, 8):
+            ws.cell(row=row, column=col_idx).border = border_all
+        row += 1
+
+    row += 1
+
+    # ── 합계 영역 ──
+    summary = [
+        ("공급가액", float(q.total_amount or 0)),
+        ("부 가 세", float(q.tax_amount or 0)),
+        ("합    계", float(q.grand_total or 0)),
+    ]
+    for label, value in summary:
+        ws.merge_cells(start_row=row, start_column=1, end_row=row, end_column=3)
+        cell = ws.cell(row=row, column=1, value=label)
+        cell.font = header_font
+        cell.alignment = right_al
+        ws.merge_cells(start_row=row, start_column=4, end_row=row, end_column=7)
+        val_cell = ws.cell(row=row, column=4, value=value)
+        val_cell.font = Font(name="맑은 고딕", size=11, bold=True) if label == "합    계" else normal_font
+        val_cell.alignment = right_al
+        val_cell.number_format = '₩#,##0'
+        for col_idx in range(1, 8):
+            ws.cell(row=row, column=col_idx).border = border_all
+        row += 1
+
+    # ── 비고 ──
+    if q.notes:
+        row += 1
+        ws.merge_cells(start_row=row, start_column=1, end_row=row, end_column=7)
+        ws.cell(row=row, column=1, value=f"비고: {q.notes}").font = normal_font
+
+    # ── 인쇄 설정 ──
+    ws.print_area = f"A1:G{row + 1}"
+    ws.page_setup.paperSize = ws.PAPERSIZE_A4
+    ws.page_margins.left = 0.5
+    ws.page_margins.right = 0.5
+    ws.page_margins.top = 0.5
+    ws.page_margins.bottom = 0.5
+
+    # ── 저장 ──
+    buffer = io.BytesIO()
+    wb.save(buffer)
+    buffer.seek(0)
+    return buffer.getvalue()

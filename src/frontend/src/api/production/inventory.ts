@@ -133,3 +133,43 @@ export async function checkOrderMaterials(orderId: string) {
   const res = await api.post(`/production/inventory/check-order/${orderId}`);
   return res.data.data as OrderMaterialCheck;
 }
+
+/* ── 견적서 단계 재고/원자재 사전 체크 ── */
+
+export interface QuotationMaterialItem {
+  material_id: string;
+  material_name: string;
+  material_code: string;
+  required_qty: number;
+  current_stock: number;
+  shortage_qty: number;
+  is_shortage: boolean;
+}
+
+export interface QuotationCheckItem {
+  product_id: string;
+  product_name: string;
+  product_code: string;
+  requested_qty: number;
+  finished_stock: number;
+  finished_shortage: number;
+  need_production: boolean;
+  materials: QuotationMaterialItem[];
+}
+
+export interface QuotationCheckResult {
+  items: QuotationCheckItem[];
+  summary: {
+    ready_to_ship: boolean;
+    can_produce: boolean;
+    need_purchase: boolean;
+    shortage_materials: string[];
+  };
+}
+
+export async function checkQuotationMaterials(
+  lines: { product_id: string; quantity: number }[],
+) {
+  const res = await api.post('/production/inventory/quotation-check', { lines });
+  return res.data.data as QuotationCheckResult;
+}

@@ -9,6 +9,7 @@ import {
   updateOrder,
   deleteOrder,
   updateOrderStatus,
+  downloadStatementExcel,
   type SalesOrder,
   type SalesOrderFormData,
   type SalesOrderLine,
@@ -383,6 +384,11 @@ export default function SalesOrdersPage() {
                             className="text-sm px-2 py-1 rounded bg-amber-50 text-amber-600 hover:bg-amber-100"
                           >상태변경</button>
                         )}
+                        <button
+                          onClick={() => downloadStatementExcel(o.id).catch(() => alert('다운로드 실패'))}
+                          className="text-sm px-2 py-1 rounded bg-green-50 text-green-600 hover:bg-green-100"
+                          title="거래명세서 Excel 다운로드"
+                        >명세서</button>
                       </div>
                     </td>
                   </tr>

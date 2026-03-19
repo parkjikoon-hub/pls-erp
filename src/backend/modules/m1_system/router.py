@@ -698,3 +698,68 @@ async def chatbot(
     from .chatbot_service import chatbot_answer
     result = await chatbot_answer(data.question)
     return success_response(data=result)
+
+
+# ──────────────────────────────────────────────
+# 회사 정보 관리 (양식 출력용)
+# ──────────────────────────────────────────────
+
+from .models import CompanyInfo
+from sqlalchemy import select as sa_select
+
+
+@router.get("/company", summary="회사 정보 조회")
+async def get_company_info(
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """회사 기본 정보를 조회합니다 (양식 출력, 견적서 등에 사용)"""
+    result = await db.execute(sa_select(CompanyInfo).limit(1))
+    info = result.scalar_one_or_none()
+    if not info:
+        return success_response(data=None, message="회사 정보가 등록되지 않았습니다")
+    return success_response(data={
+        "id": str(info.id),
+        "company_name": info.company_name,
+        "business_no": info.business_no,
+        "corp_no": info.corp_no,
+        "ceo_name": info.ceo_name,
+        "address": info.address,
+        "business_type": info.business_type,
+        "business_item": info.business_item,
+        "phone": info.phone,
+        "fax": info.fax,
+        "email": info.email,
+        "bank_name": info.bank_name,
+        "bank_account": info.bank_account,
+        "bank_holder": info.bank_holder,
+        "logo_path": info.logo_path,
+        "stamp_path": info.stamp_path,
+    })
+
+
+@router.put("/company", summary="회사 정보 수정")
+async def update_company_info(
+    data: dict,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role("admin")),
+):
+    """회사 기본 정보를 수정합니다 (관리자 전용)"""
+    result = await db.execute(sa_select(CompanyInfo).limit(1))
+    info = result.scalar_one_or_none()
+    if not info:
+        info = CompanyInfo(company_name=data.get("company_name", ""))
+        db.add(info)
+
+    allowed = [
+        "company_name", "business_no", "corp_no", "ceo_name", "address",
+        "business_type", "business_item", "phone", "fax", "email",
+        "bank_name", "bank_account", "bank_holder",
+    ]
+    for key in allowed:
+        if key in data:
+            setattr(info, key, data[key])
+
+    await db.commit()
+    await db.refresh(info)
+    return success_response(message="회사 정보가 수정되었습니다")
