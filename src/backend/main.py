@@ -36,6 +36,27 @@ async def lifespan(app: FastAPI):
         async with engine.begin() as conn:
             await conn.run_sync(Base.metadata.create_all)
         _log.info("DB 테이블 동기화 완료 (누락 테이블 자동 생성)")
+
+        # 기존 테이블에 누락된 컬럼 자동 추가
+        from sqlalchemy import text
+        alter_columns = [
+            # M3 인사급여: 4대보험 선택적 적용
+            ("employees", "ins_national_pension", "BOOLEAN DEFAULT TRUE"),
+            ("employees", "ins_health", "BOOLEAN DEFAULT TRUE"),
+            ("employees", "ins_longterm_care", "BOOLEAN DEFAULT TRUE"),
+            ("employees", "ins_employment", "BOOLEAN DEFAULT TRUE"),
+            # M3 인사급여: 추가근무 시간
+            ("payroll_details", "overtime_hours", "NUMERIC(5,1) DEFAULT 0"),
+        ]
+        async with engine.begin() as conn:
+            for table, col, col_type in alter_columns:
+                try:
+                    await conn.execute(text(
+                        f"ALTER TABLE {table} ADD COLUMN IF NOT EXISTS {col} {col_type}"
+                    ))
+                except Exception:
+                    pass
+        _log.info("DB 컬럼 마이그레이션 완료")
     except Exception as e:
         _log.warning(f"DB 테이블 동기화 실패 (무시): {e}")
 
