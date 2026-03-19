@@ -157,16 +157,16 @@ export default function NotificationsPage() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-0.5">
-                      <span className={`text-xs px-1.5 py-0.5 rounded font-medium ${badge.cls}`}>
+                      <span className={`text-sm px-1.5 py-0.5 rounded font-medium ${badge.cls}`}>
                         {badge.label}
                       </span>
                       <span className="font-medium text-sm text-slate-800 truncate">{n.title}</span>
                     </div>
                     {n.message && (
-                      <p className="text-xs text-slate-500 truncate">{n.message}</p>
+                      <p className="text-sm text-slate-500 truncate">{n.message}</p>
                     )}
                   </div>
-                  <span className="text-xs text-slate-400 whitespace-nowrap flex-shrink-0">
+                  <span className="text-sm text-slate-400 whitespace-nowrap flex-shrink-0">
                     {n.created_at ? timeAgo(n.created_at) : ''}
                   </span>
                 </div>
@@ -192,7 +192,7 @@ export default function NotificationsPage() {
         <div className="bg-white rounded-xl border border-(--border-main) overflow-hidden">
           <table className="w-full text-sm">
             <thead>
-              <tr className="bg-(--bg-card) text-slate-600 text-xs uppercase">
+              <tr className="bg-(--bg-card) text-slate-600 text-sm uppercase">
                 <th className="text-left py-3 px-5 font-semibold">알림 유형</th>
                 <th className="text-center py-3 px-5 font-semibold">인앱 알림</th>
                 <th className="text-center py-3 px-5 font-semibold">이메일 알림</th>

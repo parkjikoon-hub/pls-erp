@@ -66,7 +66,7 @@ export default function ApprovalDetailPage() {
       {/* 헤더 */}
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-xs text-slate-400 font-mono">{detail.request_no}</p>
+          <p className="text-sm text-slate-400 font-mono">{detail.request_no}</p>
           <h1 className="text-2xl font-bold text-slate-800 mt-1">{detail.title}</h1>
         </div>
         <span className={`px-3 py-1 rounded-full text-sm font-medium ${badge.cls}`}>
@@ -166,13 +166,13 @@ export default function ApprovalDetailPage() {
                     {step.approver_name || '알 수 없음'}
                     {step.role_label && <span className="text-slate-400 ml-1">({step.role_label})</span>}
                   </p>
-                  {step.comment && <p className="text-xs text-slate-500 mt-0.5">"{step.comment}"</p>}
+                  {step.comment && <p className="text-sm text-slate-500 mt-0.5">"{step.comment}"</p>}
                 </div>
-                <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${stepBadge.cls}`}>
+                <span className={`px-2 py-0.5 rounded-full text-sm font-medium ${stepBadge.cls}`}>
                   {stepBadge.text}
                 </span>
                 {step.acted_at && (
-                  <span className="text-xs text-slate-400">
+                  <span className="text-sm text-slate-400">
                     {new Date(step.acted_at).toLocaleDateString('ko-KR')}
                   </span>
                 )}

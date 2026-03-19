@@ -306,14 +306,14 @@ export default function JournalListPage() {
                   key={journal.id}
                   className="border-b border-gray-100 hover:bg-amber-50/30 transition"
                 >
-                  <td className="px-4 py-3 font-mono text-xs text-gray-700">
+                  <td className="px-4 py-3 font-mono text-sm text-gray-700">
                     {journal.entry_no}
                   </td>
                   <td className="px-4 py-3 text-gray-700">
                     {journal.entry_date}
                   </td>
                   <td className="px-4 py-3">
-                    <span className="px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-700">
+                    <span className="px-2 py-0.5 rounded text-sm font-medium bg-gray-100 text-gray-700">
                       {TYPE_LABELS[journal.entry_type] || journal.entry_type}
                     </span>
                   </td>
@@ -327,7 +327,7 @@ export default function JournalListPage() {
                     {formatAmount(journal.total_credit)}
                   </td>
                   <td className="px-4 py-3 text-center">
-                    <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${
+                    <span className={`px-2.5 py-1 rounded-full text-sm font-medium ${
                       STATUS_COLORS[journal.status] || 'bg-gray-100 text-gray-600'
                     }`}>
                       {STATUS_LABELS[journal.status] || journal.status}

@@ -80,7 +80,7 @@ export default function FinancePage() {
               <h3 className="font-bold text-slate-700 mb-1">{item.title}</h3>
               <p className="text-sm text-slate-500">{item.desc}</p>
               {!item.enabled && (
-                <span className="inline-block mt-2 px-2 py-0.5 rounded text-xs font-medium bg-slate-200 text-slate-500">
+                <span className="inline-block mt-2 px-2 py-0.5 rounded text-sm font-medium bg-slate-200 text-slate-500">
                   개발 예정
                 </span>
               )}

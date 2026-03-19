@@ -197,7 +197,7 @@ export default function ApprovalFormPage() {
             {documentType === 'leave' && (
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-medium text-slate-600 mb-1">시작일</label>
+                  <label className="block text-sm font-medium text-slate-600 mb-1">시작일</label>
                   <input
                     type="date"
                     value={leaveStart}
@@ -206,7 +206,7 @@ export default function ApprovalFormPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-slate-600 mb-1">종료일</label>
+                  <label className="block text-sm font-medium text-slate-600 mb-1">종료일</label>
                   <input
                     type="date"
                     value={leaveEnd}
@@ -224,7 +224,7 @@ export default function ApprovalFormPage() {
             {documentType === 'half_leave' && (
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-medium text-slate-600 mb-1">날짜</label>
+                  <label className="block text-sm font-medium text-slate-600 mb-1">날짜</label>
                   <input
                     type="date"
                     value={leaveStart}
@@ -233,7 +233,7 @@ export default function ApprovalFormPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-slate-600 mb-1">반차 유형</label>
+                  <label className="block text-sm font-medium text-slate-600 mb-1">반차 유형</label>
                   <select
                     value={halfType}
                     onChange={e => setHalfType(e.target.value as 'am' | 'pm')}
@@ -248,7 +248,7 @@ export default function ApprovalFormPage() {
             )}
             {documentType === 'early_leave' && (
               <div>
-                <label className="block text-xs font-medium text-slate-600 mb-1">날짜</label>
+                <label className="block text-sm font-medium text-slate-600 mb-1">날짜</label>
                 <input
                   type="date"
                   value={leaveStart}
@@ -283,7 +283,7 @@ export default function ApprovalFormPage() {
                 const tpl = templates.find(t => t.id === e.target.value);
                 if (tpl) applyTemplate(tpl);
               }}
-              className="border border-(--border-main) rounded-lg px-2 py-1 text-xs"
+              className="border border-(--border-main) rounded-lg px-2 py-1 text-sm"
               defaultValue=""
             >
               <option value="" disabled>템플릿 불러오기</option>
@@ -299,7 +299,7 @@ export default function ApprovalFormPage() {
           <div className="space-y-2">
             {steps.map((step, idx) => (
               <div key={idx} className="flex items-center gap-2 p-2 bg-slate-50 rounded-lg">
-                <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                <span className={`text-sm px-2 py-0.5 rounded-full font-medium ${
                   step.step_type === 'approval' ? 'bg-cyan-100 text-cyan-700' : 'bg-slate-200 text-slate-600'
                 }`}>
                   {step.step_type === 'approval' ? `결재 ${step.step_order}` : `참조 ${step.step_order}`}

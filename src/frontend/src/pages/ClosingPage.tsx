@@ -179,10 +179,10 @@ export default function ClosingPage() {
                     ) : (
                       trialBalance.rows.map((row) => (
                         <tr key={row.account_id} className="border-b border-gray-100 hover:bg-gray-50">
-                          <td className="px-4 py-2.5 font-mono text-xs text-gray-600">{row.account_code}</td>
+                          <td className="px-4 py-2.5 font-mono text-sm text-gray-600">{row.account_code}</td>
                           <td className="px-4 py-2.5 text-gray-800">{row.account_name}</td>
                           <td className="px-4 py-2.5">
-                            <span className="px-2 py-0.5 rounded text-xs bg-gray-100 text-gray-600">
+                            <span className="px-2 py-0.5 rounded text-sm bg-gray-100 text-gray-600">
                               {TYPE_LABELS[row.account_type] || row.account_type}
                             </span>
                           </td>
@@ -224,7 +224,7 @@ export default function ClosingPage() {
                       <tbody>
                         {incomeStatement.revenue_items.map((item) => (
                           <tr key={item.account_id} className="border-b border-gray-50">
-                            <td className="py-2 font-mono text-xs text-gray-500 w-16">{item.account_code}</td>
+                            <td className="py-2 font-mono text-sm text-gray-500 w-16">{item.account_code}</td>
                             <td className="py-2 text-gray-700">{item.account_name}</td>
                             <td className="py-2 text-right font-mono text-emerald-700">{formatAmount(item.amount)}</td>
                           </tr>
@@ -248,7 +248,7 @@ export default function ClosingPage() {
                       <tbody>
                         {incomeStatement.expense_items.map((item) => (
                           <tr key={item.account_id} className="border-b border-gray-50">
-                            <td className="py-2 font-mono text-xs text-gray-500 w-16">{item.account_code}</td>
+                            <td className="py-2 font-mono text-sm text-gray-500 w-16">{item.account_code}</td>
                             <td className="py-2 text-gray-700">{item.account_name}</td>
                             <td className="py-2 text-right font-mono text-red-600">{formatAmount(item.amount)}</td>
                           </tr>
@@ -288,7 +288,7 @@ export default function ClosingPage() {
                         <tbody>
                           {balanceSheet.asset_items.map((item) => (
                             <tr key={item.account_id} className="border-b border-gray-50">
-                              <td className="py-2 font-mono text-xs text-gray-500 w-12">{item.account_code}</td>
+                              <td className="py-2 font-mono text-sm text-gray-500 w-12">{item.account_code}</td>
                               <td className="py-2 text-gray-700">{item.account_name}</td>
                               <td className="py-2 text-right font-mono text-gray-800">{formatAmount(item.amount)}</td>
                             </tr>
@@ -314,7 +314,7 @@ export default function ClosingPage() {
                           <tbody>
                             {balanceSheet.liability_items.map((item) => (
                               <tr key={item.account_id} className="border-b border-gray-50">
-                                <td className="py-2 font-mono text-xs text-gray-500 w-12">{item.account_code}</td>
+                                <td className="py-2 font-mono text-sm text-gray-500 w-12">{item.account_code}</td>
                                 <td className="py-2 text-gray-700">{item.account_name}</td>
                                 <td className="py-2 text-right font-mono text-gray-800">{formatAmount(item.amount)}</td>
                               </tr>
@@ -338,7 +338,7 @@ export default function ClosingPage() {
                           <tbody>
                             {balanceSheet.equity_items.map((item) => (
                               <tr key={item.account_id} className="border-b border-gray-50">
-                                <td className="py-2 font-mono text-xs text-gray-500 w-12">{item.account_code}</td>
+                                <td className="py-2 font-mono text-sm text-gray-500 w-12">{item.account_code}</td>
                                 <td className="py-2 text-gray-700">{item.account_name}</td>
                                 <td className="py-2 text-right font-mono text-gray-800">{formatAmount(item.amount)}</td>
                               </tr>
@@ -409,7 +409,7 @@ export default function ClosingPage() {
                           <td className="px-4 py-3 font-bold text-gray-800">{fy.year}년</td>
                           <td className="px-4 py-3 text-gray-600">{fy.start_date} ~ {fy.end_date}</td>
                           <td className="px-4 py-3 text-center">
-                            <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${
+                            <span className={`px-2.5 py-1 rounded-full text-sm font-medium ${
                               fy.is_closed
                                 ? 'bg-purple-100 text-purple-700'
                                 : 'bg-emerald-100 text-emerald-700'
@@ -421,12 +421,12 @@ export default function ClosingPage() {
                             {isAdmin && (
                               fy.is_closed ? (
                                 <button onClick={() => handleReopen(fy.id)}
-                                  className="px-3 py-1.5 text-xs rounded-lg border border-amber-300 text-amber-700 hover:bg-amber-50 font-medium">
+                                  className="px-3 py-1.5 text-sm rounded-lg border border-amber-300 text-amber-700 hover:bg-amber-50 font-medium">
                                   마감 취소
                                 </button>
                               ) : (
                                 <button onClick={() => handleClose(fy.id)}
-                                  className="px-3 py-1.5 text-xs rounded-lg bg-purple-600 text-white hover:bg-purple-700 font-medium">
+                                  className="px-3 py-1.5 text-sm rounded-lg bg-purple-600 text-white hover:bg-purple-700 font-medium">
                                   기간 마감
                                 </button>
                               )

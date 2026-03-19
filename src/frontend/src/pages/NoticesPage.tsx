@@ -95,7 +95,7 @@ export default function NoticesPage() {
       <div className="bg-white rounded-xl border border-(--border-main) overflow-hidden">
         <table className="w-full text-sm">
           <thead>
-            <tr className="bg-(--bg-card) text-slate-600 text-xs uppercase">
+            <tr className="bg-(--bg-card) text-slate-600 text-sm uppercase">
               <th className="text-left py-3 px-4 font-semibold w-12"></th>
               <th className="text-left py-3 px-4 font-semibold">제목</th>
               <th className="text-left py-3 px-4 font-semibold">작성자</th>
@@ -112,13 +112,13 @@ export default function NoticesPage() {
                   className="border-t border-(--border-main) hover:bg-slate-50 cursor-pointer transition"
                 >
                   <td className="py-3 px-4">
-                    {n.is_pinned && <span className="text-xs bg-red-100 text-red-600 px-1.5 py-0.5 rounded font-medium">고정</span>}
-                    {n.is_important && !n.is_pinned && <span className="text-xs bg-amber-100 text-amber-600 px-1.5 py-0.5 rounded font-medium">중요</span>}
+                    {n.is_pinned && <span className="text-sm bg-red-100 text-red-600 px-1.5 py-0.5 rounded font-medium">고정</span>}
+                    {n.is_important && !n.is_pinned && <span className="text-sm bg-amber-100 text-amber-600 px-1.5 py-0.5 rounded font-medium">중요</span>}
                   </td>
                   <td className="py-3 px-4 font-medium text-slate-800">{n.title}</td>
                   <td className="py-3 px-4 text-slate-500">{n.author_name || '-'}</td>
                   <td className="py-3 px-4 text-right text-slate-400">{n.view_count}</td>
-                  <td className="py-3 px-4 text-slate-400 text-xs">
+                  <td className="py-3 px-4 text-slate-400 text-sm">
                     {n.created_at ? new Date(n.created_at).toLocaleDateString('ko-KR') : '-'}
                   </td>
                 </tr>
@@ -149,11 +149,11 @@ export default function NoticesPage() {
               <div className="flex items-start justify-between">
                 <div>
                   <div className="flex items-center gap-2 mb-1">
-                    {detail.is_pinned && <span className="text-xs bg-red-100 text-red-600 px-1.5 py-0.5 rounded font-medium">고정</span>}
-                    {detail.is_important && <span className="text-xs bg-amber-100 text-amber-600 px-1.5 py-0.5 rounded font-medium">중요</span>}
+                    {detail.is_pinned && <span className="text-sm bg-red-100 text-red-600 px-1.5 py-0.5 rounded font-medium">고정</span>}
+                    {detail.is_important && <span className="text-sm bg-amber-100 text-amber-600 px-1.5 py-0.5 rounded font-medium">중요</span>}
                   </div>
                   <h2 className="text-xl font-bold text-slate-800">{detail.title}</h2>
-                  <p className="text-xs text-slate-400 mt-1">
+                  <p className="text-sm text-slate-400 mt-1">
                     {detail.author_name} | {detail.created_at ? new Date(detail.created_at).toLocaleDateString('ko-KR') : ''} | 조회 {detail.view_count}
                   </p>
                 </div>

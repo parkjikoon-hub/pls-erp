@@ -325,7 +325,7 @@ export default function JournalFormPage() {
           <h2 className="text-sm font-semibold text-gray-700">분개 라인</h2>
           <button
             onClick={addLine}
-            className="flex items-center gap-1 px-3 py-1.5 text-xs bg-amber-50 text-amber-700 rounded-lg hover:bg-amber-100 transition font-medium"
+            className="flex items-center gap-1 px-3 py-1.5 text-sm bg-amber-50 text-amber-700 rounded-lg hover:bg-amber-100 transition font-medium"
           >
             <PlusIcon className="w-3.5 h-3.5" />
             행 추가
@@ -346,7 +346,7 @@ export default function JournalFormPage() {
           <tbody>
             {lines.map((line, idx) => (
               <tr key={line.key} className="border-b border-gray-100">
-                <td className="px-4 py-2 text-gray-400 text-xs">{idx + 1}</td>
+                <td className="px-4 py-2 text-gray-400 text-sm">{idx + 1}</td>
 
                 {/* 계정과목 검색 */}
                 <td className="px-4 py-2 relative">
@@ -359,7 +359,7 @@ export default function JournalFormPage() {
                       }}
                       className="w-full text-left px-2 py-1.5 rounded border border-gray-200 hover:border-amber-400 text-sm bg-gray-50"
                     >
-                      <span className="font-mono text-xs text-gray-500 mr-1">{line.account_code}</span>
+                      <span className="font-mono text-sm text-gray-500 mr-1">{line.account_code}</span>
                       {line.account_name}
                     </button>
                   ) : (
@@ -391,9 +391,9 @@ export default function JournalFormPage() {
                           onClick={() => selectAccount(idx, acc)}
                           className="w-full text-left px-3 py-2 text-sm hover:bg-amber-50 border-b border-gray-50 last:border-b-0"
                         >
-                          <span className="font-mono text-xs text-gray-500 mr-2">{acc.code}</span>
+                          <span className="font-mono text-sm text-gray-500 mr-2">{acc.code}</span>
                           <span>{acc.name}</span>
-                          <span className="ml-2 text-xs text-gray-400">
+                          <span className="ml-2 text-sm text-gray-400">
                             ({acc.account_type === 'asset' ? '자산' :
                               acc.account_type === 'liability' ? '부채' :
                               acc.account_type === 'equity' ? '자본' :

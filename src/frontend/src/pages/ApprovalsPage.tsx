@@ -81,7 +81,7 @@ export default function ApprovalsPage() {
       <div className="bg-white rounded-xl border border-(--border-main) overflow-hidden">
         <table className="w-full text-sm">
           <thead>
-            <tr className="bg-(--bg-card) text-slate-600 text-xs uppercase">
+            <tr className="bg-(--bg-card) text-slate-600 text-sm uppercase">
               <th className="text-left py-3 px-4 font-semibold">결재번호</th>
               <th className="text-left py-3 px-4 font-semibold">제목</th>
               <th className="text-left py-3 px-4 font-semibold">유형</th>
@@ -106,13 +106,13 @@ export default function ApprovalsPage() {
                     onClick={() => navigate(`/groupware/approvals/${item.id}`)}
                     className="border-t border-(--border-main) hover:bg-slate-50 cursor-pointer transition"
                   >
-                    <td className="py-3 px-4 text-slate-500 font-mono text-xs">{item.request_no}</td>
+                    <td className="py-3 px-4 text-slate-500 font-mono text-sm">{item.request_no}</td>
                     <td className="py-3 px-4 font-medium text-slate-800">{item.title}</td>
                     <td className="py-3 px-4 text-slate-500">{DOC_TYPE_LABEL[item.document_type] || item.document_type}</td>
                     <td className="py-3 px-4 text-right text-slate-700">
                       {item.amount ? item.amount.toLocaleString() + '원' : '-'}
                     </td>
-                    <td className="py-3 px-4 text-center text-xs text-slate-500">
+                    <td className="py-3 px-4 text-center text-sm text-slate-500">
                       {item.current_step ?? '-'}/{item.total_steps ?? '-'}
                     </td>
                     <td className="py-3 px-4 text-center">
@@ -121,7 +121,7 @@ export default function ApprovalsPage() {
                       </span>
                     </td>
                     <td className="py-3 px-4 text-slate-600">{item.requester_name || '-'}</td>
-                    <td className="py-3 px-4 text-slate-400 text-xs">
+                    <td className="py-3 px-4 text-slate-400 text-sm">
                       {item.created_at ? new Date(item.created_at).toLocaleDateString('ko-KR') : '-'}
                     </td>
                   </tr>

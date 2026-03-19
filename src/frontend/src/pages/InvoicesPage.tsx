@@ -286,19 +286,19 @@ export default function InvoicesPage() {
         <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
           <div className="grid grid-cols-4 gap-4">
             <div>
-              <p className="text-xs text-gray-500">건수</p>
+              <p className="text-sm text-gray-500">건수</p>
               <p className="text-lg font-bold text-gray-800">{currentSummary.count}건</p>
             </div>
             <div>
-              <p className="text-xs text-gray-500">공급가액 합계</p>
+              <p className="text-sm text-gray-500">공급가액 합계</p>
               <p className="text-lg font-bold text-gray-800">{formatAmount(currentSummary.total_supply)}원</p>
             </div>
             <div>
-              <p className="text-xs text-gray-500">부가세 합계</p>
+              <p className="text-sm text-gray-500">부가세 합계</p>
               <p className="text-lg font-bold text-gray-800">{formatAmount(currentSummary.total_tax)}원</p>
             </div>
             <div>
-              <p className="text-xs text-gray-500">총 합계</p>
+              <p className="text-sm text-gray-500">총 합계</p>
               <p className="text-lg font-bold text-amber-700">{formatAmount(currentSummary.total_amount)}원</p>
             </div>
           </div>
@@ -365,7 +365,7 @@ export default function InvoicesPage() {
             <tbody>
               {data.items.map((inv) => (
                 <tr key={inv.id} className="border-b border-gray-100 hover:bg-amber-50/30 transition">
-                  <td className="px-4 py-3 font-mono text-xs text-gray-700">{inv.invoice_no}</td>
+                  <td className="px-4 py-3 font-mono text-sm text-gray-700">{inv.invoice_no}</td>
                   <td className="px-4 py-3 text-gray-700">{inv.issue_date}</td>
                   <td className="px-4 py-3 text-gray-700">{inv.customer_name || '-'}</td>
                   <td className="px-4 py-3 text-right font-mono text-gray-800">{formatAmount(inv.supply_amount)}</td>
@@ -503,7 +503,7 @@ export default function InvoicesPage() {
                       }}
                       className="w-full text-left px-3 py-2 text-sm hover:bg-amber-50 border-b border-gray-50">
                       {c.name}
-                      {c.business_no && <span className="ml-2 text-xs text-gray-400">{c.business_no}</span>}
+                      {c.business_no && <span className="ml-2 text-sm text-gray-400">{c.business_no}</span>}
                     </button>
                   ))}
                 </div>

@@ -123,7 +123,7 @@ export default function PayrollPage() {
           </select>
 
           {data && (
-            <span className={`px-3 py-1 rounded-full text-xs font-medium ${STATUS_COLORS[data.status] || ''}`}>
+            <span className={`px-3 py-1 rounded-full text-sm font-medium ${STATUS_COLORS[data.status] || ''}`}>
               {STATUS_LABELS[data.status] || data.status}
             </span>
           )}
@@ -157,19 +157,19 @@ export default function PayrollPage() {
       {data && (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
           <div className="bg-(--bg-card) rounded-xl p-4 border border-(--border-main)">
-            <p className="text-xs text-slate-500 mb-1">대상 인원</p>
+            <p className="text-sm text-slate-500 mb-1">대상 인원</p>
             <p className="text-xl font-bold text-slate-800">{data.total_employees}명</p>
           </div>
           <div className="bg-(--bg-card) rounded-xl p-4 border border-(--border-main)">
-            <p className="text-xs text-slate-500 mb-1">총 지급액</p>
+            <p className="text-sm text-slate-500 mb-1">총 지급액</p>
             <p className="text-xl font-bold text-blue-600">{formatMoney(data.total_gross)}</p>
           </div>
           <div className="bg-(--bg-card) rounded-xl p-4 border border-(--border-main)">
-            <p className="text-xs text-slate-500 mb-1">총 공제액</p>
+            <p className="text-sm text-slate-500 mb-1">총 공제액</p>
             <p className="text-xl font-bold text-red-500">{formatMoney(data.total_deduction)}</p>
           </div>
           <div className="bg-(--bg-card) rounded-xl p-4 border border-(--border-main)">
-            <p className="text-xs text-slate-500 mb-1">총 실수령액</p>
+            <p className="text-sm text-slate-500 mb-1">총 실수령액</p>
             <p className="text-xl font-bold text-emerald-600">{formatMoney(data.total_net)}</p>
           </div>
         </div>
@@ -211,16 +211,16 @@ export default function PayrollPage() {
                   const incomeTax = d.income_tax + d.local_tax;
                   return (
                     <tr key={d.id} className="border-t border-(--border-main) hover:bg-(--bg-main)/50 transition-colors">
-                      <td className="px-3 py-2.5 font-mono text-xs">{d.employee_no}</td>
+                      <td className="px-3 py-2.5 font-mono text-sm">{d.employee_no}</td>
                       <td className="px-3 py-2.5 font-medium text-slate-700">{d.employee_name}</td>
-                      <td className="px-3 py-2.5 text-xs text-slate-500">{d.department_name || '-'}</td>
-                      <td className="px-3 py-2.5 text-right font-mono text-xs">{formatMoney(d.base_salary)}</td>
-                      <td className="px-3 py-2.5 text-right font-mono text-xs text-blue-600">{formatMoney(taxFree)}</td>
-                      <td className="px-3 py-2.5 text-right font-mono text-xs font-medium">{formatMoney(d.gross_salary)}</td>
-                      <td className="px-3 py-2.5 text-right font-mono text-xs text-red-500">{formatMoney(insurance)}</td>
-                      <td className="px-3 py-2.5 text-right font-mono text-xs text-red-500">{formatMoney(incomeTax)}</td>
-                      <td className="px-3 py-2.5 text-right font-mono text-xs text-red-600 font-medium">{formatMoney(d.total_deduction)}</td>
-                      <td className="px-3 py-2.5 text-right font-mono text-xs text-emerald-600 font-bold">{formatMoney(d.net_salary)}</td>
+                      <td className="px-3 py-2.5 text-sm text-slate-500">{d.department_name || '-'}</td>
+                      <td className="px-3 py-2.5 text-right font-mono text-sm">{formatMoney(d.base_salary)}</td>
+                      <td className="px-3 py-2.5 text-right font-mono text-sm text-blue-600">{formatMoney(taxFree)}</td>
+                      <td className="px-3 py-2.5 text-right font-mono text-sm font-medium">{formatMoney(d.gross_salary)}</td>
+                      <td className="px-3 py-2.5 text-right font-mono text-sm text-red-500">{formatMoney(insurance)}</td>
+                      <td className="px-3 py-2.5 text-right font-mono text-sm text-red-500">{formatMoney(incomeTax)}</td>
+                      <td className="px-3 py-2.5 text-right font-mono text-sm text-red-600 font-medium">{formatMoney(d.total_deduction)}</td>
+                      <td className="px-3 py-2.5 text-right font-mono text-sm text-emerald-600 font-bold">{formatMoney(d.net_salary)}</td>
                     </tr>
                   );
                 })
@@ -230,10 +230,10 @@ export default function PayrollPage() {
               <tfoot>
                 <tr className="border-t-2 border-(--border-light) bg-(--bg-main) font-bold">
                   <td colSpan={5} className="px-3 py-3 text-slate-700">합계 ({data.total_employees}명)</td>
-                  <td className="px-3 py-3 text-right font-mono text-xs">{formatMoney(data.total_gross)}</td>
+                  <td className="px-3 py-3 text-right font-mono text-sm">{formatMoney(data.total_gross)}</td>
                   <td colSpan={2} />
-                  <td className="px-3 py-3 text-right font-mono text-xs text-red-600">{formatMoney(data.total_deduction)}</td>
-                  <td className="px-3 py-3 text-right font-mono text-xs text-emerald-600">{formatMoney(data.total_net)}</td>
+                  <td className="px-3 py-3 text-right font-mono text-sm text-red-600">{formatMoney(data.total_deduction)}</td>
+                  <td className="px-3 py-3 text-right font-mono text-sm text-emerald-600">{formatMoney(data.total_net)}</td>
                 </tr>
               </tfoot>
             )}

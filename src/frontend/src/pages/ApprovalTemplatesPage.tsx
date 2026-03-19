@@ -113,7 +113,7 @@ export default function ApprovalTemplatesPage() {
             <div className="space-y-2">
               {lines.map((ln, idx) => (
                 <div key={idx} className="flex items-center gap-2 p-2 bg-slate-50 rounded-lg">
-                  <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                  <span className={`text-sm px-2 py-0.5 rounded-full font-medium ${
                     ln.line_type === 'approval' ? 'bg-cyan-100 text-cyan-700' : 'bg-slate-200 text-slate-600'
                   }`}>
                     {ln.line_type === 'approval' ? `결재 ${ln.step_order}` : `참조 ${ln.step_order}`}
@@ -152,13 +152,13 @@ export default function ApprovalTemplatesPage() {
               <div className="flex items-start justify-between">
                 <div>
                   <h3 className="font-bold text-slate-800">{tpl.name}</h3>
-                  {tpl.description && <p className="text-xs text-slate-400 mt-0.5">{tpl.description}</p>}
+                  {tpl.description && <p className="text-sm text-slate-400 mt-0.5">{tpl.description}</p>}
                 </div>
-                <button onClick={() => handleDelete(tpl.id)} className="text-red-400 hover:text-red-600 text-xs">삭제</button>
+                <button onClick={() => handleDelete(tpl.id)} className="text-red-400 hover:text-red-600 text-sm">삭제</button>
               </div>
               <div className="mt-3 flex flex-wrap gap-1.5">
                 {tpl.lines.map((ln, i) => (
-                  <span key={i} className={`text-xs px-2 py-0.5 rounded-full ${
+                  <span key={i} className={`text-sm px-2 py-0.5 rounded-full ${
                     ln.line_type === 'approval' ? 'bg-cyan-100 text-cyan-700' : 'bg-slate-200 text-slate-500'
                   }`}>
                     {ln.line_type === 'approval' ? '결재' : '참조'} {ln.step_order}: {ln.approver_name || '미지정'}

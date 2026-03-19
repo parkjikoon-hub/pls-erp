@@ -327,21 +327,21 @@ export default function AccountsPage() {
                       !a.is_active ? 'opacity-50' : ''
                     }`}
                   >
-                    <td className="px-4 py-3 font-mono text-xs">{a.code}</td>
+                    <td className="px-4 py-3 font-mono text-sm">{a.code}</td>
                     <td className="px-4 py-3 font-medium text-slate-700">{a.name}</td>
                     <td className="px-4 py-3">
                       <span
-                        className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${
+                        className={`inline-block px-2 py-0.5 rounded text-sm font-medium ${
                           TYPE_COLORS[a.account_type] || 'bg-slate-100 text-slate-600'
                         }`}
                       >
                         {TYPE_LABELS[a.account_type] || a.account_type}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-xs text-slate-500">
+                    <td className="px-4 py-3 text-sm text-slate-500">
                       {a.account_group || '-'}
                     </td>
-                    <td className="px-4 py-3 text-center text-xs">
+                    <td className="px-4 py-3 text-center text-sm">
                       {a.normal_balance === 'debit' ? '차변' : '대변'}
                     </td>
                     <td className="px-4 py-3 text-center">
@@ -383,7 +383,7 @@ export default function AccountsPage() {
         {/* 페이지네이션 */}
         {data && data.total_pages > 1 && (
           <div className="flex items-center justify-between px-4 py-3 border-t border-(--border-main)">
-            <span className="text-xs text-slate-500">
+            <span className="text-sm text-slate-500">
               전체 {data.total}건 중 {(data.page - 1) * data.size + 1}-
               {Math.min(data.page * data.size, data.total)}건
             </span>
@@ -407,7 +407,7 @@ export default function AccountsPage() {
                     <button
                       key={pageNum}
                       onClick={() => setPage(pageNum)}
-                      className={`w-8 h-8 text-xs rounded-lg transition-colors ${
+                      className={`w-8 h-8 text-sm rounded-lg transition-colors ${
                         pageNum === page
                           ? 'bg-amber-500 text-white font-bold'
                           : 'hover:bg-(--border-main)'
@@ -462,7 +462,7 @@ export default function AccountsPage() {
                 <div className="grid grid-cols-2 gap-3">
                   {/* 계정 코드 */}
                   <div>
-                    <label className="block text-xs font-medium text-slate-600 mb-1">
+                    <label className="block text-sm font-medium text-slate-600 mb-1">
                       계정 코드 *
                     </label>
                     <input
@@ -479,7 +479,7 @@ export default function AccountsPage() {
 
                   {/* 계정명 */}
                   <div>
-                    <label className="block text-xs font-medium text-slate-600 mb-1">
+                    <label className="block text-sm font-medium text-slate-600 mb-1">
                       계정명 *
                     </label>
                     <input
@@ -495,7 +495,7 @@ export default function AccountsPage() {
 
                   {/* 계정 유형 */}
                   <div>
-                    <label className="block text-xs font-medium text-slate-600 mb-1">
+                    <label className="block text-sm font-medium text-slate-600 mb-1">
                       유형 *
                     </label>
                     <select
@@ -513,7 +513,7 @@ export default function AccountsPage() {
 
                   {/* 정상잔액 */}
                   <div>
-                    <label className="block text-xs font-medium text-slate-600 mb-1">
+                    <label className="block text-sm font-medium text-slate-600 mb-1">
                       정상잔액
                     </label>
                     <select
@@ -530,7 +530,7 @@ export default function AccountsPage() {
 
                   {/* 계정 그룹 */}
                   <div>
-                    <label className="block text-xs font-medium text-slate-600 mb-1">
+                    <label className="block text-sm font-medium text-slate-600 mb-1">
                       계정 그룹
                     </label>
                     <input
@@ -546,7 +546,7 @@ export default function AccountsPage() {
 
                   {/* 정렬 순서 */}
                   <div>
-                    <label className="block text-xs font-medium text-slate-600 mb-1">
+                    <label className="block text-sm font-medium text-slate-600 mb-1">
                       정렬 순서
                     </label>
                     <input
@@ -600,7 +600,7 @@ export default function AccountsPage() {
             <p className="text-sm text-slate-500 mb-6">
               이 계정과목을 비활성화하시겠습니까?
               <br />
-              <span className="text-xs text-slate-400">
+              <span className="text-sm text-slate-400">
                 데이터는 삭제되지 않으며, 목록에서 숨겨집니다.
               </span>
             </p>
