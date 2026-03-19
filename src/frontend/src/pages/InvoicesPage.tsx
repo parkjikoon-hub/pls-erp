@@ -195,7 +195,7 @@ export default function InvoicesPage() {
         showToast('success', '세금계산서가 수정되었습니다');
       } else {
         await createInvoice(payload);
-        showToast('success', '세금계산서가 발행되었습니다');
+        showToast('success', form.invoice_type === 'receive' ? '세금계산서가 등록되었습니다' : '세금계산서가 발행되었습니다');
       }
       setShowModal(false);
       loadData();
@@ -252,7 +252,7 @@ export default function InvoicesPage() {
         <div className="flex items-center gap-3">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">세금계산서</h1>
-            <p className="text-sm text-gray-500 mt-0.5">매출/매입 세금계산서 발행 및 관리</p>
+            <p className="text-sm text-gray-500 mt-0.5">매출 세금계산서 발행 / 매입 세금계산서 등록 및 관리</p>
           </div>
         </div>
         {isManager && (
@@ -261,7 +261,7 @@ export default function InvoicesPage() {
             className="flex items-center gap-2 px-4 py-2.5 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition font-medium shadow-sm"
           >
             <PlusIcon className="w-5 h-5" />
-            세금계산서 발행
+            {tab === 'receive' ? '세금계산서 등록' : '세금계산서 발행'}
           </button>
         )}
       </div>
@@ -446,7 +446,7 @@ export default function InvoicesPage() {
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
           <div className="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl space-y-4">
             <h3 className="text-lg font-bold text-gray-900">
-              {editId ? '세금계산서 수정' : '세금계산서 발행'}
+              {editId ? '세금계산서 수정' : (form.invoice_type === 'receive' ? '세금계산서 등록' : '세금계산서 발행')}
             </h3>
 
             {/* 유형 */}
@@ -463,9 +463,11 @@ export default function InvoicesPage() {
               </select>
             </div>
 
-            {/* 발행일 */}
+            {/* 발행일/등록일 */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">발행일</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                {form.invoice_type === 'receive' ? '등록일' : '발행일'}
+              </label>
               <input
                 type="date" value={form.issue_date}
                 onChange={(e) => setForm({ ...form, issue_date: e.target.value })}
@@ -559,7 +561,7 @@ export default function InvoicesPage() {
               </button>
               <button onClick={handleSave}
                 className="px-4 py-2 rounded-lg bg-amber-600 text-white hover:bg-amber-700 font-medium">
-                {editId ? '수정' : '발행'}
+                {editId ? '수정' : (form.invoice_type === 'receive' ? '등록' : '발행')}
               </button>
             </div>
           </div>
