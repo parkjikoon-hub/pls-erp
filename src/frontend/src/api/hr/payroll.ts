@@ -33,6 +33,7 @@ export interface PayrollDetail {
   absent_days: number;
   leave_deduction: number;
   ai_optimized: boolean;
+  detail_status: string;
 }
 
 export interface PayrollHeader {
@@ -73,6 +74,17 @@ export async function calculatePayroll(year: number, month: number) {
 export async function approvePayroll(year: number, month: number, paymentDate?: string) {
   const res = await api.post(`/hr/payroll/${year}/${month}/approve`, {
     payment_date: paymentDate || null,
+  });
+  return res.data;
+}
+
+export async function approvePayrollItems(
+  year: number,
+  month: number,
+  detailIds: string[],
+) {
+  const res = await api.post(`/hr/payroll/${year}/${month}/approve-items`, {
+    detail_ids: detailIds,
   });
   return res.data;
 }

@@ -85,6 +85,27 @@ async def approve_payroll(
     return success_response(data=result, message=f"{year}년 {month}월 급여가 승인되었습니다")
 
 
+class ApproveItemsRequest(BaseModel):
+    detail_ids: List[str]
+
+
+@router.post("/{year}/{month}/approve-items", summary="급여 개별 승인")
+async def approve_payroll_items(
+    year: int,
+    month: int,
+    data: ApproveItemsRequest,
+    request: Request,
+    db: AsyncSession = Depends(get_db),
+    current_user=Depends(require_role("admin")),
+):
+    """선택한 직원의 급여를 개별 승인합니다"""
+    ip = request.client.host if request.client else None
+    result = await payroll_service.approve_payroll_items(
+        db, year, month, data.detail_ids, current_user, ip
+    )
+    return success_response(data=result, message=f"{len(data.detail_ids)}건 급여가 승인되었습니다")
+
+
 @router.patch("/{year}/{month}/overtime", summary="추가근무 시간 입력")
 async def update_overtime(
     year: int,

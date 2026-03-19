@@ -1,6 +1,6 @@
 /**
  * M3 인사/급여 — 급여 관리 페이지
- * 급여 계산, 추가근무 입력, 급여대장 조회, 승인
+ * 급여 계산, 추가근무 입력, 급여대장 조회, 개별/전체 승인
  */
 import { useState, useEffect, useCallback } from 'react';
 import {
@@ -12,6 +12,7 @@ import {
   fetchPayroll,
   calculatePayroll,
   approvePayroll,
+  approvePayrollItems,
   updateOvertime,
   type PayrollHeader,
 } from '../api/hr/payroll';
@@ -28,6 +29,11 @@ const STATUS_COLORS: Record<string, string> = {
   calculated: 'bg-blue-100 text-blue-700',
   approved: 'bg-emerald-100 text-emerald-700',
   paid: 'bg-purple-100 text-purple-700',
+};
+
+const DETAIL_STATUS_LABELS: Record<string, string> = {
+  pending: '대기',
+  approved: '승인',
 };
 
 export default function PayrollPage() {
@@ -48,6 +54,9 @@ export default function PayrollPage() {
   const [savingOvertime, setSavingOvertime] = useState(false);
   const [showOvertimeCol, setShowOvertimeCol] = useState(false);
 
+  // 체크박스 선택 상태
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+
   const formatMoney = (n: number) => new Intl.NumberFormat('ko-KR').format(Math.round(n));
 
   const loadData = useCallback(async () => {
@@ -56,6 +65,7 @@ export default function PayrollPage() {
       const result = await fetchPayroll(year, month);
       setData(result);
       setOvertimeEdits({});
+      setSelectedIds(new Set());
     } catch {
       setData(null);
     } finally {
@@ -82,11 +92,47 @@ export default function PayrollPage() {
     }
   };
 
-  const handleApprove = async () => {
-    if (!confirm(`${year}년 ${month}월 급여를 승인하시겠습니까?`)) return;
+  // 전체 승인 (기존)
+  const handleApproveAll = async () => {
+    if (!confirm(`${year}년 ${month}월 급여를 전체 승인하시겠습니까?`)) return;
     setApproving(true);
     try {
       await approvePayroll(year, month);
+      loadData();
+    } catch (err: unknown) {
+      const axiosErr = err as { response?: { data?: { detail?: string } } };
+      alert(axiosErr.response?.data?.detail || '승인 중 오류가 발생했습니다.');
+    } finally {
+      setApproving(false);
+    }
+  };
+
+  // 선택 승인 (개별)
+  const handleApproveSelected = async () => {
+    const ids = Array.from(selectedIds);
+    if (ids.length === 0) {
+      alert('승인할 직원을 선택하세요.');
+      return;
+    }
+    if (!confirm(`선택한 ${ids.length}명의 급여를 승인하시겠습니까?`)) return;
+    setApproving(true);
+    try {
+      await approvePayrollItems(year, month, ids);
+      loadData();
+    } catch (err: unknown) {
+      const axiosErr = err as { response?: { data?: { detail?: string } } };
+      alert(axiosErr.response?.data?.detail || '승인 중 오류가 발생했습니다.');
+    } finally {
+      setApproving(false);
+    }
+  };
+
+  // 개별 행 승인
+  const handleApproveOne = async (detailId: string) => {
+    if (!confirm('이 직원의 급여를 승인하시겠습니까?')) return;
+    setApproving(true);
+    try {
+      await approvePayrollItems(year, month, [detailId]);
       loadData();
     } catch (err: unknown) {
       const axiosErr = err as { response?: { data?: { detail?: string } } };
@@ -119,8 +165,34 @@ export default function PayrollPage() {
     }
   };
 
+  // 체크박스 핸들러
+  const pendingDetails = data?.details?.filter(d => (d.detail_status || 'pending') !== 'approved') || [];
+  const allPendingSelected = pendingDetails.length > 0 && pendingDetails.every(d => selectedIds.has(d.id));
+
+  const toggleSelectAll = () => {
+    if (allPendingSelected) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(pendingDetails.map(d => d.id)));
+    }
+  };
+
+  const toggleSelect = (id: string) => {
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
   const canEdit = data?.status === 'calculated' || data?.status === 'draft';
+  const canApprove = isAdmin && data?.status === 'calculated';
   const hasOvertimeEdits = Object.keys(overtimeEdits).length > 0;
+
+  // 칼럼 수 계산
+  const extraCols = (showOvertimeCol ? 1 : 0) + (canApprove ? 2 : 0);
+  const totalCols = 11 + extraCols;
 
   return (
     <div>
@@ -200,16 +272,6 @@ export default function PayrollPage() {
               {calculating ? '계산 중...' : '급여 계산'}
             </button>
           )}
-          {isAdmin && data?.status === 'calculated' && (
-            <button
-              onClick={handleApprove}
-              disabled={approving}
-              className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-emerald-500 to-emerald-600 rounded-lg hover:from-emerald-600 hover:to-emerald-700 disabled:opacity-50 shadow-sm"
-            >
-              <CheckCircleIcon className="w-4 h-4" />
-              {approving ? '승인 중...' : '급여 승인'}
-            </button>
-          )}
         </div>
       </div>
 
@@ -241,6 +303,18 @@ export default function PayrollPage() {
           <table className="w-full text-sm">
             <thead>
               <tr className="bg-(--bg-main) text-slate-600">
+                {/* 체크박스 (승인 가능할 때만) */}
+                {canApprove && (
+                  <th className="px-3 py-3 w-10">
+                    <input
+                      type="checkbox"
+                      checked={allPendingSelected}
+                      onChange={toggleSelectAll}
+                      className="w-4 h-4 rounded border-slate-300 text-violet-600 focus:ring-violet-500"
+                      title="전체 선택"
+                    />
+                  </th>
+                )}
                 <th className="text-left px-3 py-3 font-semibold w-16">사번</th>
                 <th className="text-left px-3 py-3 font-semibold">이름</th>
                 <th className="text-left px-3 py-3 font-semibold">부서</th>
@@ -255,16 +329,20 @@ export default function PayrollPage() {
                 <th className="text-right px-3 py-3 font-semibold">소득세</th>
                 <th className="text-right px-3 py-3 font-semibold">총공제</th>
                 <th className="text-right px-3 py-3 font-semibold text-emerald-700">실수령</th>
+                {/* 승인 상태/버튼 칼럼 */}
+                {canApprove && (
+                  <th className="text-center px-3 py-3 font-semibold w-20">승인</th>
+                )}
               </tr>
             </thead>
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan={showOvertimeCol ? 12 : 11} className="text-center py-12 text-slate-400">불러오는 중...</td>
+                  <td colSpan={totalCols} className="text-center py-12 text-slate-400">불러오는 중...</td>
                 </tr>
               ) : !data || !data.details || data.details.length === 0 ? (
                 <tr>
-                  <td colSpan={showOvertimeCol ? 12 : 11} className="text-center py-12 text-slate-400">
+                  <td colSpan={totalCols} className="text-center py-12 text-slate-400">
                     급여 데이터가 없습니다. '급여 계산' 버튼을 눌러 계산하세요.
                   </td>
                 </tr>
@@ -274,8 +352,29 @@ export default function PayrollPage() {
                   const insurance = d.national_pension + d.health_insurance + d.long_term_care + d.employment_insurance;
                   const incomeTax = d.income_tax + d.local_tax;
                   const currentOT = overtimeEdits[d.id] ?? d.overtime_hours;
+                  const isApproved = (d.detail_status || 'pending') === 'approved';
                   return (
-                    <tr key={d.id} className="border-t border-(--border-main) hover:bg-(--bg-main)/50 transition-colors">
+                    <tr
+                      key={d.id}
+                      className={`border-t border-(--border-main) hover:bg-(--bg-main)/50 transition-colors ${
+                        isApproved ? 'bg-emerald-50/30' : ''
+                      }`}
+                    >
+                      {/* 체크박스 */}
+                      {canApprove && (
+                        <td className="px-3 py-2.5 text-center">
+                          {isApproved ? (
+                            <CheckCircleIcon className="w-5 h-5 text-emerald-500 mx-auto" />
+                          ) : (
+                            <input
+                              type="checkbox"
+                              checked={selectedIds.has(d.id)}
+                              onChange={() => toggleSelect(d.id)}
+                              className="w-4 h-4 rounded border-slate-300 text-violet-600 focus:ring-violet-500"
+                            />
+                          )}
+                        </td>
+                      )}
                       <td className="px-3 py-2.5 text-sm">{d.employee_no}</td>
                       <td className="px-3 py-2.5 font-medium text-slate-700">{d.employee_name}</td>
                       <td className="px-3 py-2.5 text-sm text-slate-500">{d.department_name || '-'}</td>
@@ -305,6 +404,24 @@ export default function PayrollPage() {
                       <td className="px-3 py-2.5 text-right text-sm text-red-500">{formatMoney(incomeTax)}</td>
                       <td className="px-3 py-2.5 text-right text-sm text-red-600 font-medium">{formatMoney(d.total_deduction)}</td>
                       <td className="px-3 py-2.5 text-right text-sm text-emerald-600 font-bold">{formatMoney(d.net_salary)}</td>
+                      {/* 개별 승인 버튼 */}
+                      {canApprove && (
+                        <td className="px-2 py-2 text-center">
+                          {isApproved ? (
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-700">
+                              {DETAIL_STATUS_LABELS['approved']}
+                            </span>
+                          ) : (
+                            <button
+                              onClick={() => handleApproveOne(d.id)}
+                              disabled={approving}
+                              className="px-2.5 py-1 text-xs font-medium text-violet-700 bg-violet-50 border border-violet-200 rounded-md hover:bg-violet-100 disabled:opacity-50 transition-colors"
+                            >
+                              승인
+                            </button>
+                          )}
+                        </td>
+                      )}
                     </tr>
                   );
                 })
@@ -313,16 +430,52 @@ export default function PayrollPage() {
             {data?.details && data.details.length > 0 && (
               <tfoot>
                 <tr className="border-t-2 border-(--border-light) bg-(--bg-main) font-bold">
-                  <td colSpan={showOvertimeCol ? 7 : 6} className="px-3 py-3 text-slate-700">합계 ({data.total_employees}명)</td>
+                  <td colSpan={(canApprove ? 1 : 0) + (showOvertimeCol ? 7 : 6)} className="px-3 py-3 text-slate-700">
+                    합계 ({data.total_employees}명)
+                  </td>
                   <td className="px-3 py-3 text-right text-sm">{formatMoney(data.total_gross)}</td>
                   <td colSpan={2} />
                   <td className="px-3 py-3 text-right text-sm text-red-600">{formatMoney(data.total_deduction)}</td>
                   <td className="px-3 py-3 text-right text-sm text-emerald-600">{formatMoney(data.total_net)}</td>
+                  {canApprove && <td />}
                 </tr>
               </tfoot>
             )}
           </table>
         </div>
+
+        {/* 하단 승인 바 */}
+        {canApprove && data?.details && data.details.length > 0 && (
+          <div className="flex items-center justify-between px-4 py-3 bg-slate-50 border-t border-(--border-main)">
+            <div className="text-sm text-slate-600">
+              {selectedIds.size > 0 ? (
+                <span className="font-medium text-violet-700">{selectedIds.size}명 선택됨</span>
+              ) : (
+                <span>직원을 선택하여 개별 승인하거나, 전체 승인할 수 있습니다.</span>
+              )}
+            </div>
+            <div className="flex items-center gap-2">
+              {/* 선택 승인 */}
+              <button
+                onClick={handleApproveSelected}
+                disabled={approving || selectedIds.size === 0}
+                className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-violet-700 bg-violet-50 border border-violet-200 rounded-lg hover:bg-violet-100 disabled:opacity-50 transition-colors"
+              >
+                <CheckCircleIcon className="w-4 h-4" />
+                {approving ? '승인 중...' : `선택 승인 (${selectedIds.size}명)`}
+              </button>
+              {/* 전체 승인 */}
+              <button
+                onClick={handleApproveAll}
+                disabled={approving}
+                className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-emerald-500 to-emerald-600 rounded-lg hover:from-emerald-600 hover:to-emerald-700 disabled:opacity-50 shadow-sm"
+              >
+                <CheckCircleIcon className="w-4 h-4" />
+                {approving ? '승인 중...' : '전체 승인'}
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -332,6 +332,12 @@ class PayrollDetail(Base):
         Numeric(15, 2), default=0, comment="결근 공제액"
     )
 
+    # ── 개별 승인 상태 ──
+    detail_status: Mapped[str] = mapped_column(
+        String(20), default="pending",
+        comment="개별 승인 상태 (pending=대기/approved=승인)"
+    )
+
     # ── AI 최적화 플래그 ──
     ai_optimized: Mapped[bool] = mapped_column(
         Boolean, default=False, comment="AI 세무 최적화 적용 여부"

@@ -304,6 +304,7 @@ async def get_payroll(db: AsyncSession, year: int, month: int):
             "absent_days": float(d.absent_days),
             "leave_deduction": float(d.leave_deduction),
             "ai_optimized": d.ai_optimized,
+            "detail_status": getattr(d, 'detail_status', 'pending') or 'pending',
         })
 
     return {
@@ -435,7 +436,7 @@ async def update_overtime(
 async def approve_payroll(
     db: AsyncSession, year: int, month: int, payment_date, current_user, ip_address: Optional[str] = None
 ):
-    """급여 승인 (calculated → approved)"""
+    """급여 전체 승인 (calculated → approved) — 모든 직원 일괄"""
     result = await db.execute(
         select(PayrollHeader).where(
             PayrollHeader.payroll_year == year,
@@ -445,8 +446,15 @@ async def approve_payroll(
     header = result.scalar_one_or_none()
     if not header:
         raise HTTPException(status_code=404, detail="급여대장을 찾을 수 없습니다")
-    if header.status != "calculated":
+    if header.status not in ("calculated",):
         raise HTTPException(status_code=400, detail=f"현재 상태({header.status})에서는 승인할 수 없습니다. '계산완료' 상태여야 합니다.")
+
+    # 모든 상세 내역을 approved로 변경
+    details_result = await db.execute(
+        select(PayrollDetail).where(PayrollDetail.payroll_id == header.id)
+    )
+    for detail in details_result.scalars().all():
+        detail.detail_status = "approved"
 
     header.status = "approved"
     header.approved_by = current_user.id
@@ -458,6 +466,61 @@ async def approve_payroll(
         db=db, table_name="payroll_headers", record_id=header.id,
         action="UPDATE", changed_by=current_user.id,
         new_values={"status": "approved"},
+        ip_address=ip_address,
+    )
+    await db.commit()
+    return await get_payroll(db, year, month)
+
+
+async def approve_payroll_items(
+    db: AsyncSession, year: int, month: int, detail_ids: list[str],
+    current_user, ip_address: Optional[str] = None
+):
+    """급여 개별 승인 — 선택한 직원만 승인"""
+    import uuid as _uuid
+
+    result = await db.execute(
+        select(PayrollHeader).where(
+            PayrollHeader.payroll_year == year,
+            PayrollHeader.payroll_month == month,
+        )
+    )
+    header = result.scalar_one_or_none()
+    if not header:
+        raise HTTPException(status_code=404, detail="급여대장을 찾을 수 없습니다")
+    if header.status not in ("calculated",):
+        raise HTTPException(status_code=400, detail=f"현재 상태({header.status})에서는 승인할 수 없습니다. '계산완료' 상태여야 합니다.")
+
+    # 선택된 항목 승인
+    approved_count = 0
+    for did in detail_ids:
+        detail_result = await db.execute(
+            select(PayrollDetail).where(
+                PayrollDetail.id == _uuid.UUID(did),
+                PayrollDetail.payroll_id == header.id,
+            )
+        )
+        detail = detail_result.scalar_one_or_none()
+        if detail and getattr(detail, 'detail_status', 'pending') != 'approved':
+            detail.detail_status = "approved"
+            approved_count += 1
+
+    # 전체 승인 여부 확인 — 모든 상세가 approved이면 헤더도 approved로 변경
+    all_details = await db.execute(
+        select(PayrollDetail).where(PayrollDetail.payroll_id == header.id)
+    )
+    all_items = all_details.scalars().all()
+    all_approved = all(getattr(d, 'detail_status', 'pending') == 'approved' for d in all_items)
+
+    if all_approved and len(all_items) > 0:
+        header.status = "approved"
+        header.approved_by = current_user.id
+        header.approved_at = func.now()
+
+    await log_action(
+        db=db, table_name="payroll_details", record_id=header.id,
+        action="UPDATE", changed_by=current_user.id,
+        new_values={"approved_items": approved_count, "detail_ids": detail_ids},
         ip_address=ip_address,
     )
     await db.commit()

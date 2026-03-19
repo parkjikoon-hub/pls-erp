@@ -47,6 +47,8 @@ async def lifespan(app: FastAPI):
             ("employees", "ins_employment", "BOOLEAN DEFAULT TRUE"),
             # M3 인사급여: 추가근무 시간
             ("payroll_details", "overtime_hours", "NUMERIC(5,1) DEFAULT 0"),
+            # M3 인사급여: 개별 승인 상태
+            ("payroll_details", "detail_status", "VARCHAR(20) DEFAULT 'pending'"),
         ]
         async with engine.begin() as conn:
             for table, col, col_type in alter_columns:
