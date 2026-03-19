@@ -28,6 +28,10 @@ export interface Employee {
   address: string | null;
   has_childcare: boolean;
   has_car_allowance: boolean;
+  ins_national_pension: boolean;
+  ins_health: boolean;
+  ins_longterm_care: boolean;
+  ins_employment: boolean;
   memo: string | null;
   is_active: boolean;
   created_at: string;
@@ -53,6 +57,10 @@ export interface EmployeeFormData {
   address?: string;
   has_childcare: boolean;
   has_car_allowance: boolean;
+  ins_national_pension?: boolean;
+  ins_health?: boolean;
+  ins_longterm_care?: boolean;
+  ins_employment?: boolean;
   memo?: string;
 }
 

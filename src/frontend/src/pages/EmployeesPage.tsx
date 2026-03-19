@@ -45,6 +45,10 @@ const EMPTY_FORM: EmployeeFormData = {
   annual_leave_days: 15,
   has_childcare: false,
   has_car_allowance: false,
+  ins_national_pension: true,
+  ins_health: true,
+  ins_longterm_care: true,
+  ins_employment: true,
 };
 
 export default function EmployeesPage() {
@@ -129,6 +133,10 @@ export default function EmployeesPage() {
       address: emp.address || undefined,
       has_childcare: emp.has_childcare,
       has_car_allowance: emp.has_car_allowance,
+      ins_national_pension: emp.ins_national_pension ?? true,
+      ins_health: emp.ins_health ?? true,
+      ins_longterm_care: emp.ins_longterm_care ?? true,
+      ins_employment: emp.ins_employment ?? true,
       memo: emp.memo || undefined,
     });
     setError('');
@@ -517,6 +525,28 @@ export default function EmployeesPage() {
                       />
                       자가운전보조금 대상
                     </label>
+                  </div>
+                  {/* 4대보험 가입 선택 */}
+                  <div className="col-span-2 mt-2">
+                    <p className="text-sm font-medium text-slate-600 mb-1.5">4대보험 가입 선택</p>
+                    <div className="flex flex-wrap gap-4">
+                      {[
+                        { key: 'ins_national_pension', label: '국민연금' },
+                        { key: 'ins_health', label: '건강보험' },
+                        { key: 'ins_longterm_care', label: '장기요양보험' },
+                        { key: 'ins_employment', label: '고용보험' },
+                      ].map(({ key, label }) => (
+                        <label key={key} className="flex items-center gap-2 text-sm text-slate-700 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={(form as any)[key] ?? true}
+                            onChange={(e) => setForm((f) => ({ ...f, [key]: e.target.checked }))}
+                            className="w-4 h-4 rounded border-slate-300 text-violet-500 focus:ring-violet-500"
+                          />
+                          {label}
+                        </label>
+                      ))}
+                    </div>
                   </div>
                 </div>
               </fieldset>

@@ -107,11 +107,11 @@ def calculate_employee_payroll(
     if taxable < 0:
         taxable = 0
 
-    # ── 4. 4대보험 계산 (과세소득 기준) ──
-    national_pension = round(taxable * RATES["national_pension"])
-    health_insurance = round(taxable * RATES["health_insurance"])
-    long_term_care = round(health_insurance * RATES["long_term_care_ratio"])
-    employment_insurance = round(taxable * RATES["employment_insurance"])
+    # ── 4. 4대보험 계산 (과세소득 기준, 직원별 가입 여부 반영) ──
+    national_pension = round(taxable * RATES["national_pension"]) if getattr(emp, 'ins_national_pension', True) else 0
+    health_insurance = round(taxable * RATES["health_insurance"]) if getattr(emp, 'ins_health', True) else 0
+    long_term_care = round(health_insurance * RATES["long_term_care_ratio"]) if getattr(emp, 'ins_longterm_care', True) else 0
+    employment_insurance = round(taxable * RATES["employment_insurance"]) if getattr(emp, 'ins_employment', True) else 0
 
     # ── 5. 소득세 (간이세액표 기반) ──
     annual_taxable = taxable * 12
@@ -281,6 +281,7 @@ async def get_payroll(db: AsyncSession, year: int, month: int):
             "employee_name": d.employee.name if d.employee else None,
             "department_name": d.employee.department.name if d.employee and d.employee.department else None,
             "base_salary": float(d.base_salary),
+            "overtime_hours": float(getattr(d, 'overtime_hours', 0) or 0),
             "overtime_pay": float(d.overtime_pay),
             "bonus": float(d.bonus),
             "meal_allowance": float(d.meal_allowance),
@@ -351,6 +352,84 @@ async def list_payrolls(db: AsyncSession, year: Optional[int] = None):
         }
         for h in headers
     ]
+
+
+async def update_overtime(
+    db: AsyncSession, year: int, month: int, items: list, current_user, ip_address: Optional[str] = None
+):
+    """
+    추가근무 시간 일괄 입력 → 급여 재계산.
+    overtime_hours 기준으로 overtime_pay를 계산하고 총 지급액/공제액을 재산출합니다.
+    """
+    result = await db.execute(
+        select(PayrollHeader).where(
+            PayrollHeader.payroll_year == year,
+            PayrollHeader.payroll_month == month,
+        )
+    )
+    header = result.scalar_one_or_none()
+    if not header:
+        raise HTTPException(status_code=404, detail="급여대장을 찾을 수 없습니다")
+    if header.status in ("approved", "paid"):
+        raise HTTPException(status_code=400, detail="승인/지급 완료된 급여는 수정할 수 없습니다")
+
+    import uuid as _uuid
+
+    for item in items:
+        detail_result = await db.execute(
+            select(PayrollDetail)
+            .options(selectinload(PayrollDetail.employee))
+            .where(PayrollDetail.id == _uuid.UUID(item.detail_id))
+        )
+        detail = detail_result.scalar_one_or_none()
+        if not detail:
+            continue
+
+        # 추가근무수당 = 시급(기본급/209h) × 1.5 × 추가근무시간
+        base = float(detail.base_salary)
+        hourly_rate = base / 209 if base > 0 else 0
+        overtime_hours = float(item.overtime_hours)
+        overtime_pay = round(hourly_rate * 1.5 * overtime_hours)
+
+        detail.overtime_hours = overtime_hours
+        detail.overtime_pay = overtime_pay
+
+        # 총 지급액 재계산
+        tax_free = (float(detail.meal_allowance) + float(detail.car_allowance) +
+                    float(detail.research_allowance) + float(detail.childcare_allowance))
+        detail.gross_salary = base + overtime_pay + float(detail.bonus) + tax_free - float(detail.leave_deduction)
+        detail.taxable_salary = max(0, base + overtime_pay + float(detail.bonus) - float(detail.leave_deduction))
+
+        # 4대보험 재계산 (직원 보험 가입여부 반영)
+        emp = detail.employee
+        taxable = float(detail.taxable_salary)
+        detail.national_pension = round(taxable * RATES["national_pension"]) if getattr(emp, 'ins_national_pension', True) else 0
+        detail.health_insurance = round(taxable * RATES["health_insurance"]) if getattr(emp, 'ins_health', True) else 0
+        detail.long_term_care = round(float(detail.health_insurance) * RATES["long_term_care_ratio"]) if getattr(emp, 'ins_longterm_care', True) else 0
+        detail.employment_insurance = round(taxable * RATES["employment_insurance"]) if getattr(emp, 'ins_employment', True) else 0
+
+        # 소득세 재계산
+        detail.income_tax = _calc_income_tax(taxable * 12)
+        detail.local_tax = round(float(detail.income_tax) * 0.1)
+
+        detail.total_deduction = (
+            float(detail.income_tax) + float(detail.local_tax) +
+            float(detail.national_pension) + float(detail.health_insurance) +
+            float(detail.long_term_care) + float(detail.employment_insurance)
+        )
+        detail.net_salary = max(0, float(detail.gross_salary) - float(detail.total_deduction))
+
+    # 헤더 합계 재계산
+    all_details = await db.execute(
+        select(PayrollDetail).where(PayrollDetail.payroll_id == header.id)
+    )
+    totals = all_details.scalars().all()
+    header.total_gross = sum(float(d.gross_salary) for d in totals)
+    header.total_deduction = sum(float(d.total_deduction) for d in totals)
+    header.total_net = sum(float(d.net_salary) for d in totals)
+
+    await db.commit()
+    return await get_payroll(db, year, month)
 
 
 async def approve_payroll(

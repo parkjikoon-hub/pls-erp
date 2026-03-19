@@ -85,6 +85,19 @@ class Employee(Base):
     has_car_allowance: Mapped[bool] = mapped_column(
         Boolean, default=False, comment="자가운전보조금 대상 여부"
     )
+    # 4대보험 선택적 적용 (기본값: 전부 가입)
+    ins_national_pension: Mapped[bool] = mapped_column(
+        Boolean, default=True, comment="국민연금 가입 여부"
+    )
+    ins_health: Mapped[bool] = mapped_column(
+        Boolean, default=True, comment="건강보험 가입 여부"
+    )
+    ins_longterm_care: Mapped[bool] = mapped_column(
+        Boolean, default=True, comment="장기요양보험 가입 여부"
+    )
+    ins_employment: Mapped[bool] = mapped_column(
+        Boolean, default=True, comment="고용보험 가입 여부"
+    )
     memo: Mapped[str | None] = mapped_column(
         Text, comment="비고"
     )
@@ -244,6 +257,9 @@ class PayrollDetail(Base):
     # ── 지급 항목 ──
     base_salary: Mapped[float] = mapped_column(
         Numeric(15, 2), default=0, comment="기본급"
+    )
+    overtime_hours: Mapped[float] = mapped_column(
+        Numeric(5, 1), default=0, comment="추가근무 시간"
     )
     overtime_pay: Mapped[float] = mapped_column(
         Numeric(15, 2), default=0, comment="초과근무수당"

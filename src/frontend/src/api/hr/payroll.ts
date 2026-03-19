@@ -10,6 +10,7 @@ export interface PayrollDetail {
   employee_name: string | null;
   department_name: string | null;
   base_salary: number;
+  overtime_hours: number;
   overtime_pay: number;
   bonus: number;
   meal_allowance: number;
@@ -73,5 +74,14 @@ export async function approvePayroll(year: number, month: number, paymentDate?: 
   const res = await api.post(`/hr/payroll/${year}/${month}/approve`, {
     payment_date: paymentDate || null,
   });
+  return res.data;
+}
+
+export async function updateOvertime(
+  year: number,
+  month: number,
+  items: { detail_id: string; overtime_hours: number }[],
+) {
+  const res = await api.patch(`/hr/payroll/${year}/${month}/overtime`, { items });
   return res.data;
 }

@@ -1,16 +1,18 @@
 /**
  * M3 인사/급여 — 급여 관리 페이지
- * 급여 계산, 급여대장 조회, 승인
+ * 급여 계산, 추가근무 입력, 급여대장 조회, 승인
  */
 import { useState, useEffect, useCallback } from 'react';
 import {
   CalculatorIcon,
   CheckCircleIcon,
+  ClockIcon,
 } from '@heroicons/react/24/outline';
 import {
   fetchPayroll,
   calculatePayroll,
   approvePayroll,
+  updateOvertime,
   type PayrollHeader,
 } from '../api/hr/payroll';
 import { useAuthStore } from '../stores/authStore';
@@ -41,6 +43,11 @@ export default function PayrollPage() {
   const [calculating, setCalculating] = useState(false);
   const [approving, setApproving] = useState(false);
 
+  // 추가근무 편집 상태
+  const [overtimeEdits, setOvertimeEdits] = useState<Record<string, number>>({});
+  const [savingOvertime, setSavingOvertime] = useState(false);
+  const [showOvertimeCol, setShowOvertimeCol] = useState(false);
+
   const formatMoney = (n: number) => new Intl.NumberFormat('ko-KR').format(Math.round(n));
 
   const loadData = useCallback(async () => {
@@ -48,6 +55,7 @@ export default function PayrollPage() {
     try {
       const result = await fetchPayroll(year, month);
       setData(result);
+      setOvertimeEdits({});
     } catch {
       setData(null);
     } finally {
@@ -88,6 +96,32 @@ export default function PayrollPage() {
     }
   };
 
+  // 추가근무 시간 저장
+  const handleSaveOvertime = async () => {
+    const items = Object.entries(overtimeEdits).map(([detail_id, overtime_hours]) => ({
+      detail_id,
+      overtime_hours,
+    }));
+    if (items.length === 0) {
+      alert('변경된 추가근무 시간이 없습니다.');
+      return;
+    }
+    setSavingOvertime(true);
+    try {
+      await updateOvertime(year, month, items);
+      await loadData();
+      alert('추가근무 시간이 반영되었습니다.');
+    } catch (err: unknown) {
+      const axiosErr = err as { response?: { data?: { detail?: string } } };
+      alert(axiosErr.response?.data?.detail || '저장 중 오류가 발생했습니다.');
+    } finally {
+      setSavingOvertime(false);
+    }
+  };
+
+  const canEdit = data?.status === 'calculated' || data?.status === 'draft';
+  const hasOvertimeEdits = Object.keys(overtimeEdits).length > 0;
+
   return (
     <div>
       {/* 헤더 */}
@@ -95,7 +129,7 @@ export default function PayrollPage() {
         <div>
           <h1 className="text-xl font-bold text-slate-800">급여 관리</h1>
           <p className="text-sm text-slate-500">
-            월급여 계산 (4대보험, 소득세, 비과세 자동 산출)
+            월급여 계산 (4대보험, 소득세, 비과세, 추가근무 자동 산출)
           </p>
         </div>
       </div>
@@ -129,6 +163,32 @@ export default function PayrollPage() {
           )}
 
           <div className="flex-1" />
+
+          {/* 추가근무 입력 토글 */}
+          {isManager && data?.details && data.details.length > 0 && canEdit && (
+            <button
+              onClick={() => setShowOvertimeCol(!showOvertimeCol)}
+              className={`flex items-center gap-1.5 px-4 py-2 text-sm font-medium rounded-lg border shadow-sm transition-colors ${
+                showOvertimeCol
+                  ? 'bg-amber-50 border-amber-300 text-amber-700'
+                  : 'bg-white border-(--border-main) text-slate-600 hover:bg-slate-50'
+              }`}
+            >
+              <ClockIcon className="w-4 h-4" />
+              추가근무 입력
+            </button>
+          )}
+
+          {/* 추가근무 저장 */}
+          {showOvertimeCol && hasOvertimeEdits && (
+            <button
+              onClick={handleSaveOvertime}
+              disabled={savingOvertime}
+              className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-white bg-amber-500 rounded-lg hover:bg-amber-600 disabled:opacity-50 shadow-sm"
+            >
+              {savingOvertime ? '저장 중...' : '추가근무 저장'}
+            </button>
+          )}
 
           {isManager && (
             <button
@@ -185,6 +245,10 @@ export default function PayrollPage() {
                 <th className="text-left px-3 py-3 font-semibold">이름</th>
                 <th className="text-left px-3 py-3 font-semibold">부서</th>
                 <th className="text-right px-3 py-3 font-semibold">기본급</th>
+                {showOvertimeCol && (
+                  <th className="text-center px-3 py-3 font-semibold text-amber-700 bg-amber-50">추가근무(h)</th>
+                )}
+                <th className="text-right px-3 py-3 font-semibold">추가근무수당</th>
                 <th className="text-right px-3 py-3 font-semibold">비과세</th>
                 <th className="text-right px-3 py-3 font-semibold">총지급</th>
                 <th className="text-right px-3 py-3 font-semibold">4대보험</th>
@@ -196,11 +260,11 @@ export default function PayrollPage() {
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan={10} className="text-center py-12 text-slate-400">불러오는 중...</td>
+                  <td colSpan={showOvertimeCol ? 12 : 11} className="text-center py-12 text-slate-400">불러오는 중...</td>
                 </tr>
               ) : !data || !data.details || data.details.length === 0 ? (
                 <tr>
-                  <td colSpan={10} className="text-center py-12 text-slate-400">
+                  <td colSpan={showOvertimeCol ? 12 : 11} className="text-center py-12 text-slate-400">
                     급여 데이터가 없습니다. '급여 계산' 버튼을 눌러 계산하세요.
                   </td>
                 </tr>
@@ -209,12 +273,32 @@ export default function PayrollPage() {
                   const taxFree = d.meal_allowance + d.car_allowance + d.research_allowance + d.childcare_allowance;
                   const insurance = d.national_pension + d.health_insurance + d.long_term_care + d.employment_insurance;
                   const incomeTax = d.income_tax + d.local_tax;
+                  const currentOT = overtimeEdits[d.id] ?? d.overtime_hours;
                   return (
                     <tr key={d.id} className="border-t border-(--border-main) hover:bg-(--bg-main)/50 transition-colors">
                       <td className="px-3 py-2.5 font-mono text-sm">{d.employee_no}</td>
                       <td className="px-3 py-2.5 font-medium text-slate-700">{d.employee_name}</td>
                       <td className="px-3 py-2.5 text-sm text-slate-500">{d.department_name || '-'}</td>
                       <td className="px-3 py-2.5 text-right font-mono text-sm">{formatMoney(d.base_salary)}</td>
+                      {showOvertimeCol && (
+                        <td className="px-2 py-1.5 text-center bg-amber-50/50">
+                          <input
+                            type="number"
+                            min={0}
+                            step={0.5}
+                            value={currentOT}
+                            onChange={(e) => {
+                              const v = parseFloat(e.target.value) || 0;
+                              setOvertimeEdits((prev) => ({ ...prev, [d.id]: v }));
+                            }}
+                            disabled={!canEdit}
+                            className="w-16 px-2 py-1 text-sm text-center border border-amber-300 rounded-md bg-white focus:outline-none focus:border-amber-500 disabled:opacity-50"
+                          />
+                        </td>
+                      )}
+                      <td className="px-3 py-2.5 text-right font-mono text-sm text-amber-600">
+                        {d.overtime_pay > 0 ? formatMoney(d.overtime_pay) : '-'}
+                      </td>
                       <td className="px-3 py-2.5 text-right font-mono text-sm text-blue-600">{formatMoney(taxFree)}</td>
                       <td className="px-3 py-2.5 text-right font-mono text-sm font-medium">{formatMoney(d.gross_salary)}</td>
                       <td className="px-3 py-2.5 text-right font-mono text-sm text-red-500">{formatMoney(insurance)}</td>
@@ -229,7 +313,7 @@ export default function PayrollPage() {
             {data?.details && data.details.length > 0 && (
               <tfoot>
                 <tr className="border-t-2 border-(--border-light) bg-(--bg-main) font-bold">
-                  <td colSpan={5} className="px-3 py-3 text-slate-700">합계 ({data.total_employees}명)</td>
+                  <td colSpan={showOvertimeCol ? 7 : 6} className="px-3 py-3 text-slate-700">합계 ({data.total_employees}명)</td>
                   <td className="px-3 py-3 text-right font-mono text-sm">{formatMoney(data.total_gross)}</td>
                   <td colSpan={2} />
                   <td className="px-3 py-3 text-right font-mono text-sm text-red-600">{formatMoney(data.total_deduction)}</td>

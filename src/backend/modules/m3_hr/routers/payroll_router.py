@@ -1,7 +1,9 @@
 """
 M3 인사/급여 — 급여 API 라우터
 """
-from typing import Optional
+import uuid
+from typing import Optional, List
+from pydantic import BaseModel
 from fastapi import APIRouter, Depends, Query, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -10,6 +12,15 @@ from ....auth.dependencies import get_current_user, require_role
 from ....shared.response import success_response
 from ..schemas.payroll import PayrollCalculateRequest, PayrollApproveRequest
 from ..services import payroll_service
+
+
+class OvertimeUpdateItem(BaseModel):
+    detail_id: str
+    overtime_hours: float
+
+
+class OvertimeUpdateRequest(BaseModel):
+    items: List[OvertimeUpdateItem]
 
 router = APIRouter()
 
@@ -72,3 +83,20 @@ async def approve_payroll(
         db, year, month, data.payment_date, current_user, ip
     )
     return success_response(data=result, message=f"{year}년 {month}월 급여가 승인되었습니다")
+
+
+@router.patch("/{year}/{month}/overtime", summary="추가근무 시간 입력")
+async def update_overtime(
+    year: int,
+    month: int,
+    data: OvertimeUpdateRequest,
+    request: Request,
+    db: AsyncSession = Depends(get_db),
+    current_user=Depends(require_role("admin", "manager")),
+):
+    """급여 상세 항목의 추가근무 시간을 수정하고 급여를 재계산합니다"""
+    ip = request.client.host if request.client else None
+    result = await payroll_service.update_overtime(
+        db, year, month, data.items, current_user, ip
+    )
+    return success_response(data=result, message="추가근무 시간이 반영되었습니다")
