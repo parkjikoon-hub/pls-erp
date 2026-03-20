@@ -8,6 +8,7 @@ from .invoice_router import router as invoice_router
 from .closing_router import router as closing_router
 from .bank_import_router import router as bank_import_router
 from .customer_analysis_router import router as customer_analysis_router
+from .bank_realtime_router import router as bank_realtime_router
 
 router = APIRouter()
 
@@ -29,3 +30,6 @@ router.include_router(bank_import_router, prefix="/bank-import", tags=["M4-은�
 
 # 거래처 분석
 router.include_router(customer_analysis_router, prefix="/customer-analysis", tags=["M4-거래처분석"])
+
+# CODEF 은행 실시간 연동
+router.include_router(bank_realtime_router, prefix="/bank-realtime", tags=["M4-은행실시간연동"])

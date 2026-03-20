@@ -20,6 +20,15 @@ import {
   type CompanyBankAccount,
 } from '../api/finance/bankImport';
 import { searchAccounts, type AccountSearchResult } from '../api/finance/accounts';
+import {
+  testCodefConnection,
+  getBankCodes,
+  createConnectedId,
+  getAccountList,
+  syncTransactions,
+  type BankCode,
+  type CodefSyncResult,
+} from '../api/finance/bankRealtime';
 
 const BANKS = [
   { code: 'shinhan', name: '신한은행' },
@@ -31,7 +40,30 @@ const BANKS = [
 ];
 
 export default function BankImportPage() {
-  /* ── 상태 ── */
+  /* ── 탭 ── */
+  const [activeTab, setActiveTab] = useState<'csv' | 'realtime'>('csv');
+
+  /* ── CODEF 실시간 연동 상태 ── */
+  const [codefTesting, setCodefTesting] = useState(false);
+  const [codefStatus, setCodefStatus] = useState<{ success: boolean; message: string } | null>(null);
+  const [codefBankCodes, setCodefBankCodes] = useState<BankCode[]>([]);
+  const [codefBankCode, setCodefBankCode] = useState('');
+  const [codefLoginId, setCodefLoginId] = useState('');
+  const [codefLoginPw, setCodefLoginPw] = useState('');
+  const [codefConnectedId, setCodefConnectedId] = useState('');
+  const [codefCreating, setCodefCreating] = useState(false);
+  const [codefAccounts, setCodefAccounts] = useState<any[]>([]);
+  const [codefAccountNo, setCodefAccountNo] = useState('');
+  const [codefStartDate, setCodefStartDate] = useState(
+    new Date(Date.now() - 30 * 86400000).toISOString().slice(0, 10)
+  );
+  const [codefEndDate, setCodefEndDate] = useState(
+    new Date().toISOString().slice(0, 10)
+  );
+  const [codefSyncing, setCodefSyncing] = useState(false);
+  const [codefResult, setCodefResult] = useState<CodefSyncResult | null>(null);
+
+  /* ── CSV 상태 ── */
   const [selectedAccountId, setSelectedAccountId] = useState('');
   const [parsing, setParsing] = useState(false);
   const [transactions, setTransactions] = useState<ParsedTransaction[]>([]);
@@ -293,26 +325,292 @@ export default function BankImportPage() {
   );
 
   /* ── 렌더링 ── */
+  /* ── CODEF 연결 테스트 ── */
+  const handleCodefTest = async () => {
+    setCodefTesting(true);
+    try {
+      const result = await testCodefConnection();
+      setCodefStatus(result);
+      if (result.success && codefBankCodes.length === 0) {
+        const codes = await getBankCodes();
+        setCodefBankCodes(codes);
+        if (codes.length > 0) setCodefBankCode(codes[0].code);
+      }
+    } catch (e: any) {
+      setCodefStatus({ success: false, message: e?.response?.data?.detail || '연결 실패' });
+    } finally {
+      setCodefTesting(false);
+    }
+  };
+
+  /* ── Connected ID 생성 ── */
+  const handleCreateConnectedId = async () => {
+    if (!codefBankCode || !codefLoginId || !codefLoginPw) {
+      alert('은행, 아이디, 비밀번호를 모두 입력해주세요'); return;
+    }
+    setCodefCreating(true);
+    try {
+      const result = await createConnectedId({
+        bank_code: codefBankCode,
+        login_type: '1',
+        login_id: codefLoginId,
+        login_pw: codefLoginPw,
+      });
+      if (result.success && result.connected_id) {
+        setCodefConnectedId(result.connected_id);
+        alert('은행 계좌 연결 성공!');
+        // 계좌 목록 자동 조회
+        const accResult = await getAccountList({
+          connected_id: result.connected_id,
+          bank_code: codefBankCode,
+        });
+        if (accResult.success) setCodefAccounts(accResult.accounts);
+      } else {
+        alert(result.message);
+      }
+    } catch (e: any) {
+      alert(e?.response?.data?.detail || '연결 실패');
+    } finally {
+      setCodefCreating(false);
+    }
+  };
+
+  /* ── 거래내역 동기화 ── */
+  const handleCodefSync = async () => {
+    if (!codefConnectedId || !codefAccountNo) {
+      alert('Connected ID와 계좌번호를 먼저 설정해주세요'); return;
+    }
+    setCodefSyncing(true);
+    try {
+      const result = await syncTransactions({
+        connected_id: codefConnectedId,
+        bank_code: codefBankCode,
+        account_no: codefAccountNo,
+        start_date: codefStartDate,
+        end_date: codefEndDate,
+      });
+      setCodefResult(result);
+    } catch (e: any) {
+      alert(e?.response?.data?.detail || '동기화 실패');
+    } finally {
+      setCodefSyncing(false);
+    }
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-slate-800">입금 내역 가져오기</h1>
         <div className="flex gap-2">
-          <button onClick={() => setShowAccountMgmt(!showAccountMgmt)}
-            className="px-3 py-1.5 text-sm border border-(--border-main) rounded-lg text-slate-600 hover:bg-slate-50">
-            계좌 관리 {showAccountMgmt ? '닫기' : '열기'}
-          </button>
-          <button onClick={() => setShowMappings(!showMappings)}
-            className="px-3 py-1.5 text-sm border border-(--border-main) rounded-lg text-slate-600 hover:bg-slate-50">
-            매핑 규칙 {showMappings ? '닫기' : '관리'}
-          </button>
-          <button onClick={() => setShowHistory(!showHistory)}
-            className="px-3 py-1.5 text-sm border border-(--border-main) rounded-lg text-slate-600 hover:bg-slate-50">
-            {showHistory ? '이력 닫기' : '임포트 이력'}
-          </button>
+          {activeTab === 'csv' && (
+            <>
+              <button onClick={() => setShowAccountMgmt(!showAccountMgmt)}
+                className="px-3 py-1.5 text-sm border border-(--border-main) rounded-lg text-slate-600 hover:bg-slate-50">
+                계좌 관리 {showAccountMgmt ? '닫기' : '열기'}
+              </button>
+              <button onClick={() => setShowMappings(!showMappings)}
+                className="px-3 py-1.5 text-sm border border-(--border-main) rounded-lg text-slate-600 hover:bg-slate-50">
+                매핑 규칙 {showMappings ? '닫기' : '관리'}
+              </button>
+              <button onClick={() => setShowHistory(!showHistory)}
+                className="px-3 py-1.5 text-sm border border-(--border-main) rounded-lg text-slate-600 hover:bg-slate-50">
+                {showHistory ? '이력 닫기' : '임포트 이력'}
+              </button>
+            </>
+          )}
         </div>
       </div>
 
+      {/* ── 탭 ── */}
+      <div className="flex gap-1 bg-slate-100 rounded-lg p-1">
+        <button
+          onClick={() => setActiveTab('csv')}
+          className={`flex-1 px-4 py-2 rounded-md text-sm font-medium transition ${
+            activeTab === 'csv'
+              ? 'bg-white text-slate-800 shadow-sm'
+              : 'text-slate-500 hover:text-slate-700'
+          }`}
+        >
+          CSV 업로드
+        </button>
+        <button
+          onClick={() => setActiveTab('realtime')}
+          className={`flex-1 px-4 py-2 rounded-md text-sm font-medium transition ${
+            activeTab === 'realtime'
+              ? 'bg-white text-slate-800 shadow-sm'
+              : 'text-slate-500 hover:text-slate-700'
+          }`}
+        >
+          실시간 연동 (CODEF)
+        </button>
+      </div>
+
+      {/* ── 실시간 연동 탭 ── */}
+      {activeTab === 'realtime' && (
+        <div className="space-y-4">
+          {/* Step 1: 연결 테스트 */}
+          <div className="bg-white rounded-xl border border-(--border-main) p-5 space-y-3">
+            <h2 className="font-bold text-slate-700">Step 1. CODEF API 연결 확인</h2>
+            <div className="flex items-center gap-3">
+              <button onClick={handleCodefTest} disabled={codefTesting}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 disabled:opacity-50">
+                {codefTesting ? '테스트 중...' : '연결 테스트'}
+              </button>
+              {codefStatus && (
+                <span className={`text-sm font-medium ${codefStatus.success ? 'text-emerald-600' : 'text-red-600'}`}>
+                  {codefStatus.success ? '✓' : '✗'} {codefStatus.message}
+                </span>
+              )}
+            </div>
+          </div>
+
+          {/* Step 2: 은행 계좌 연결 */}
+          {codefStatus?.success && (
+            <div className="bg-white rounded-xl border border-(--border-main) p-5 space-y-3">
+              <h2 className="font-bold text-slate-700">Step 2. 은행 계좌 연결</h2>
+              <p className="text-xs text-slate-500">인터넷뱅킹 아이디/비밀번호로 은행 계좌를 연결합니다 (데모 모드)</p>
+              <div className="grid grid-cols-2 gap-3 max-w-lg">
+                <div>
+                  <label className="block text-xs font-medium text-slate-600 mb-1">은행 선택</label>
+                  <select value={codefBankCode} onChange={e => setCodefBankCode(e.target.value)}
+                    className="w-full border border-(--border-main) rounded-lg px-3 py-2 text-sm">
+                    {codefBankCodes.map(b => (
+                      <option key={b.code} value={b.code}>{b.name} ({b.code})</option>
+                    ))}
+                  </select>
+                </div>
+                <div />
+                <div>
+                  <label className="block text-xs font-medium text-slate-600 mb-1">인터넷뱅킹 아이디</label>
+                  <input value={codefLoginId} onChange={e => setCodefLoginId(e.target.value)}
+                    className="w-full border border-(--border-main) rounded-lg px-3 py-2 text-sm"
+                    placeholder="아이디" />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-slate-600 mb-1">비밀번호</label>
+                  <input type="password" value={codefLoginPw} onChange={e => setCodefLoginPw(e.target.value)}
+                    className="w-full border border-(--border-main) rounded-lg px-3 py-2 text-sm"
+                    placeholder="비밀번호" />
+                </div>
+              </div>
+              <button onClick={handleCreateConnectedId} disabled={codefCreating}
+                className="px-4 py-2 bg-red-600 text-white rounded-lg text-sm hover:bg-red-700 disabled:opacity-50">
+                {codefCreating ? '연결 중...' : '계좌 연결'}
+              </button>
+              {codefConnectedId && (
+                <div className="text-sm text-emerald-600 font-medium">
+                  ✓ Connected ID: {codefConnectedId.slice(0, 12)}...
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Step 3: 거래내역 조회 */}
+          {codefConnectedId && (
+            <div className="bg-white rounded-xl border border-(--border-main) p-5 space-y-3">
+              <h2 className="font-bold text-slate-700">Step 3. 거래내역 조회</h2>
+              {codefAccounts.length > 0 && (
+                <div>
+                  <label className="block text-xs font-medium text-slate-600 mb-1">계좌 선택</label>
+                  <select value={codefAccountNo} onChange={e => setCodefAccountNo(e.target.value)}
+                    className="border border-(--border-main) rounded-lg px-3 py-2 text-sm max-w-md w-full">
+                    <option value="">계좌를 선택하세요</option>
+                    {codefAccounts.map((a: any, i: number) => (
+                      <option key={i} value={a.resAccount || a.resAccountNum || ''}>
+                        {a.resAccount || a.resAccountNum} ({a.resAccountName || ''})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+              {codefAccounts.length === 0 && (
+                <div>
+                  <label className="block text-xs font-medium text-slate-600 mb-1">계좌번호 직접 입력</label>
+                  <input value={codefAccountNo} onChange={e => setCodefAccountNo(e.target.value)}
+                    className="border border-(--border-main) rounded-lg px-3 py-2 text-sm max-w-md w-full"
+                    placeholder="계좌번호 입력" />
+                </div>
+              )}
+              <div className="flex gap-3 items-end">
+                <div>
+                  <label className="block text-xs font-medium text-slate-600 mb-1">시작일</label>
+                  <input type="date" value={codefStartDate}
+                    onChange={e => setCodefStartDate(e.target.value)}
+                    className="border border-(--border-main) rounded-lg px-3 py-2 text-sm" />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-slate-600 mb-1">종료일</label>
+                  <input type="date" value={codefEndDate}
+                    onChange={e => setCodefEndDate(e.target.value)}
+                    className="border border-(--border-main) rounded-lg px-3 py-2 text-sm" />
+                </div>
+                <button onClick={handleCodefSync} disabled={codefSyncing || !codefAccountNo}
+                  className="px-4 py-2 bg-red-600 text-white rounded-lg text-sm hover:bg-red-700 disabled:opacity-50">
+                  {codefSyncing ? '조회 중...' : '거래내역 조회'}
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* 조회 결과 */}
+          {codefResult && (
+            <div className="bg-white rounded-xl border border-(--border-main) p-5 space-y-3">
+              <div className="flex items-center justify-between">
+                <h2 className="font-bold text-slate-700">조회 결과</h2>
+                <span className="text-sm text-slate-500">
+                  {codefResult.period?.start_date} ~ {codefResult.period?.end_date}
+                </span>
+              </div>
+              <div className="flex gap-4">
+                <div className="bg-blue-50 rounded-lg px-4 py-2 text-center">
+                  <div className="text-xs text-blue-600">전체</div>
+                  <div className="text-lg font-bold text-blue-800">{codefResult.total_fetched}</div>
+                </div>
+                <div className="bg-emerald-50 rounded-lg px-4 py-2 text-center">
+                  <div className="text-xs text-emerald-600">신규</div>
+                  <div className="text-lg font-bold text-emerald-800">{codefResult.new_count}</div>
+                </div>
+                <div className="bg-slate-50 rounded-lg px-4 py-2 text-center">
+                  <div className="text-xs text-slate-600">중복</div>
+                  <div className="text-lg font-bold text-slate-800">{codefResult.duplicate_count}</div>
+                </div>
+              </div>
+              {codefResult.preview && codefResult.preview.length > 0 && (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead className="bg-slate-50">
+                      <tr>
+                        <th className="text-left px-3 py-2 font-medium text-slate-600">날짜</th>
+                        <th className="text-right px-3 py-2 font-medium text-slate-600">입금액</th>
+                        <th className="text-left px-3 py-2 font-medium text-slate-600">적요</th>
+                        <th className="text-right px-3 py-2 font-medium text-slate-600">잔액</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {codefResult.preview.map((tx, i) => (
+                        <tr key={i} className="border-t border-(--border-main)">
+                          <td className="px-3 py-2">{tx.date}</td>
+                          <td className="px-3 py-2 text-right text-emerald-600 font-medium">
+                            ₩{tx.amount.toLocaleString()}
+                          </td>
+                          <td className="px-3 py-2">{tx.description}</td>
+                          <td className="px-3 py-2 text-right text-slate-500">{tx.balance}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+              {!codefResult.success && (
+                <div className="text-sm text-red-600">{codefResult.message}</div>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ── CSV 업로드 탭 ── */}
+      {activeTab === 'csv' && <>
       {/* 안내 */}
       <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 text-sm text-amber-800">
         <p className="font-medium mb-1">사용 방법</p>
@@ -706,6 +1004,7 @@ export default function BankImportPage() {
           </table>
         </div>
       )}
+      </>}
     </div>
   );
 }
