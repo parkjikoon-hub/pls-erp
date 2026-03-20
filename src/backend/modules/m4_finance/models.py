@@ -351,3 +351,74 @@ class BankTransferLine(Base):
     )
 
     transfer = relationship("BankTransfer", back_populates="lines")
+
+
+# ── 은행 입금 내역 임포트 ──
+class BankImportHistory(Base):
+    """은행 CSV 임포트 이력"""
+    __tablename__ = "bank_import_history"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
+    import_date: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), comment="임포트 일시"
+    )
+    bank_code: Mapped[str] = mapped_column(
+        String(20), nullable=False, comment="은행 코드 (shinhan/ibk/kb/woori/hana)"
+    )
+    file_name: Mapped[str] = mapped_column(
+        String(255), nullable=False, comment="원본 파일명"
+    )
+    total_rows: Mapped[int] = mapped_column(
+        Integer, default=0, comment="파일 내 총 행수"
+    )
+    imported_count: Mapped[int] = mapped_column(
+        Integer, default=0, comment="실제 임포트된 건수"
+    )
+    skipped_count: Mapped[int] = mapped_column(
+        Integer, default=0, comment="건너뛴 건수 (중복 등)"
+    )
+    total_deposit: Mapped[float] = mapped_column(
+        Numeric(15, 2), default=0, comment="총 입금액"
+    )
+    source: Mapped[str] = mapped_column(
+        String(20), default="csv", comment="데이터 소스 (csv/api_codef)"
+    )
+    transaction_hashes: Mapped[str | None] = mapped_column(
+        Text, comment="임포트된 거래 해시 목록 (중복 방지용, JSON)"
+    )
+    imported_by: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("users.id"), comment="임포트 수행자"
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now()
+    )
+
+
+class BankAccountMapping(Base):
+    """적요 키워드 → 계정과목 자동 매핑 규칙"""
+    __tablename__ = "bank_account_mappings"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
+    keyword: Mapped[str] = mapped_column(
+        String(100), nullable=False, comment="적요 키워드"
+    )
+    account_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("chart_of_accounts.id"),
+        nullable=False, comment="매핑 계정과목"
+    )
+    priority: Mapped[int] = mapped_column(
+        Integer, default=0, comment="우선순위 (높을수록 우선)"
+    )
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True)
+    created_by: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("users.id")
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now()
+    )
+
+    account = relationship("ChartOfAccounts")

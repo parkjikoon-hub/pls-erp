@@ -6,6 +6,7 @@ from .fiscal_year_router import router as fiscal_year_router
 from .journal_router import router as journal_router
 from .invoice_router import router as invoice_router
 from .closing_router import router as closing_router
+from .bank_import_router import router as bank_import_router
 
 router = APIRouter()
 
@@ -21,3 +22,6 @@ router.include_router(invoice_router, prefix="/invoices", tags=["M4-세금계산
 
 # 결산/재무제표 (Step 2-5)
 router.include_router(closing_router, prefix="/closing", tags=["M4-결산"])
+
+# 은행 입금 내역 임포트
+router.include_router(bank_import_router, prefix="/bank-import", tags=["M4-은행임포트"])

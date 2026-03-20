@@ -79,6 +79,7 @@ export const MODULES: ModuleInfo[] = [
       { label: '계정과목', path: '/finance/accounts' },
       { label: '전표관리', path: '/finance/journals' },
       { label: '세금계산서', path: '/finance/invoices' },
+      { label: '입금가져오기', path: '/finance/bank-import' },
       { label: '결산마감', path: '/finance/closing' },
     ],
     moduleKey: 'finance',
