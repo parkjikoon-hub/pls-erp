@@ -33,6 +33,7 @@ export default function ShipmentsPage() {
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
   const [statusFilter, setStatusFilter] = useState('');
+  const [search, setSearch] = useState('');
 
   /* 상세 모달 */
   const [detail, setDetail] = useState<Shipment | null>(null);
@@ -52,13 +53,14 @@ export default function ShipmentsPage() {
     try {
       const result = await listShipments({
         status: statusFilter || undefined,
+        search: search || undefined,
         page, size: 30,
       });
       setItems(result.items);
       setTotal(result.total);
     } catch (e) { console.error(e); }
     finally { setLoading(false); }
-  }, [statusFilter, page]);
+  }, [statusFilter, search, page]);
 
   useEffect(() => { fetchData(); }, [fetchData]);
 
@@ -127,12 +129,20 @@ export default function ShipmentsPage() {
           <h1 className="text-2xl font-bold text-slate-800">출하 관리</h1>
           <p className="text-sm text-slate-500 mt-1">출하지시서 관리 및 배송 추적</p>
         </div>
-        <button
-          onClick={openOrderModal}
-          className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition font-medium"
-        >
-          + 수주→출하 생성
-        </button>
+        <div className="flex gap-2">
+          <input
+            placeholder="거래처, 출하번호 검색..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="px-3 py-2 border border-(--border-main) rounded-lg text-sm w-56"
+          />
+          <button
+            onClick={openOrderModal}
+            className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition font-medium"
+          >
+            + 수주→출하 생성
+          </button>
+        </div>
       </div>
 
       {/* ── 상태 필터 ── */}

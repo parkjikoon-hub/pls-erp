@@ -298,7 +298,7 @@ export default function SalesOrdersPage() {
           <option value="invoiced">청구완료</option>
         </select>
         <input
-          placeholder="수주번호 검색..."
+          placeholder="거래처, 수주번호, 비고 검색..."
           value={search}
           onChange={(e) => { setSearch(e.target.value); setPage(1); }}
           className="border border-(--border-main) rounded-lg px-3 py-1.5 text-sm flex-1 max-w-xs"

@@ -31,6 +31,7 @@ export default function WorkOrdersPage() {
   const [loading, setLoading] = useState(false);
   const [viewMode, setViewMode] = useState<'kanban' | 'list'>('kanban');
   const [statusFilter, setStatusFilter] = useState('');
+  const [search, setSearch] = useState('');
 
   /* 생성 모달 */
   const [showCreate, setShowCreate] = useState(false);
@@ -62,13 +63,14 @@ export default function WorkOrdersPage() {
     try {
       const result = await listWorkOrders({
         status: statusFilter || undefined,
+        search: search || undefined,
         page, size: 100,
       });
       setItems(result.items);
       setTotal(result.total);
     } catch (e) { console.error(e); }
     finally { setLoading(false); }
-  }, [statusFilter, page]);
+  }, [statusFilter, search, page]);
 
   useEffect(() => { fetchData(); }, [fetchData]);
 
@@ -229,6 +231,12 @@ export default function WorkOrdersPage() {
           </p>
         </div>
         <div className="flex gap-2">
+          <input
+            placeholder="품목명, 작업지시번호, 수주번호 검색..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="px-3 py-2 border border-(--border-main) rounded-lg text-sm w-64"
+          />
           <button
             onClick={() => setViewMode(viewMode === 'kanban' ? 'list' : 'kanban')}
             className="px-3 py-2 border border-(--border-main) rounded-lg text-sm text-slate-600 hover:bg-slate-50"

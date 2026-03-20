@@ -13,6 +13,7 @@ from fastapi import HTTPException, status
 from ..models import Quotation, QuotationLine
 from ..schemas.quotations import QuotationCreate, QuotationUpdate
 from ....audit.service import log_action
+from ...m1_system.models import Customer
 
 
 async def _generate_quote_no(db: AsyncSession, quote_date: date) -> str:
@@ -51,9 +52,11 @@ async def list_quotations(
         query = query.where(Quotation.status == status_filter)
     if search:
         sf = f"%{search}%"
+        query = query.join(Customer, Quotation.customer_id == Customer.id, isouter=True)
         query = query.where(or_(
             Quotation.quote_no.ilike(sf),
             Quotation.notes.ilike(sf),
+            Customer.name.ilike(sf),
         ))
 
     # 전체 건수

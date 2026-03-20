@@ -45,9 +45,11 @@ async def list_orders(
         query = query.where(SalesOrder.status == status_filter)
     if search:
         sf = f"%{search}%"
+        query = query.join(Customer, SalesOrder.customer_id == Customer.id, isouter=True)
         query = query.where(or_(
             SalesOrder.order_no.ilike(sf),
             SalesOrder.notes.ilike(sf),
+            Customer.name.ilike(sf),
         ))
 
     count_q = select(func.count()).select_from(query.subquery())

@@ -14,6 +14,7 @@ from ..models import TaxInvoice, ChartOfAccounts, JournalEntry, JournalEntryLine
 from ..schemas.invoices import InvoiceCreate, InvoiceUpdate
 from .fiscal_year_service import get_fiscal_year_by_date
 from ....audit.service import log_action
+from ...m1_system.models import Customer
 
 
 async def generate_invoice_no(
@@ -58,10 +59,12 @@ async def list_invoices(
         query = query.where(TaxInvoice.status == invoice_status)
     if search:
         sf = f"%{search}%"
+        query = query.join(Customer, TaxInvoice.customer_id == Customer.id, isouter=True)
         query = query.where(
             or_(
                 TaxInvoice.invoice_no.ilike(sf),
                 TaxInvoice.description.ilike(sf),
+                Customer.name.ilike(sf),
             )
         )
 

@@ -6,7 +6,7 @@ import uuid
 from datetime import date, datetime
 
 from fastapi import HTTPException
-from sqlalchemy import select, func, and_, case, literal_column
+from sqlalchemy import select, func, and_, case, literal_column, or_
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -66,7 +66,12 @@ async def list_shipments(
     if order_id:
         base = base.where(Shipment.order_id == uuid.UUID(order_id))
     if search:
-        base = base.where(Shipment.shipment_no.ilike(f"%{search}%"))
+        sf = f"%{search}%"
+        base = base.join(Customer, Shipment.customer_id == Customer.id, isouter=True)
+        base = base.where(or_(
+            Shipment.shipment_no.ilike(sf),
+            Customer.name.ilike(sf),
+        ))
 
     # 총 건수
     count_stmt = select(func.count()).select_from(base.subquery())

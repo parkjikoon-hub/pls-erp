@@ -88,8 +88,12 @@ async def list_work_orders(
         query = query.where(WorkOrder.order_id == order_id)
     if search:
         sf = f"%{search}%"
+        query = query.join(Product, WorkOrder.product_id == Product.id, isouter=True)
+        query = query.join(SalesOrder, WorkOrder.order_id == SalesOrder.id, isouter=True)
         query = query.where(or_(
             WorkOrder.wo_no.ilike(sf),
+            Product.name.ilike(sf),
+            SalesOrder.order_no.ilike(sf),
         ))
 
     count_q = select(func.count()).select_from(query.subquery())

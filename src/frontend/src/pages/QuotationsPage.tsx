@@ -365,7 +365,7 @@ export default function QuotationsPage() {
           <option value="rejected">거절됨</option>
         </select>
         <input
-          placeholder="견적번호 검색..."
+          placeholder="거래처, 견적번호, 비고 검색..."
           value={search}
           onChange={(e) => { setSearch(e.target.value); setPage(1); }}
           className="border border-(--border-main) rounded-lg px-3 py-1.5 text-sm flex-1 max-w-xs"
