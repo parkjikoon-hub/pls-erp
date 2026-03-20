@@ -7,6 +7,7 @@ from .journal_router import router as journal_router
 from .invoice_router import router as invoice_router
 from .closing_router import router as closing_router
 from .bank_import_router import router as bank_import_router
+from .customer_analysis_router import router as customer_analysis_router
 
 router = APIRouter()
 
@@ -25,3 +26,6 @@ router.include_router(closing_router, prefix="/closing", tags=["M4-결산"])
 
 # 은행 입금 내역 임포트
 router.include_router(bank_import_router, prefix="/bank-import", tags=["M4-은행임포트"])
+
+# 거래처 분석
+router.include_router(customer_analysis_router, prefix="/customer-analysis", tags=["M4-거래처분석"])

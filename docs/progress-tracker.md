@@ -292,6 +292,18 @@
 - [x] ✅ **공지사항 작성 권한 세밀화** — admin만 고정/중요, manager는 본인 글만 수정/삭제 (`a5fc556`)
 - [x] ✅ **직원 등록 시 그룹웨어 자동 권한** — user_id 연결 시 M3/M6 모듈 자동 부여 (`a5fc556`)
 
+### 거래처 분석 + 은행 실시간 연동 설계 (2026-03-20 완료)
+- [x] 거래처별 수주/세금계산서/입금 분석 기능
+  - 백엔드: schemas/customer_analysis.py, services/customer_analysis_service.py, routers/customer_analysis_router.py
+  - 프론트엔드: CustomerAnalysisPage.tsx (6탭: 요약/수주/세금계산서/입금/동향/랭킹)
+  - API: /finance/customer-analysis (3개 엔드포인트)
+  - 입금 동향 분석 (세금계산서↔입금 매칭, 입금소요일 통계, 성향 분류)
+  - 거래처 랭킹 (매출/미수금 비교)
+- [x] 은행 입금 실시간 연동 설계 문서 — `docs/bank-realtime-integration-plan.md`
+  - CODEF API 1순위 추천 (3개월 무료 데모, ERP 도입 사례)
+  - 연동 아키텍처 + DB 테이블 + API 설계 + 구현 로드맵
+- [ ] 은행 실시간 연동 실제 구현 (보류 — CODEF 가입 후 진행)
+
 ### AI 기능 (별도 Step, 나중에 추가)
 - [ ] M4-F01: 영수증 OCR (Gemini Vision → 자동 분개)
 - [ ] M4-F01: 계정과목 AI 추천 (적요→계정 매칭)

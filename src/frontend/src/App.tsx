@@ -38,6 +38,7 @@ import ApprovalTemplatesPage from './pages/ApprovalTemplatesPage';
 import NoticesPage from './pages/NoticesPage';
 import NotificationsPage from './pages/NotificationsPage';
 import BankImportPage from './pages/BankImportPage';
+import CustomerAnalysisPage from './pages/CustomerAnalysisPage';
 
 /** 인증된 사용자만 접근 가능한 라우트 */
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -85,6 +86,7 @@ export default function App() {
           <Route path="/finance/invoices" element={<ModuleGuard moduleKey="finance"><InvoicesPage /></ModuleGuard>} />
           <Route path="/finance/closing" element={<ModuleGuard moduleKey="finance"><ClosingPage /></ModuleGuard>} />
           <Route path="/finance/bank-import" element={<ModuleGuard moduleKey="finance"><BankImportPage /></ModuleGuard>} />
+          <Route path="/finance/customer-analysis" element={<ModuleGuard moduleKey="finance"><CustomerAnalysisPage /></ModuleGuard>} />
 
           {/* M3 인사/급여 — /hr → 사원관리로 리다이렉트 */}
           <Route path="/hr" element={<ModuleGuard moduleKey="hr"><Navigate to="/hr/employees" replace /></ModuleGuard>} />
