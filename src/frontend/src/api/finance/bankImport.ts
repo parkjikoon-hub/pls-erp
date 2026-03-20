@@ -55,6 +55,20 @@ export interface AccountMapping {
   is_active: boolean;
 }
 
+export interface CompanyBankAccount {
+  id: string;
+  bank_code: string;
+  bank_name: string;
+  account_no: string;
+  account_holder: string;
+  account_type: string;
+  chart_account_id: string;
+  chart_account_name: string | null;
+  is_primary: boolean;
+  is_active: boolean;
+  memo: string | null;
+}
+
 /* ── API 함수 ── */
 
 /** CSV 파일 업로드 + 파싱 (미리보기) */
@@ -103,5 +117,49 @@ export async function createMapping(data: {
 /** 매핑 규칙 삭제 */
 export async function deleteMapping(id: string) {
   const res = await api.delete(`/finance/bank-import/mappings/${id}`);
+  return res.data?.data ?? res.data;
+}
+
+/* ── 회사 은행 계좌 관리 ── */
+
+/** 등록된 회사 계좌 목록 */
+export async function getBankAccounts(): Promise<CompanyBankAccount[]> {
+  const res = await api.get('/finance/bank-import/accounts');
+  return res.data?.data ?? res.data;
+}
+
+/** 회사 계좌 등록 */
+export async function createBankAccount(data: {
+  bank_code: string;
+  bank_name: string;
+  account_no: string;
+  account_holder: string;
+  account_type?: string;
+  chart_account_id: string;
+  is_primary?: boolean;
+  memo?: string;
+}): Promise<CompanyBankAccount> {
+  const res = await api.post('/finance/bank-import/accounts', data);
+  return res.data?.data ?? res.data;
+}
+
+/** 회사 계좌 수정 */
+export async function updateBankAccount(id: string, data: Partial<{
+  bank_code: string;
+  bank_name: string;
+  account_no: string;
+  account_holder: string;
+  account_type: string;
+  chart_account_id: string;
+  is_primary: boolean;
+  memo: string;
+}>): Promise<CompanyBankAccount> {
+  const res = await api.put(`/finance/bank-import/accounts/${id}`, data);
+  return res.data?.data ?? res.data;
+}
+
+/** 회사 계좌 삭제 */
+export async function deleteBankAccount(id: string) {
+  const res = await api.delete(`/finance/bank-import/accounts/${id}`);
   return res.data?.data ?? res.data;
 }

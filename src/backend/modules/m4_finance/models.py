@@ -422,3 +422,45 @@ class BankAccountMapping(Base):
     )
 
     account = relationship("ChartOfAccounts")
+
+
+# ── 회사 은행 계좌 ──
+class CompanyBankAccount(Base):
+    """회사가 보유한 은행 계좌 (여러 은행/여러 계좌 관리)"""
+    __tablename__ = "company_bank_accounts"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
+    bank_code: Mapped[str] = mapped_column(
+        String(20), nullable=False, comment="은행 코드 (shinhan/ibk/kb/woori/hana)"
+    )
+    bank_name: Mapped[str] = mapped_column(
+        String(50), nullable=False, comment="은행명"
+    )
+    account_no: Mapped[str] = mapped_column(
+        String(50), nullable=False, comment="계좌번호"
+    )
+    account_holder: Mapped[str] = mapped_column(
+        String(50), nullable=False, comment="예금주"
+    )
+    account_type: Mapped[str] = mapped_column(
+        String(30), default="보통예금", comment="계좌 유형 (보통예금/정기예금/당좌예금)"
+    )
+    chart_account_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("chart_of_accounts.id"),
+        nullable=False, comment="연결 계정과목 (보통예금 등)"
+    )
+    is_primary: Mapped[bool] = mapped_column(
+        Boolean, default=False, comment="기본 계좌 여부"
+    )
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True)
+    memo: Mapped[str | None] = mapped_column(String(200), comment="메모")
+    created_by: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("users.id"), comment="등록자"
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now()
+    )
+
+    chart_account = relationship("ChartOfAccounts")

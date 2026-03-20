@@ -14,13 +14,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import HTTPException
 
 from ..models import (
-    BankImportHistory, BankAccountMapping,
+    BankImportHistory, BankAccountMapping, CompanyBankAccount,
     JournalEntry, JournalEntryLine, ChartOfAccounts,
 )
 from ..schemas.bank_import import (
     ParsedTransaction, ParseResult,
     ConfirmTransaction, ConfirmImportRequest,
-    MappingResponse,
+    MappingResponse, BankAccountResponse,
 )
 from .journal_service import generate_entry_no
 from .fiscal_year_service import get_fiscal_year_by_date
@@ -546,3 +546,163 @@ async def delete_mapping(db: AsyncSession, mapping_id: str) -> dict:
     mapping.is_active = False
     await db.commit()
     return {"message": "매핑 규칙이 삭제되었습니다"}
+
+
+# ── 회사 은행 계좌 관리 ──
+
+async def list_bank_accounts(db: AsyncSession) -> list[BankAccountResponse]:
+    """활성 회사 계좌 목록 조회"""
+    result = await db.execute(
+        select(CompanyBankAccount, ChartOfAccounts.name)
+        .join(ChartOfAccounts, CompanyBankAccount.chart_account_id == ChartOfAccounts.id)
+        .where(CompanyBankAccount.is_active == True)
+        .order_by(CompanyBankAccount.is_primary.desc(), CompanyBankAccount.created_at)
+    )
+    return [
+        BankAccountResponse(
+            id=str(row[0].id),
+            bank_code=row[0].bank_code,
+            bank_name=row[0].bank_name,
+            account_no=row[0].account_no,
+            account_holder=row[0].account_holder,
+            account_type=row[0].account_type,
+            chart_account_id=str(row[0].chart_account_id),
+            chart_account_name=row[1],
+            is_primary=row[0].is_primary,
+            is_active=row[0].is_active,
+            memo=row[0].memo,
+        )
+        for row in result.all()
+    ]
+
+
+async def create_bank_account(db: AsyncSession, data, current_user) -> BankAccountResponse:
+    """회사 계좌 등록"""
+    # 계정과목 유효성 확인
+    acc_result = await db.execute(
+        select(ChartOfAccounts).where(
+            ChartOfAccounts.id == uuid.UUID(data.chart_account_id),
+            ChartOfAccounts.is_active == True,
+        )
+    )
+    acc = acc_result.scalar_one_or_none()
+    if not acc:
+        raise HTTPException(400, "유효하지 않은 계정과목입니다")
+
+    # 기본 계좌 설정 시 기존 기본 계좌 해제
+    if data.is_primary:
+        await db.execute(
+            select(CompanyBankAccount).where(CompanyBankAccount.is_primary == True)
+        )
+        existing = (await db.execute(
+            select(CompanyBankAccount).where(
+                CompanyBankAccount.is_primary == True,
+                CompanyBankAccount.is_active == True,
+            )
+        )).scalars().all()
+        for e in existing:
+            e.is_primary = False
+
+    account = CompanyBankAccount(
+        bank_code=data.bank_code,
+        bank_name=data.bank_name,
+        account_no=data.account_no,
+        account_holder=data.account_holder,
+        account_type=data.account_type,
+        chart_account_id=uuid.UUID(data.chart_account_id),
+        is_primary=data.is_primary,
+        memo=data.memo,
+        created_by=current_user.id,
+    )
+    db.add(account)
+    await db.commit()
+    await db.refresh(account)
+
+    return BankAccountResponse(
+        id=str(account.id),
+        bank_code=account.bank_code,
+        bank_name=account.bank_name,
+        account_no=account.account_no,
+        account_holder=account.account_holder,
+        account_type=account.account_type,
+        chart_account_id=str(account.chart_account_id),
+        chart_account_name=acc.name,
+        is_primary=account.is_primary,
+        is_active=account.is_active,
+        memo=account.memo,
+    )
+
+
+async def update_bank_account(db: AsyncSession, account_id: str, data, current_user) -> BankAccountResponse:
+    """회사 계좌 수정"""
+    result = await db.execute(
+        select(CompanyBankAccount).where(
+            CompanyBankAccount.id == uuid.UUID(account_id),
+            CompanyBankAccount.is_active == True,
+        )
+    )
+    account = result.scalar_one_or_none()
+    if not account:
+        raise HTTPException(404, "계좌를 찾을 수 없습니다")
+
+    # 기본 계좌 설정 시 기존 기본 계좌 해제
+    if data.is_primary and not account.is_primary:
+        existing = (await db.execute(
+            select(CompanyBankAccount).where(
+                CompanyBankAccount.is_primary == True,
+                CompanyBankAccount.is_active == True,
+                CompanyBankAccount.id != account.id,
+            )
+        )).scalars().all()
+        for e in existing:
+            e.is_primary = False
+
+    # 변경 가능한 필드만 업데이트
+    update_fields = data.model_dump(exclude_unset=True)
+    for field, value in update_fields.items():
+        if field == "chart_account_id" and value:
+            setattr(account, field, uuid.UUID(value))
+        elif value is not None:
+            setattr(account, field, value)
+
+    await db.commit()
+    await db.refresh(account)
+
+    # 계정과목명 조회
+    acc_result = await db.execute(
+        select(ChartOfAccounts.name).where(
+            ChartOfAccounts.id == account.chart_account_id
+        )
+    )
+    chart_name = acc_result.scalar_one_or_none()
+
+    return BankAccountResponse(
+        id=str(account.id),
+        bank_code=account.bank_code,
+        bank_name=account.bank_name,
+        account_no=account.account_no,
+        account_holder=account.account_holder,
+        account_type=account.account_type,
+        chart_account_id=str(account.chart_account_id),
+        chart_account_name=chart_name,
+        is_primary=account.is_primary,
+        is_active=account.is_active,
+        memo=account.memo,
+    )
+
+
+async def delete_bank_account(db: AsyncSession, account_id: str) -> dict:
+    """회사 계좌 비활성화 (소프트 삭제)"""
+    result = await db.execute(
+        select(CompanyBankAccount).where(
+            CompanyBankAccount.id == uuid.UUID(account_id)
+        )
+    )
+    account = result.scalar_one_or_none()
+    if not account:
+        raise HTTPException(404, "계좌를 찾을 수 없습니다")
+
+    account.is_active = False
+    account.is_primary = False
+    await db.commit()
+    return {"message": "계좌가 삭제되었습니다"}

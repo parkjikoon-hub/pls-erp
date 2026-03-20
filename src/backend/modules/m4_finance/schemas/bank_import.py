@@ -67,3 +67,44 @@ class MappingResponse(BaseModel):
     account_name: Optional[str] = None
     priority: int = 0
     is_active: bool = True
+
+
+# ── 회사 은행 계좌 ──
+
+class BankAccountCreate(BaseModel):
+    """회사 은행 계좌 등록"""
+    bank_code: str = Field(..., description="은행 코드 (shinhan/ibk/kb/woori/hana)")
+    bank_name: str = Field(..., description="은행명")
+    account_no: str = Field(..., min_length=1, description="계좌번호")
+    account_holder: str = Field(..., min_length=1, description="예금주")
+    account_type: str = Field("보통예금", description="계좌 유형")
+    chart_account_id: str = Field(..., description="연결 계정과목 ID")
+    is_primary: bool = Field(False, description="기본 계좌 여부")
+    memo: Optional[str] = Field(None, description="메모")
+
+
+class BankAccountUpdate(BaseModel):
+    """회사 은행 계좌 수정"""
+    bank_code: Optional[str] = None
+    bank_name: Optional[str] = None
+    account_no: Optional[str] = None
+    account_holder: Optional[str] = None
+    account_type: Optional[str] = None
+    chart_account_id: Optional[str] = None
+    is_primary: Optional[bool] = None
+    memo: Optional[str] = None
+
+
+class BankAccountResponse(BaseModel):
+    """회사 은행 계좌 응답"""
+    id: str
+    bank_code: str
+    bank_name: str
+    account_no: str
+    account_holder: str
+    account_type: str
+    chart_account_id: str
+    chart_account_name: Optional[str] = None
+    is_primary: bool = False
+    is_active: bool = True
+    memo: Optional[str] = None

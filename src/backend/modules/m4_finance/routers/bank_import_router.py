@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from ....database import get_db
 from ....auth.dependencies import get_current_user, require_role
 from ....shared.response import success_response
-from ..schemas.bank_import import ConfirmImportRequest, MappingCreate
+from ..schemas.bank_import import ConfirmImportRequest, MappingCreate, BankAccountCreate, BankAccountUpdate
 from ..services import bank_import_service
 
 router = APIRouter()
@@ -102,4 +102,50 @@ async def remove_mapping(
 ):
     """매핑 규칙 삭제"""
     result = await bank_import_service.delete_mapping(db, mapping_id)
+    return success_response(result)
+
+
+# ── 회사 은행 계좌 관리 ──
+
+@router.get("/accounts")
+async def list_accounts(
+    db: AsyncSession = Depends(get_db),
+    current_user=Depends(get_current_user),
+):
+    """등록된 회사 은행 계좌 목록"""
+    accounts = await bank_import_service.list_bank_accounts(db)
+    return success_response([a.model_dump() for a in accounts])
+
+
+@router.post("/accounts")
+async def create_account(
+    data: BankAccountCreate,
+    db: AsyncSession = Depends(get_db),
+    current_user=Depends(require_role("admin", "manager")),
+):
+    """회사 은행 계좌 등록"""
+    result = await bank_import_service.create_bank_account(db, data, current_user)
+    return success_response(result.model_dump())
+
+
+@router.put("/accounts/{account_id}")
+async def update_account(
+    account_id: str,
+    data: BankAccountUpdate,
+    db: AsyncSession = Depends(get_db),
+    current_user=Depends(require_role("admin", "manager")),
+):
+    """회사 은행 계좌 수정"""
+    result = await bank_import_service.update_bank_account(db, account_id, data, current_user)
+    return success_response(result.model_dump())
+
+
+@router.delete("/accounts/{account_id}")
+async def delete_account(
+    account_id: str,
+    db: AsyncSession = Depends(get_db),
+    current_user=Depends(require_role("admin", "manager")),
+):
+    """회사 은행 계좌 비활성화"""
+    result = await bank_import_service.delete_bank_account(db, account_id)
     return success_response(result)
